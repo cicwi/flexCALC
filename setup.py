@@ -11,7 +11,16 @@ with open('README.md') as readme_file:
 with open('CHANGELOG.md') as history_file:
     history = history_file.read()
 
-requirements = [ ]
+requirements = [
+    "numpy",
+    "tqdm",
+    "simpleitk",
+    "scipy",
+    "numpy-stl",
+    "scikit-image",
+    "transforms3d",
+    "flexdata",
+    "flextomo"]
 
 setup_requirements = [ ]
 
