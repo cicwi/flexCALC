@@ -1,0 +1,34 @@
+
+{% set data = load_setup_py_data() %}
+
+package:
+    name: flexcalc
+    
+    version: {{ data['version'] }}
+
+source:
+    path: ../
+
+build:
+    number: '0'
+
+requirements:
+    build:
+        - python
+        - setuptools
+
+    run:
+        - python
+        # dependencies are defined in setup.py
+        {% for dep in data['install_requires'] %}
+        - {{ dep.lower() }}
+        {% endfor %}
+
+about:
+    home: https://github.com/teascavenger/flexcalc
+    license_file: LICENSE.md
+    summary: "ASTRA-based cone beam reconstruction routines"
+
+extra:
+    maintainers:
+        - Alex Kostenko
