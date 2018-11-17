@@ -16,6 +16,12 @@ TODO
 
 ### Installing from source
 
+We recommend to install [Xraylib](https://anaconda.org/conda-forge/xraylib) module first using Anaconda from the Conda-Forge channel:
+
+```
+conda install -c conda-forge xraylib 
+```
+
 To install flexCALC, clone this GitHub project. Go to the cloned directory and run PIP installer:
 ```
 git clone https://github.com/cicwi/flexcalc.git
