@@ -733,6 +733,8 @@ def rotate(data, angle, axis = 0):
     
     print('Applying rotation.')
     
+    time.sleep(0.3)
+    
     sz = data.shape[axis]
     
     for ii in tqdm(range(sz), unit = 'Slices'):     
@@ -1135,7 +1137,32 @@ def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'ax
     display.plot(values, func_values, title = 'Objective')
     
     return _parabolic_min_(func_values, min_index, values)  
-        
+   
+def optimize_detector_tilt(projections, geometry, amplitude = 1):
+    '''
+    Find the detector rotation within +-1deg range:
+    '''
+    amplitude = numpy.deg2rad(amplitude)
+    
+    # Find how an amplitude will translate into pixels:
+    nstep = int(projections.shape[2] * numpy.sin(amplitude))*2
+    
+    # Name and range of the parameter to optimize:
+    key = 'det_rot'
+    trial_values = numpy.linspace(-amplitude, amplitude, nstep)
+
+    # Subsampling of data (vertical x 10)
+    samp = [20, 1, 1]
+    
+    # Optimization:
+    print('Searching for a correct detector tilt...')
+    guess = optimize_modifier(trial_values, projections, geometry, samp = samp, key = key, preview = False)
+    geometry[key] = guess
+    
+    print('Tilt found at %2.2f degrees.' % numpy.rad2deg(guess))
+    
+    return guess
+     
 def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, centre_of_mass = False):
     '''
     Find a center of rotation. If you can, use the center_of_mass option to get the initial guess.
@@ -1176,6 +1203,10 @@ def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, 
         print('Current guess is %0.3f mm' % guess)
         
         subscale = subscale // 2
+        
+    geometry['axs_hrz'] = guess
+    
+    print('Old value:%0.3f' % geometry['axs_hrz'], 'new value: %0.3f' % guess)        
     
     return guess
 
@@ -1487,7 +1518,7 @@ def append_tile(data, geom, tot_data, tot_geom):
         # Create distances to edge:
         tot_data[:, ii, :] = ((base_dist * base) + (new_dist * new)) / norm
         
-def data_to_spectrum(path, compound = 'Al', density = 2.7, energy_bin = 20):
+def data_to_spectrum(path, compound = 'Al', density = 2.7, energy_bin = 50):
     """
     Convert data with Al calibration object at path to a spectrum.txt.
     """

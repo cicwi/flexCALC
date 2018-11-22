@@ -29,8 +29,6 @@ guess = process.optimize_rotation_center(proj, meta['geometry'], subscale = 8)
 
 #%% REconstruct corrected:
 
-meta['geometry']['axs_hrz'] = guess
-
 vol = project.init_volume(proj)
 project.FDK(proj, vol, meta['geometry'])
 

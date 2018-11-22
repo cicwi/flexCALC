@@ -16,7 +16,6 @@ import warnings
 import time
 import gc
 import os
-import sys
 
 from flexdata import scp
 from flexdata import io
@@ -1050,7 +1049,12 @@ class Pipe:
             total = self._buffer_['total']
             vol_z0 = self._buffer_['vol_z0']
             overlap = self._buffer_['overlap']
-            
+           
+        # Check if the datasets have correct size
+        shape = numpy.array(total.shape)
+        shape[0] = data.data.shape[0]
+        data.data = array.cast2shape(data.data, shape)   
+    
         # Index of the current dataset:
         vol_z = data.meta['geometry']['vol_tra'][0]
         
@@ -1240,8 +1244,8 @@ class Pipe:
         print('Optimization of the rotation axis...')
         guess = process.optimize_rotation_center(data.data, data.meta['geometry'], centre_of_mass = False, subscale = subscale)
         
-        print('Old value:%0.3f' % data.meta['geometry']['axs_hrz'], 'new value: %0.3f' % guess)
-        data.meta['geometry']['axs_hrz'] = guess
+        #print('Old value:%0.3f' % data.meta['geometry']['axs_hrz'], 'new value: %0.3f' % guess)
+        #data.meta['geometry']['axs_hrz'] = guess
         
         self._record_history_('Rotation axis optimized. [offset in mm]', guess)
 
@@ -1250,6 +1254,58 @@ class Pipe:
         Find the rotation center.
         """
         self._add_action_('find_rotation', self._find_rotation_, _ACTION_BATCH_, subscale)
+        
+    def _find_tilt_(self, data, count, argument):        
+        """
+        Find the detector tilt:
+        """
+        
+        amplitude = self._arg_(argument, 0)
+        
+        print('Optimization of the rotation axis...')
+        guess = process.optimize_detector_tilt(data.data, data.meta['geometry'], amplitude)
+        
+        self._record_history_('Detector tilt optimized. [angle in radians]', guess)
+
+    def find_tilt(self, amplitude = 1):
+        """
+        Find the detector tilt.
+        """
+        self._add_action_('find_tilt', self._find_tilt_, _ACTION_BATCH_, amplitude)
+    
+    def _modify_geometry_(self, data, count, argument):
+        """
+        Change one of the geometry records manually.
+        """
+        
+        key = self._arg_(argument, 0)
+        value = self._arg_(argument, 1)
+        
+        data.meta['geometry'][key] = value
+        
+        self._record_history_('Changed geometry record "%s". [new record]' %key, value)
+    
+    def modify_geometry(self, key, value):
+        """
+        Change one of the geometry records manually.
+        """
+        self._add_action_('modify_geometry', self._modify_geometry_, _ACTION_BATCH_, key, value)
+   
+    def _untilt_(self, data, count, argument):     
+        """
+        Derotate image on the detectors if it was tilted.
+        """
+        angle = numpy.rad2deg(data.meta['geometry']['det_rot'])
+        process.rotate(data.data, -angle, axis = 1)
+        
+        print('Detector derotated by', angle)
+        data.meta['geometry']['det_rot'] = 0
+        
+    def untilt(self):
+        """
+        Derotate image on the detectors if it was tilted.
+        """
+        self._add_action_('untilt', self._untilt_, _ACTION_BATCH_)        
         
     def _em_(self, data, count, argument):        
         
