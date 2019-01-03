@@ -30,7 +30,7 @@ vol = project.init_volume(proj)
 
 project.FDK(proj, vol, meta['geometry'])
 
-display.display_slice(vol, title = 'Uncorrected FDK')
+display.slice(vol, title = 'Uncorrected FDK')
 
 a,b = process.histogram(vol, rng = [-0.05, 0.15])
 
@@ -44,7 +44,7 @@ vol = project.init_volume(proj)
 
 project.FDK(proj, vol, meta['geometry'])
 
-display.display_slice(vol, title = 'Corrected FDK')
+display.slice(vol, title = 'Corrected FDK')
 
 a,b = process.histogram(vol, rng = [-1, 4])
         

@@ -16,7 +16,9 @@ from scipy import ndimage
 from scipy import signal
 
 import transforms3d
+
 import scipy.ndimage.interpolation as interp
+from scipy.interpolate import interp1d
 
 from tqdm import tqdm
 
@@ -245,7 +247,7 @@ def _find_best_flip_(fixed, moving, Rfix, Tfix, Rmov, Tmov, use_CG = True, sampl
             Lmax = L
             
             print('We found better flip(%u), L ='%ii, L)
-            display.display_projection(fixed - affine(moving, Rtot_, Ttot_), title = 'Diff (%u). L2 = %f' %(ii, L))
+            display.projection(fixed - affine(moving, Rtot_, Ttot_), title = 'Diff (%u). L2 = %f' %(ii, L))
     
     return Rtot, Ttot * sample 
 
@@ -291,7 +293,7 @@ def find_marker(data, meta, d = 5):
     A[A < 0] = 0
     A /= A.max()
     
-    display.display_max_projection(A, dim = 0, title = 'Feature size.')
+    display.max_projection(A, dim = 0, title = 'Feature size.')
     
     print('Estimating local variance...')
     
@@ -309,7 +311,7 @@ def find_marker(data, meta, d = 5):
     B = ndimage.filters.gaussian_filter(B, 4)
     B /= B.max()
     
-    display.display_max_projection(B, dim = 0, title = 'Variance.')
+    display.max_projection(B, dim = 0, title = 'Variance.')
     
     # Compute final weight:    
     A -= B
@@ -325,7 +327,7 @@ def find_marker(data, meta, d = 5):
     index = numpy.argmax(A)
     
     # Display:
-    display.display_max_projection(A, dim = 0, title = 'Marker map')
+    display.max_projection(A, dim = 0, title = 'Marker map')
     
     # Coordinates:
     a, b, c = numpy.unravel_index(index, A.shape)
@@ -535,7 +537,7 @@ def _itk_registration_(fixed, moving, R_init = None, T_init = None, shrink = [4,
     #moving_image = sitk.Resample(moving_image, fixed_image, transform, sitk.sitkLinear, 0.0, moving_image.GetPixelID())
     #moving = sitk.GetArrayFromImage(moving_image)    
         
-    #flexUtil.display_projection(fixed - moving, dim = 1, title = 'native diff')  
+    #flexUtil.projection(fixed - moving, dim = 1, title = 'native diff')  
     
     return T, R, registration_method.GetMetricValue()
     
@@ -706,6 +708,9 @@ def register_astra_geometry(proj_fix, proj_mov, geom_fix, geom_mov, subsamp = 1)
     project.FDK(proj_mov, vol2, geom_mov)
     project.SIRT(proj_mov, vol2, geom_mov, iterations = 2)
     
+    display.slice(vol1, title = 'Fixed volume preview')
+    display.slice(vol1, title = 'Moving volume preview')
+    
     # Find transformation between two volumes:
     R, T = register_volumes(vol1, vol2, subsamp = subsamp, use_moments = True, use_CG = True)
     
@@ -837,7 +842,7 @@ def centre(data):
         """
         Compute the centre of the square of mass.
         """
-        data2 = data[::2, ::2, ::2].copy().astype('float32')()**2
+        data2 = data[::2, ::2, ::2].copy().astype('float32')**2
         
         M00 = data2.sum()
                 
@@ -928,9 +933,10 @@ def interpolate_holes(data, mask2d, kernel = [1,1]):
     
     Args:
         mask2d: holes are zeros. Mask is the same for all projections.
+        kernel: size of the interpolation kernel
     '''
     mask_norm = ndimage.filters.gaussian_filter(numpy.float32(mask2d), sigma = kernel)
-    #flexUtil.display_slice(mask_norm, title = 'mask_norm')
+    #flexUtil.slice(mask_norm, title = 'mask_norm')
     
     sh = data.shape[1]
     
@@ -941,11 +947,32 @@ def interpolate_holes(data, mask2d, kernel = [1,1]):
         # Compute the filler:
         tmp = ndimage.filters.gaussian_filter(data[:, ii, :], sigma = kernel) / mask_norm      
                                               
-        #flexUtil.display_slice(tmp, title = 'tmp')
+        #flexUtil.slice(tmp, title = 'tmp')
 
         # Apply filler:                 
         data[:, ii, :][~mask2d] = tmp[~mask2d]
          
+def interpolate_zeros(data, kernel = [1,1], epsilon = 1e-9):
+    '''
+    Fill in zero volues, for instance, blank pixels.
+    
+    Args:
+        kernel: Size of the interpolation kernel
+        epsilon: if less than epsilon -> interpolate
+    '''
+    sh = data.shape[1]
+    
+    for ii in tqdm(range(sh), unit='images'):    
+           
+        mask = data[:, ii, :] > epsilon 
+        mask_norm = ndimage.filters.gaussian_filter(numpy.float32(mask), sigma = kernel)
+        
+        # Compute the filler:
+        tmp = ndimage.filters.gaussian_filter(data[:, ii, :], sigma = kernel) / mask_norm      
+        
+        # Apply filler:                 
+        data[:, ii, :][~mask] = tmp[~mask]        
+        
 def expand_medipix(data):
     
     # Bigger array:
@@ -971,7 +998,45 @@ def expand_medipix(data):
     mask = img >= 0
     interpolate_holes(new, mask, kernel = [1,1])        
         
-    return new            
+    return new  
+
+def flatfield(data, mode = 'sides'):
+    '''
+    Apply simple flatfield correction.
+    
+    Args:
+        mode (str): use "sides" to use maximum values of the detector sides to estimate the flat field or a single maximum value with "single".     
+    '''          
+    if mode == 'single':
+        flat = data.max()
+        data /= flat
+        
+    elif mode == 'sides':
+        pr = data.max(1)    
+        
+        # compute side intensities:
+        left = ndimage.filters.gaussian_filter1d(pr[:, 0], sigma = 11)
+        right = ndimage.filters.gaussian_filter1d(pr[:, -1], sigma = 11)
+        
+        linfit = interp1d([0,1], numpy.vstack([left, right]).T, axis=1)
+        
+        flat = linfit(numpy.linspace(0, 1, data.shape[2]))
+        flat = flat.astype(data.dtype)
+        display.slice(flat, title = 'Estimated flat field')
+        
+        # If data is int need to use // instead of /:
+        if (data.dtype.kind == 'i') | (data.dtype.kind == 'u'):    
+            
+            # in case data is mapped on disk, we need to rewrite the file as another type:
+            new = (data / flat[:, None, :]).astype('float32')    
+            data = array.rewrite_memmap(data, new)    
+
+        else:
+            data /= flat[:, None, :]
+    else:
+        raise Exception('Wrong mode: ' + mode)
+        
+    return data
 
 def residual_rings(data, kernel=[3, 3]):
     '''
@@ -1108,7 +1173,7 @@ def _modifier_l2cost_(projections, geometry, subsample, value, key, preview):
         l2 += numpy.mean((ndimage.gaussian_filter(vol[ii, :, :], 2) - vol[ii, :, :])**2)
         
     if preview:
-        display.display_slice(vol, title = 'Guess = %0.2e, L2 = %0.2e'% (value, l2))    
+        display.slice(vol, title = 'Guess = %0.2e, L2 = %0.2e'% (value, l2))    
             
     return -l2    
     
@@ -1136,7 +1201,12 @@ def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'ax
     
     display.plot(values, func_values, title = 'Objective')
     
-    return _parabolic_min_(func_values, min_index, values)  
+    guess = _parabolic_min_(func_values, min_index, values)  
+    geometry[key] = guess
+    
+    print('Optimum found at %2.2f' % guess)
+    
+    return guess
    
 def optimize_detector_tilt(projections, geometry, amplitude = 1):
     '''
@@ -1357,14 +1427,14 @@ def _find_shift_(data_ref, data_slave, offset, dim = 1):
             im_ref = im_ref[numpy.ix_(no_zero.any(1),no_zero.any(0))]    
             im_slv = im_slv[numpy.ix_(no_zero.any(1),no_zero.any(0))]                
 
-            #flexUtil.display_slice(im_ref - im_slv, title = 'im_ref')
+            #flexUtil.slice(im_ref - im_slv, title = 'im_ref')
                                   
             # Laplace is way better for clipped objects than comparing intensities!
             im_ref = ndimage.laplace(im_ref)
             im_slv = ndimage.laplace(im_slv)
             
-            #display.display_slice(im_ref, title = 'im_ref')
-            #display.display_slice(im_slv, title = 'im_slv')
+            #display.slice(im_ref, title = 'im_ref')
+            #display.slice(im_slv, title = 'im_slv')
         
             # Shift registration with subpixel accuracy (skimage):
             shift, error, diffphase = feature.register_translation(im_ref, im_slv, 10)
@@ -1524,14 +1594,14 @@ def data_to_spectrum(path, compound = 'Al', density = 2.7, energy_bin = 50):
     """
     proj, meta = process_flex(path, skip = 2, sample = 2)
     
-    display.display_slice(proj, dim=0,title = 'PROJECTIONS')
+    display.slice(proj, dim=0,title = 'PROJECTIONS')
 
     vol = project.init_volume(proj, meta['geometry'])
     
     print('FDK reconstruction...')
     
     project.FDK(proj, vol, meta['geometry'])
-    display.display_slice(vol, title = 'Uncorrected FDK')
+    display.slice(vol, title = 'Uncorrected FDK')
 
     print('Callibrating spectrum...')    
     e, s = calibrate_spectrum(proj, vol, meta, compound = 'Al', density = 2.7, iterations = 1000, n_bin = energy_bin)   
@@ -1565,7 +1635,7 @@ def calibrate_spectrum(projections, volume, meta, compound = 'Al', density = 2.7
         t = binary_threshold(volume, mode = 'otsu')
         segmentation = numpy.float32(volume > t)
         
-    display.display_slice(segmentation, dim=0,title = 'Segmentation')        
+    display.slice(segmentation, dim=0,title = 'Segmentation')        
         
     # Crop:    
     #height = segmentation.shape[0]   
@@ -1623,8 +1693,8 @@ def calibrate_spectrum(projections, volume, meta, compound = 'Al', density = 2.7
             
     # TODO: Some cropping might be needed to avoid artefacts at the edges
     
-    #flexUtil.display_slice(length, title = 'length sinogram')
-    #flexUtil.display_slice(projections_, title = 'apparent sinogram')
+    #flexUtil.slice(length, title = 'length sinogram')
+    #flexUtil.slice(projections_, title = 'apparent sinogram')
         
     # Rebin:
     idx  = numpy.digitize(length, bins)

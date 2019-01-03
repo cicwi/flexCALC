@@ -36,7 +36,7 @@ guess = process.optimize_modifier(trial_values, proj, meta['geometry'], samp = s
 vol = project.init_volume(proj)
 project.FDK(proj, vol, meta['geometry'])
 
-display.display_slice(vol, bounds = [], title = 'FDK Corrected')
+display.slice(vol, bounds = [], title = 'FDK Corrected')
 
 #%% REconstruct corrected:
 
@@ -45,4 +45,4 @@ meta['geometry'][key] = guess
 vol = project.init_volume(proj)
 project.FDK(proj, vol, meta['geometry'])
 
-display.display_slice(vol, bounds = [], title = 'FDK Corrected')
+display.slice(vol, bounds = [], title = 'FDK Corrected')

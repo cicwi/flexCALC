@@ -26,7 +26,7 @@ geometry = io.init_geometry(src2obj = 100, det2obj = 100, det_pixel = 0.2,
 
 # This is our phantom:
 vol = phantom.cuboid([1,128,128], geometry, 8,8,8)  
-display.display_slice(vol , title = 'Phantom') 
+display.slice(vol , title = 'Phantom') 
 
 # Spectrum of the scanner:   
 kv = 90
@@ -47,7 +47,7 @@ counts = numpy.zeros([1, 128, 128], dtype = 'float32')
 spectrum.forward_spectral(vol, counts, geometry, mats, E, S, n_phot = 1e6)
 
 # Display:
-display.display_slice(counts, title = 'Modelled sinogram')  
+display.slice(counts, title = 'Modelled sinogram')  
 
 #%% Reconstruct:
     
@@ -59,7 +59,7 @@ proj = -numpy.log(counts)
 project.FDK(proj, vol_rec, geometry)
 
 # Display:
-display.display_slice(vol_rec, title = 'Uncorrected FDK')
+display.slice(vol_rec, title = 'Uncorrected FDK')
 display.plot(vol_rec[0, 64])       
 
 #%% Correct Beam Hardening:
@@ -79,5 +79,5 @@ vol_rec = numpy.zeros_like(vol)
 project.FDK(proj, vol_rec, geometry)
 
 # Display:
-display.display_slice(vol_rec, title = 'Corrected FDK')
+display.slice(vol_rec, title = 'Corrected FDK')
 display.plot(vol_rec[0, 64])      

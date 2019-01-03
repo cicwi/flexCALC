@@ -21,7 +21,7 @@ proj, meta = process.process_flex(path)
 vol = project.init_volume(proj)
 project.FDK(proj, vol, meta['geometry'])
 
-display.display_slice(vol, bounds = [], title = 'FDK Corrected')
+display.slice(vol, bounds = [], title = 'FDK Corrected')
 
 #%% Use optimize_rotation_center:
     
@@ -32,4 +32,4 @@ guess = process.optimize_rotation_center(proj, meta['geometry'], subscale = 8)
 vol = project.init_volume(proj)
 project.FDK(proj, vol, meta['geometry'])
 
-display.display_slice(vol, bounds = [], title = 'FDK Corrected')
+display.slice(vol, bounds = [], title = 'FDK Corrected')

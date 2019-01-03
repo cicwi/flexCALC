@@ -844,7 +844,7 @@ class Pipe:
     
         # Preview:
         if preview:
-            display.display_mesh(stl_mesh)
+            display.mesh(stl_mesh)
                 
     def make_stl(self, file, preview = False):
         """
@@ -936,13 +936,13 @@ class Pipe:
         
         # Display:
         if preview:
-            display.display_slice(total, dim = 1,title = 'total projection')  
-            display.display_slice(total, dim = 0,title = 'total top view')  
+            display.slice(total, dim = 1,title = 'total projection')  
+            display.slice(total, dim = 0,title = 'total top view')  
         
         self._buffer_['tot_data'][index] = total   
     
         # Display:
-        #flexUtil.display_slice(total, dim = 1,title = 'total to buffer')  
+        #flexUtil.slice(total, dim = 1,title = 'total to buffer')  
         
         if data.status == _STATUS_STANDBY_:
            pass 
@@ -1106,7 +1106,7 @@ class Pipe:
                 
         #total[index] = numpy.max([data.data, total[index]], 0)
         
-        display.display_slice(total, dim = 1,title = 'vol merge')  
+        display.slice(total, dim = 1,title = 'vol merge')  
 
         self._buffer_['total'] = total 
 
@@ -1205,7 +1205,7 @@ class Pipe:
                 
         project.SIRT(data.data, self._buffer_['tot_data'], meta['geometry'], iterations = iterations)
                
-        display.display_slice(self._buffer_['tot_data'], dim = 0, title = 'Reconstructed slice')
+        display.slice(self._buffer_['tot_data'], dim = 0, title = 'Reconstructed slice')
         
         # Catch finial call of SIRT:
         if data.status == _STATUS_STANDBY_:
@@ -1527,13 +1527,13 @@ class Pipe:
             
         # DIsplay single dimension:
         if display_type == 'projection':
-            display.display_projection(data.data, dim = dim, title = 'Projection. Block #%u'%count)
+            display.projection(data.data, dim = dim, title = 'Projection. Block #%u'%count)
                                         
         elif display_type == 'max_projection':
-            display.display_max_projection(data.data, dim = dim, title = 'Max projection. Block #%u'%count)    
+            display.max_projection(data.data, dim = dim, title = 'Max projection. Block #%u'%count)    
                                         
         elif display_type == 'slice':
-            display.display_slice(data.data, dim = dim, title = 'Mid slice. Block #%u'%count)    
+            display.slice(data.data, dim = dim, title = 'Mid slice. Block #%u'%count)    
                    
         else: raise Exception('Unknown display type.')
                                   
