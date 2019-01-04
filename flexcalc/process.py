@@ -218,8 +218,8 @@ def _find_best_flip_(fixed, moving, Rfix, Tfix, Rmov, Tmov, use_CG = True, sampl
     moving = moving[::sample, ::sample, ::sample].astype('float32')
     
     # Apply filters to smooth erors somewhat:
-    fixed = ndimage.filters.gaussian_filter(fixed, sigma = 2)
-    moving = ndimage.filters.gaussian_filter(moving, sigma = 2)
+    fixed = ndimage.filters.gaussian_filter(fixed, sigma = 3)
+    moving = ndimage.filters.gaussian_filter(moving, sigma = 3)
     
     # Generate flips:
     Rs = _generate_flips_(Rfix)
@@ -420,7 +420,7 @@ def _mat2itk_(R, T, shape):
 
     transform = sitk.Euler3DTransform()
     transform.SetComputeZYX(True)
-    
+        
     transform.SetTranslation(-T[::-1])
     transform.SetCenter((centre + T)[::-1])    
 
@@ -596,6 +596,9 @@ def register_volumes(fixed, moving, subsamp = 2, use_moments = True, use_CG = Tr
         fixed_0[fixed_0 < threshold] = 0
         moving_0[moving_0 < threshold] = 0
         
+    display.display_max_projection(fixed_0, title = 'Preview: fixed volume')
+    display.display_max_projection(moving_0, title = 'Preview: moving volume')
+        
     L2 = norm(fixed_0 - moving_0)
     print('L2 norm before registration: %0.2e' % L2)
     
@@ -697,14 +700,14 @@ def register_astra_geometry(proj_fix, proj_mov, geom_fix, geom_mov, subsamp = 1)
     vol2 = numpy.zeros(sz, dtype = 'float32')
     
     project.settings['bounds'] = [0, 5]
-    project.settings['block_number'] = 10
-    project.settings['mode'] = 'random'
+    project.settings['block_number'] = 20
+    project.settings['mode'] = 'sequential'
     
     project.FDK(proj_fix, vol1, geom_fix)    
-    project.SIRT(proj_fix, vol1, geom_fix, iterations = 2)
+    project.SIRT(proj_fix, vol1, geom_fix, iterations = 5)
     
     project.FDK(proj_mov, vol2, geom_mov)
-    project.SIRT(proj_mov, vol2, geom_mov, iterations = 2)
+    project.SIRT(proj_mov, vol2, geom_mov, iterations = 5)
     
     # Find transformation between two volumes:
     R, T = register_volumes(vol1, vol2, subsamp = subsamp, use_moments = True, use_CG = True)
@@ -1145,7 +1148,7 @@ def optimize_detector_tilt(projections, geometry, amplitude = 1):
     amplitude = numpy.deg2rad(amplitude)
     
     # Find how an amplitude will translate into pixels:
-    nstep = int(projections.shape[2] * numpy.sin(amplitude))*2
+    nstep = int(projections.shape[2] * numpy.sin(amplitude))
     
     # Name and range of the parameter to optimize:
     key = 'det_rot'

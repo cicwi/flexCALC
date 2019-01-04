@@ -26,7 +26,7 @@ key = 'det_rot'
 trial_values = numpy.linspace(-0.01, 0.01, 11)
 
 # Subsampling of data (vertical x 10)
-samp = [5, 1, 1]
+samp = [10, 1, 1]
 
 # Optimization:
 guess = process.optimize_modifier(trial_values, proj, meta['geometry'], samp = samp, key = key, preview = True)

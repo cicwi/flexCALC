@@ -32,7 +32,7 @@ display.display_slice(vol , title = 'Phantom')
 kv = 90
 filtr = {'material':'Cu', 'density':8, 'thickness':0.1}
 detector = {'material':'Si', 'density':5, 'thickness':1} 
-E, S = spectrum.effective_spectrum(kv = 90, filtr = filtr, detector = detector)  
+E, S = spectrum.effective_spectrum(kv = kv, filtr = filtr, detector = detector)  
 
 # Display:
 display.plot(E,S, title ='Spectrum')   

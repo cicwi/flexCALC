@@ -204,7 +204,7 @@ class Pipe:
                     print('Removing:' + file_)
                     os.remove(file_)
             
-        if not os.path.exists(self._memmap_path_):
+        if (self._memmap_path_ is not '') & (not os.path.exists(self._memmap_path_)):
                 os.mkdir(self._memmap_path_)             
             
     def ignore_warnings(self, ignore = True):
@@ -656,7 +656,8 @@ class Pipe:
                 
                 if os.path.exists(os.path.join(path, 'meta.toml')):
                     meta = io.read_toml(os.path.join(path, 'meta.toml'))
-                    
+                    meta['geometry']['det_pixel'] *= samp
+                    meta['geometry']['img_pixel'] *= samp
                 else:
                     try: 
                         meta = io.read_meta(path, 'metadata', sample = samp)   
@@ -735,7 +736,7 @@ class Pipe:
         
         # Read volume:
         data.data = io.read_tiffs(path, 'scan', skip = samp, sample = samp, memmap = memmap_file)  
-        data.data = array.raw2astra(data.data)
+        data.data = numpy.transpose(data.data, [1,0,2])
         
         data.type = 'projections'
         
@@ -1186,6 +1187,7 @@ class Pipe:
         block_number = self._arg_(argument, 1)
         mode = self._arg_(argument, 2)
         vol_shape = self._arg_(argument, 3)
+        memmap = self._arg_(argument, 4)
         
         project.settings['bounds'] = [0, 10]
         project.settings['block_number'] = block_number
@@ -1197,11 +1199,25 @@ class Pipe:
             
             self._buffer_ = {}
             
-            if vol_shape:
-                self._buffer_['tot_data'] = numpy.zeros(vol_shape, dtype = 'float32')
+            # Create
+            if not vol_shape:
+                vol_shape = array.volume_shape(data.data.shape, meta['geometry'])
+                
+            # Create memmaps:
+            if memmap: 
+                
+                if not self._memmap_path_:
+                    raise Exception('memmap_path is not initialized in pipe!')
+                
+                if not os.path.exists(self._memmap_path_):
+                    os.mkdir(self._memmap_path_)  
+                    
+                file = os.path.join(self._memmap_path_, 'volume')
+                
+                self._buffer_['tot_data'] = array.memmap(file, dtype='float32', mode='w+', shape = (vol_shape[0], vol_shape[1], vol_shape[2]))       
                 
             else:
-                self._buffer_['tot_data'] = project.init_volume(data.data, meta['geometry'])
+                self._buffer_['tot_data'] = numpy.zeros(vol_shape, dtype='float32')
                 
         project.SIRT(data.data, self._buffer_['tot_data'], meta['geometry'], iterations = iterations)
                
@@ -1228,7 +1244,7 @@ class Pipe:
         
         self._record_history_('SIRT reconstruction [iterations, block number, volume shape]', [iterations, block_number, data.data.shape])
 
-    def SIRT_M(self, iterations = 10, block_number = 40, mode = 'random', vol_shape = None):
+    def SIRT_M(self, iterations = 10, block_number = 40, mode = 'random', vol_shape = None, memmap = False):
         """
         Run Multi-tile SIRT. Use block_number and mode for the subset version of SIRT.
         """
