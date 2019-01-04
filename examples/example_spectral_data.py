@@ -29,8 +29,8 @@ proj[proj > 1] = 1
 # Da Holy LOG:
 proj = -numpy.log(proj)
 
-display.display_slice(proj, title = 'Sinogram')
-display.display_slice(proj, dim = 1, title = 'Projection')
+display.slice(proj, title = 'Sinogram')
+display.slice(proj, dim = 1, title = 'Projection')
 
 #%% Create geometry:
 
@@ -76,7 +76,7 @@ vol = numpy.zeros([10, 1200, 1200], dtype = 'float32')
 
 project.FDK(proj, vol, geometry)
 
-display.display_projection(vol, dim = 0, bounds = [], title = 'FDK')
+display.projection(vol, dim = 0, bounds = [], title = 'FDK')
 
 #%% Save geometry:
 import os

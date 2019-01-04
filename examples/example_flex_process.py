@@ -22,4 +22,4 @@ proj, meta = process.process_flex(path, skip = 4, sample = 4)
 vol = project.init_volume(proj)
 project.FDK(proj, vol, meta['geometry'])
 
-display.display_slice(vol, bounds = [], title = 'FDK')
+display.slice(vol, bounds = [], title = 'FDK')

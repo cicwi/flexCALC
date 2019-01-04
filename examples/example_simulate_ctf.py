@@ -38,7 +38,7 @@ vol = phantom.sphere(vol.shape, geometry, 0.08)
 vol -= phantom.sphere(vol.shape, geometry, 0.07)     
 
 # Show:
-display.display_slice(vol, title = 'Phantom')
+display.slice(vol, title = 'Phantom')
 
 # Project:
 project.forwardproject(proj, vol, geometry)
@@ -66,14 +66,14 @@ proj_i = numpy.exp(-proj * n )
 # Field intensity:
 proj_i = resolution.apply_ctf(proj_i, phase_ctf) ** 2
 
-display.display_slice(proj_i, title = 'Projections (phase contrast)')
+display.slice(proj_i, title = 'Projections (phase contrast)')
 
 #%% Reconstruct with phase contrast:
     
 vol_rec = numpy.zeros_like(vol)
 
 project.FDK(-numpy.log(proj_i), vol_rec, geometry)
-display.display_slice(vol_rec, title = 'FDK')  
+display.slice(vol_rec, title = 'FDK')  
     
 #%% Invertion of phase contrast based on dual-CTF model:
     
@@ -88,9 +88,9 @@ proj_inv = resolution.deapply_ctf(proj_i, dual_ctf, epsilon = 0.1)
 # Depending on epsilon there is some lof frequency bias introduced...
 proj_inv /= proj_inv.max()
 
-display.display_slice(proj_inv, title = 'Inverted phase contrast')   
+display.slice(proj_inv, title = 'Inverted phase contrast')   
 
 # Reconstruct:
 vol_rec = numpy.zeros_like(vol)
 project.FDK(-numpy.log(proj_inv), vol_rec, geometry)
-display.display_slice(vol_rec, title = 'FDK')   
+display.slice(vol_rec, title = 'FDK')   

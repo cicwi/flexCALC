@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Using two scans of a PCB we will try to make a PWLS reconstruction with reduced artifacts.
+Model two datasets and use them in a combined PWLS-type reconstruction.
 """
 #%% Imports
 
@@ -33,8 +33,8 @@ project.FDK(proj1, vol1, geom1)
 vol2 = project.init_volume(proj2, geom2)
 project.FDK(proj2, vol2, geom2)
 
-display.display_max_projection(vol1, dim = 1,  title = 'Volume 1')
-display.display_max_projection(vol2, dim = 1, title = 'Volume 2')
+display.max_projection(vol1, dim = 1,  title = 'Volume 1')
+display.max_projection(vol2, dim = 1, title = 'Volume 2')
 
 #%% Register:
 
@@ -47,12 +47,12 @@ geom2_reg = process.transform_to_geometry(R, T, geom2)
 # Show the result of registration:
 vol2 *= 0
 project.FDK(proj2, vol2, geom2_reg)
-display.display_max_projection(vol2, dim = 1,  title = 'Volume 2 - registered')
+display.max_projection(vol2, dim = 1,  title = 'Volume 2 - registered')
 
 #%% FDK doens't compute the correct intensity in rotated system of coordinates. Here we will correct for that:
 
 process.equalize_intensity(vol1, vol2)
-display.display_max_projection(vol2, dim = 1,  title = 'Volume 2 - registered')
+display.max_projection(vol2, dim = 1,  title = 'Volume 2 - registered')
 
 #%% Use Multi-axis PWLS:
 
@@ -61,4 +61,4 @@ vol1 *= 0
 project.settings['block_number'] = 20
 project.MULTI_PWLS([proj1, proj2], vol1, [geom1, geom2_reg], iterations = 20)
     
-display.display_max_projection(vol1, dim = 1,  title = 'Volume combined PWLS')
+display.max_projection(vol1, dim = 1,  title = 'Volume combined PWLS')
