@@ -1236,7 +1236,7 @@ def optimize_detector_tilt(projections, geometry, amplitude = 1):
     
     return guess
      
-def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, centre_of_mass = False):
+def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, centre_of_mass = False, preview = False):
     '''
     Find a center of rotation. If you can, use the center_of_mass option to get the initial guess.
     If that fails - use a subscale larger than the potential deviation from the center. Usually, 8 or 16 works fine!
@@ -1266,12 +1266,12 @@ def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, 
         print('Subscale factor %1d' % subscale)    
 
         # We will use constant subscale in the vertical direction but vary the horizontal subscale:
-        samp =  [20, subscale, subscale]
+        samp =  [10, subscale, subscale]
 
         # Create a search space of 5 values around the initial guess:
         trial_values = numpy.linspace(guess - img_pix * subscale, guess + img_pix * subscale, 5)
         
-        guess = optimize_modifier(trial_values, projections, geometry, samp, key = 'axs_hrz', preview = False)
+        guess = optimize_modifier(trial_values, projections, geometry, samp, key = 'axs_hrz', preview = preview)
                 
         print('Current guess is %0.3f mm' % guess)
         
