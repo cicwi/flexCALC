@@ -1263,7 +1263,7 @@ def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, 
         print('Subscale factor %1d' % subscale)    
 
         # We will use constant subscale in the vertical direction but vary the horizontal subscale:
-        samp =  [20, subscale, subscale]
+        samp =  [10, subscale, subscale]
 
         # Create a search space of 5 values around the initial guess:
         trial_values = numpy.linspace(guess - img_pix * subscale, guess + img_pix * subscale, 5)
