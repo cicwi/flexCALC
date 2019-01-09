@@ -598,8 +598,8 @@ def register_volumes(fixed, moving, subsamp = 2, use_moments = True, use_CG = Tr
         fixed_0[fixed_0 < threshold] = 0
         moving_0[moving_0 < threshold] = 0
         
-    display.display_max_projection(fixed_0, title = 'Preview: fixed volume')
-    display.display_max_projection(moving_0, title = 'Preview: moving volume')
+    display.max_projection(fixed_0, title = 'Preview: fixed volume')
+    display.max_projection(moving_0, title = 'Preview: moving volume')
         
     L2 = norm(fixed_0 - moving_0)
     print('L2 norm before registration: %0.2e' % L2)
@@ -1152,7 +1152,7 @@ def _sample_FDK_(projections, geometry, sample):
     
     return volume
     
-def _modifier_l2cost_(projections, geometry, subsample, value, key, preview):
+def _modifier_l2cost_(projections, geometry, subsample, value, key, metric = 'gradient', preview = False):
     '''
     Cost function based on L2 norm of the first derivative of the volume. Computation of the first derivative is done by FDK with pre-initialized reconstruction filter.
     '''
@@ -1163,24 +1163,40 @@ def _modifier_l2cost_(projections, geometry, subsample, value, key, preview):
     vol = _sample_FDK_(projections, geometry_, subsample)
     
     vol[vol < 0] = 0
+    
+    # Crop to central part:
+    sz = numpy.array(vol.shape) // 4
+    vol = vol[sz[0]:-sz[0], sz[1]:-sz[1], sz[2]:-sz[2]]
+    
+    #vol /= vol.max()
 
     l2 = 0
     
     for ii in range(vol.shape[0]):
-        #grad = numpy.gradient(numpy.squeeze(vol[ii, :, :]))
-        #grad = (grad[0] ** 2 + grad[1] ** 2)         
+        if metric == 'gradient':
+            grad = numpy.gradient(numpy.squeeze(vol[ii, :, :]))
+            grad = (grad[0] ** 2 + grad[1] ** 2)         
         
-        #l2 += numpy.mean(grad[grad > 0])
-        #l2 += numpy.max(grad)
+            l2 += numpy.mean(grad[grad > 0])
+            
+        elif metric == 'highpass':
         
-        l2 += numpy.mean((ndimage.gaussian_filter(vol[ii, :, :], 2) - vol[ii, :, :])**2)
+            l2 += numpy.mean((ndimage.gaussian_filter(vol[ii, :, :], 2) - vol[ii, :, :])**2)
+            
+        elif metric == 'correlation':
+            
+            im = numpy.fft.fft2(vol[ii, :, :])
+            l2 += numpy.abs(numpy.mean(im * numpy.conj(im)))
+            
+        else:
+            raise Exception('Unknown metric: ' + metric)
         
     if preview:
         display.slice(vol, title = 'Guess = %0.2e, L2 = %0.2e'% (value, l2))    
             
     return -l2    
     
-def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'axs_hrz', preview = False):  
+def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'axs_hrz', metric = 'correlation', preview = False):  
     '''
     Optimize a geometry modifier using a particular sampling of the projection data.
     '''  
@@ -1196,7 +1212,7 @@ def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'ax
     ii = 0
     for val in tqdm(values, unit = 'point'):
         
-        func_values[ii] = _modifier_l2cost_(projections, geometry, samp, val, key, preview)
+        func_values[ii] = _modifier_l2cost_(projections, geometry, samp, val, key, metric = 'correlation', preview = preview)
         
         ii += 1          
         

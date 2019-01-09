@@ -17,13 +17,13 @@ from flexcalc import process
 
 path = '/ufs/ciacc/flexbox/al_test/90KV_no_filt/'
 
-proj, meta = process.process_flex(path, sample = 1, skip = 1)
+proj, meta = process.process_flex(path, sample = 4, skip = 4)
 
 #%% Use optimize_rotation_center:
 
 # Name and range of the parameter to optimize:
-key = 'det_rot'
-trial_values = numpy.linspace(-0.01, 0.01, 11)
+key = 'det_roll'
+trial_values = numpy.linspace(-0.05, 0.05, 11)
 
 # Subsampling of data (vertical x 10)
 samp = [10, 1, 1]
