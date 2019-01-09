@@ -58,13 +58,13 @@ pipe.display(dim = 2, display_type = 'max_projection')
 
 # Write to disk:
 pipe.history_to_meta()                                                 # Create a history record
-pipe.write_flexray(folder = '../fdk_nobin', dim=0, compress='zip')     # Save slices with zip compression
+pipe.write_flexray(folder = '../fdk_nobin', dim=0, zip=True)     # Save slices with zip compression
 
 # Downsample and write to disk:
 pipe.bin()                                                             # Produce a binned volume with integer 8-bit precision as a preview
 pipe.cast2type(dtype = 'uint8', bounds = [0, 50])
 pipe.history_to_meta()
-pipe.write_flexray(folder = '../fdk_bin', dim=0, compress='zip')
+pipe.write_flexray(folder = '../fdk_bin', dim=0, zip=True)
 
 # Make and STL preview and write to disk:
 pipe.bin()                                                             # Make an STL file 

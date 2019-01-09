@@ -1311,11 +1311,11 @@ class Pipe:
         """
         Derotate image on the detectors if it was tilted.
         """
-        angle = numpy.rad2deg(data.meta['geometry']['det_rot'])
+        angle = numpy.rad2deg(data.meta['geometry']['det_roll'])
         process.rotate(data.data, -angle, axis = 1)
         
         print('Detector derotated by', angle)
-        data.meta['geometry']['det_rot'] = 0
+        data.meta['geometry']['det_roll'] = 0
         
     def untilt(self):
         """
@@ -1608,16 +1608,16 @@ class Pipe:
         self._record_history_('Saved to disk. [shape, dtype, zlib compression]', [data.data.shape, data.data.dtype, compress])
         
         print('Writing data at:', os.path.join(data.path, folder))
-        io.write_tiffs(os.path.join(data.path, folder), name, data.data, dim = dim, skip = skip, compress = compress)
+        io.write_tiffs(os.path.join(data.path, folder), name, data.data, dim = dim, skip = skip, zip = compress)
         
         print('Writing meta to:', os.path.join(data.path, folder, 'meta.toml'))
         io.write_toml(os.path.join(data.path, folder, 'meta.toml'), data.meta)  
 
-    def write_flexray(self, folder, name = 'vol', dim = 0, skip = 1, compress = 'zip'):
+    def write_flexray(self, folder, name = 'vol', dim = 0, skip = 1, zip = True):
         """
         Write the raw and meta files to disk.
         """
-        self._add_action_('write_flexray', self._write_flexray_, _ACTION_BATCH_, folder, name, dim, skip, compress)
+        self._add_action_('write_flexray', self._write_flexray_, _ACTION_BATCH_, folder, name, dim, skip, zip)
         
     def _history_to_meta_(self, data, count, argument):
         """

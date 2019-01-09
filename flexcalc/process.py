@@ -1237,11 +1237,11 @@ def optimize_detector_tilt(projections, geometry, amplitude = 1):
     nstep = int(projections.shape[2] * numpy.sin(amplitude))
     
     # Name and range of the parameter to optimize:
-    key = 'det_rot'
+    key = 'det_roll'
     trial_values = numpy.linspace(-amplitude, amplitude, nstep)
 
     # Subsampling of data (vertical x 10)
-    samp = [20, 1, 1]
+    samp = [10, 1, 1]
     
     # Optimization:
     print('Searching for a correct detector tilt...')
