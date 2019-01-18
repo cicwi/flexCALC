@@ -14,6 +14,7 @@ import time
 
 from scipy import ndimage
 from scipy import signal
+from scipy import stats
 
 import transforms3d
 
@@ -1011,7 +1012,11 @@ def flatfield(data, mode = 'sides'):
         mode (str): use "sides" to use maximum values of the detector sides to estimate the flat field or a single maximum value with "single".     
     '''          
     if mode == 'single':
-        flat = data.max()
+        
+        values = data[:,:, 0]
+        values.extend(data[:,:, -1])
+        
+        flat = stat.mode(values)
         data /= flat
         
     elif mode == 'sides':
