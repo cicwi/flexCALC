@@ -1612,6 +1612,47 @@ def append_tile(data, geom, tot_data, tot_geom):
         # Create distances to edge:
         tot_data[:, ii, :] = ((base_dist * base) + (new_dist * new)) / norm
         
+def append_volume(data, geom, tot_data, tot_geom, ramp = 10):
+    """
+    Append a volume array to a larger dataset.
+    Args:
+        
+        data: projection stack
+        geom: geometry descritption
+        tot_data: output array
+        tot_geom: output geometry
+        
+    """ 
+    print('Stitching a volume block...')               
+    
+    # Offset (pixel precision):   
+    offset = numpy.array(geom['vol_tra']) / geom['img_pixel'] - numpy.array(data.shape) / 2
+    offset -= numpy.array(tot_geom['vol_tra']) / tot_geom['img_pixel'] - numpy.array(tot_data.shape) / 2
+    offset = numpy.round(offset).astype('int')
+    
+    # Create a slice of the big dataset:
+    s0 = slice(offset[0], offset[0] + data.shape[0])
+    s1 = slice(offset[1], offset[1] + data.shape[1])
+    s2 = slice(offset[2], offset[2] + data.shape[2])
+    
+    # Writable view on the total data:
+    w_data = tot_data[s0, s1, s2]
+    
+    # Ramp weight:
+    weight = numpy.ones_like(data)
+    weight = array.ramp(weight, 0, [ramp, ramp], mode = 'linear')
+    weight = array.ramp(weight, 1, [ramp, ramp], mode = 'linear')
+    weight = array.ramp(weight, 2, [ramp, ramp], mode = 'linear')
+    
+    # Weight can be 100% where no prior data exists:
+    weight[w_data == 0] = 1
+    
+    # Apply weights and add:
+    data *= weight
+    
+    w_data *= (1 - weight)
+    w_data += data
+               
 def data_to_spectrum(path, compound = 'Al', density = 2.7, energy_bin = 50):
     """
     Convert data with Al calibration object at path to a spectrum.txt.
