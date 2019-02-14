@@ -23,12 +23,12 @@ energy, spectrum = process.data_to_spectrum(path, compound = 'Al', density = 2.7
 #%% Read data, reconstruct uncorrected:
 
 # Read:
-proj, meta = process.process_flex(path, sample = 2, skip = 2)
+proj, geom = process.process_flex(path, sample = 2, skip = 2)
 
 # Reconstruct:
 vol = project.init_volume(proj)
 
-project.FDK(proj, vol, meta['geometry'])
+project.FDK(proj, vol, geom)
 
 display.slice(vol, title = 'Uncorrected FDK')
 
@@ -36,13 +36,13 @@ a,b = process.histogram(vol, rng = [-0.05, 0.15])
 
 #%% Calibrate: 
 
-proj = process.equivalent_density(proj, meta, energy, spectrum, compound = 'Al', density = 2.7) 
+proj = process.equivalent_density(proj, geom, energy, spectrum, compound = 'Al', density = 2.7) 
 
 #%% Reconstruct corrected:
 
 vol = project.init_volume(proj)
 
-project.FDK(proj, vol, meta['geometry'])
+project.FDK(proj, vol, geom)
 
 display.slice(vol, title = 'Corrected FDK')
 

@@ -12,6 +12,7 @@ from copy import deepcopy
 #from glob import glob        
 
 from flexdata import io
+from flexdata import geometry
 from flexdata import array
 from flexdata import display
 from flextomo import project
@@ -25,10 +26,7 @@ import matplotlib.pyplot as plt
 class logger:
    """
    A class for logging and printing messages.
-   """
-   #def __init__(self):
-   #   pass
-   
+   """  
    @staticmethod
    def print(message):
       """
@@ -76,14 +74,15 @@ class Buffer:
         self.filename = ''
         self.path = path
         
-        # Init data and meta:
+        # Init data and geometry:
         self._data_ = None
-        self._meta_ = None
-                
-        # Shape and type of the memmap data:
-        self.shape = shape
-        self.dtype = dtype
+        self._geom_ = None
+        self._misc_ = None
         
+        # Data attributes:
+        self._dshape_ = None
+        self._dtype_ = None
+                        
         # Init links to the writer/reader nodes:
         self.writer_node = writer_node
         self.reader_node = None
@@ -93,7 +92,7 @@ class Buffer:
         #logger.print(writer_node.node_name + ' created a buffer!')
         
     def __copy__(self):
-        logger.print('Copying a buffer!')
+        logger.print('Attempt to copy a buffer!')
         
         return None
         
@@ -129,10 +128,18 @@ class Buffer:
         
         # Make sure that file was written on disk:
         if self._data_ is not None:
-            self._data_.flush()              
-  
+            self._data_.flush()
+            dtype = self._data_.dtype
+            shape = self._data_.shape
+        else:
+            dtype  = 'float32'
+            shape = (1,1,1)
+
+        self._data_ = None
+        gc.collect()
+        
         # Link with a file (array can be modified but the file stays read-only):
-        self._data_ = numpy.memmap(self.filename, dtype = self.dtype, mode = 'c', shape = self.shape) 
+        self._data_ = numpy.memmap(self.filename, dtype = dtype, mode = 'c', shape = shape) 
         self.readonly = True
             
     def switch_writeonly(self):
@@ -142,16 +149,49 @@ class Buffer:
       # Get a new name if needed:
       self._get_filename_()
       
+      dshape = self.dshape  
+      dtype = self.dtype            
+      
+      # Release memmap:
+      self._data_ = None
+      gc.collect()
+            
       # Link with a file:
-      self._data_ = numpy.memmap(self.filename, dtype = self.dtype, mode = 'w+', shape = self.shape)       
+      self._data_ = numpy.memmap(self.filename, dtype = dtype, mode = 'w+', shape = dshape)       
       self.readonly = False
-    
+      
+    def switch_offline(self):
+        '''
+        Switch buffers to offline to be able to serialize node tree and save them on disk.
+        '''
+        if self._data_ is None: return
+        
+        self._dtype_ = self._data_.dtype
+        self._dshape_ = self._data_.shape
+        
+        self._data_ = None
+        gc.collect()
+        
+    def switch_online(self):
+        '''
+        Switch buffers to online after loading the node tree from disk or after backing it up.
+        '''
+        if not self.filename: return 
+        
+        if self.readonly:
+            self._data_ = numpy.memmap(self.filename, dtype = self._dtype_, mode = 'c', shape = self._dshape_) 
+            
+        else:
+            self._data_ = numpy.memmap(self.filename, dtype = self._dtype_, mode = 'w+', shape = self._dshape_)             
+                
     def suicide(self):
       """
       Remove file from disk and delete variables.
       """
       self._data_ = None
-      self._meta_ = None
+      self._geom_ = None
+      self._misc_ = None
+      
       gc.collect()
         
       if os.path.exists(self.filename):     
@@ -159,37 +199,72 @@ class Buffer:
           logger.print('Deleted a memmap file @' + self.filename)
       
       self.filename = ''
+
+    @property
+    def dshape(self):
+        if not self._data_ is None:
+            return self._data_.shape   
+        else:
+            return (1, 1, 1)  
       
-    def set_shape(self, shape):
+    @dshape.setter
+    def dshape(self, shape):
         """
         Change the shape of the buffered data.
         """
         if self.readonly: logger.error('Attempt to write into read-only block!')
         
-        if any(self.shape != shape): 
-            self.shape = tuple(shape)
+        dtype = self.dtype
         
-        self._data_ = numpy.memmap(self.filename, dtype = self.dtype, mode = 'w+', shape = self.shape)
+        self._data_ = None
+        gc.collect()
         
+        self._data_ = numpy.memmap(self.filename, dtype = dtype, mode = 'w+', shape = tuple(shape))
+        self._dshape_ = self._data_.shape
+            
+    @property
+    def dtype(self):
+        if not self._data_ is None:
+            return self._data_.dtype   
+        else:
+            return 'float32'
+        
+    @dtype.setter
+    def dtype(self, shape):
+        """
+        Change the type of the buffered data.
+        """
+        if self.readonly: logger.error('Attempt to write into read-only block!')
+        
+        dtype = self.dtype
+        
+        self._data_ = None
+        gc.collect()
+        
+        self._data_ = numpy.memmap(self.filename, dtype = dtype, mode = 'w+', shape = tuple(shape))
+        self._dtype_ = self._data_.dtype
+    
     def set_data(self, data):
         '''
         Write the data data.
         '''
         if self.readonly: logger.error('Attempt to write into read-only block!')
-        
-        if self.shape != data.shape: self.shape = data.shape
-        if self.dtype != data.dtype: self.dtype = data.dtype
-        #logger.error('Wrong data data shape:' + str(data.shape))
-        
+                
         # Check free space:
         buffer_gb = data.nbytes / 1e9 
         free_gb = array.free_disk(self.filename)
         logger.print('Writing buffer of %1.1fGB (%u%% of current disk space).' % (buffer_gb, 100 * buffer_gb / free_gb))
         
         # We will open data here again in case the shape or type changed:
-        self._data_ = numpy.memmap(self.filename, dtype = self.dtype, mode = 'w+', shape = self.shape)  
+        self._data_ = None
+        gc.collect()
+      
+        self._data_ = numpy.memmap(self.filename, dtype = data.dtype, mode = 'w+', shape = data.shape)  
         self._data_[:] = data
         self._data_.flush()
+        
+        self._dtype_ = self._data_.dtype
+        self._dshape_ = self._data_.shape
     
     def get_data(self):
         '''
@@ -204,24 +279,41 @@ class Buffer:
         logger.print('Retrieving buffer of %1.1fGB (%u%% of current RAM).' % (buffer_gb, 100 * buffer_gb / free_gb))
         
         return self._data_
-    
-    def set_meta(self, meta):
-        '''
-        Write the meta record.
-        '''
-        if self.readonly: logger.error('Attempt to write into read-only block!')
-        self._meta_ = meta
-        
-    def get_meta(self):
+      
+    def get_geom(self):
         '''
         Read the meta record.
         '''
         if self.readonly:
-           return deepcopy(self._meta_)
+           return deepcopy(self._geom_)
        
         else:
-           return self._meta_
-    
+           return self._geom_
+
+    def set_geom(self, geom):
+        '''
+        Write the meta record.
+        '''
+        if self.readonly: logger.error('Attempt to write into read-only block!')
+        self._geom_ = geom
+
+    def get_misc(self):
+        '''
+        Read the meta record.
+        '''
+        if self.readonly:
+           return deepcopy(self._misc_)
+       
+        else:
+           return self._misc_
+            
+    def set_misc(self, misc):
+        '''
+        Write the misc record.
+        '''
+        if self.readonly: logger.error('Attempt to write into read-only block!')
+        self._misc_ = misc
+            
     def __del__(self):
         # This can be a copy of an original buffer. Suicide only on request!
         #self.suicide()
@@ -247,7 +339,7 @@ class Node:
    node_type = _NTYPE_BATCH_
    node_name = 'Default node'
    
-   def __init__(self, pipe, arguments, inputs):
+   def __init__(self, scheduler, arguments, inputs):
       """
       Initialize ...
       """
@@ -256,7 +348,7 @@ class Node:
       self.outputs = []
       
       # Parent:
-      self.pipe = pipe
+      self.scheduler = scheduler
       
       # Initial state and type:
       self.state = _NSTATE_PENDING_
@@ -289,8 +381,9 @@ class Node:
        Runtime callback. Override this in sub-classes
        """
        # Pass data from the input buffer to output without change:
-       data, meta = self.get_input(0)
-       self.set_output(data, meta, 0)
+       data, geom, misc = self.get_inputs(0)
+       
+       self.set_outputs(0, data, geom, misc)
        
    def init_outputs(self, count):
       """
@@ -298,53 +391,61 @@ class Node:
       """
       
       for ii in range(count):
-          buffer = Buffer(self.pipe._scratch_path_, self)
+          buffer = Buffer(self.scheduler._scratch_path_, self)
           
           # By default, buffer meta record is passed from parent to child:
           if len(self.inputs) > 0:
-              meta = self.inputs[0].get_meta()
-              buffer.set_meta(meta)
+              geom = self.inputs[0].get_geom()
+              misc = self.inputs[0].get_misc()
+              
+              buffer.set_geom(geom)
+              buffer.set_misc(misc)
               
           self.outputs.append(buffer)   
-      
-   def set_output(self, data = None, meta = None, index = 0):
-      """
-      Set the writable buffer data and meta.
-      """
-      buffer = self.outputs[index]        
-        
-      if data is not None:
-          buffer.set_data(data)
           
-      if meta is not None:    
-          buffer.set_meta(meta)
-      
-   def get_input(self, index = 0):
-      """
-      Get the readable buffer data and meta.
+   def get_outputs(self, index):
+        """
+        Get data, geom and misc from a buffer using index
+        """
+        buf = self.outputs[index]
         
-        Returns:
-            data, meta
-      """
-      # TODO: get meta too!!!
-      data = self.inputs[index].get_data()
-      meta = self.inputs[index].get_meta()
+        return buf.get_data(), buf.get_geom(), buf.get_misc()
+    
+   def get_inputs(self, index):
+        """
+        Get data, geom and misc from a buffer using index
+        """
+        buf = self.inputs[index]
         
-      return data, meta
-  
-   def get_output(self, index = 0):
-      """
-      Get the outputs data and meta.
+        return buf.get_data(), buf.get_geom(), buf.get_misc()
         
-        Returns:
-            data, meta
-      """
-      # TODO: get meta too!!!
-      data = self.outputs[index].get_data()
-      meta = self.outputs[index].get_meta()
+   def set_outputs(self, index, data, geom = None, misc = None):
+       """
+       Set data, geom and misc from a buffer using index
+       """
+       if not data is None:
+           self.outputs[index].set_data(data)
+           
+       if not geom is None:
+           self.outputs[index].set_geom(geom)
+           
+       if not misc is None: 
+           self.outputs[index].set_misc(misc)
+           
+   def offline(self):
+       """
+       Switch node to offline (switch its buffers to offline). This is needed for backing up nodes.
+       """
+       for buf in self.outputs:
+           buf.switch_offline()
+   
+   def online(self):
+       """
+       Switch node to online (switch its buffers to online). This is needed for backing up nodes.
+       """
+       for buf in self.outputs:
+           buf.switch_online()        
         
-      return data, meta
-  
    def get_parents(self):
         """
         Get parent nodes.
@@ -397,7 +498,7 @@ class Node:
                               
    def deactivate(self):
       """
-      Kill all inputs. Switch all outputs to read.
+      Kill all inputs. Switch all outputs to read-only mode.
       """
       # Check if the node is in correct state:
       if self.state != _NSTATE_ACTIVE_:
@@ -409,7 +510,7 @@ class Node:
       self.state = _NSTATE_DEACTIVATED_
       
       # Check if the output buffer is
-      if numpy.prod(self.outputs[0].shape) < 1000:
+      if numpy.prod(self.outputs[0].dshape) < 1000:
           logger.warning('Node output buffer is too small!')
       
       # Switch states of the buffers:
@@ -466,20 +567,19 @@ class batch_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
         callback = self.arguments[0]
         args = self.arguments[1]
         
         if data != []:
-            out = callback(data, **args)
+            out = callback(data, geom, **args)
             
             # If there is output pass it further down the pipeline:
-            if out != None:
-                self.set_output(out, meta, 0)
+            if out is None:
+                out = data
                 
-            else:
-                self.set_output(data, meta, 0)
+            self.set_outputs(0, out, geom, misc)    
 
 class info_node(Node):
     """
@@ -493,15 +593,15 @@ class info_node(Node):
         logger.title('Found %u buffers.' % len(self.inputs))
         
         for ii in range(len(self.inputs)):
-            data, meta = self.get_input(ii)
+            data, geom, misc = self.get_inputs(ii)
         
             logger.print('Data shape: ' + str(data.shape))
             logger.print('Data range: ' + str([data.min(), data.max()]))
       
-            logger.print('Meta:')
-            logger.print(meta)
+            logger.print('Geometry:')
+            logger.print(geom)
             
-            self.set_output(data, meta, ii) 
+            self.set_outputs(ii, data, geom, misc)    
                                 
 class fdk_node(Node):
     """
@@ -513,20 +613,24 @@ class fdk_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
-        vol_shape = self.arguments[0]
+        (vol_shape, sirt) = self.arguments
         
         if vol_shape:
             vol = numpy.zeros(vol_shape, dtype = 'float32')
             
         else:
-            vol = project.init_volume(data, meta['geometry'])
+            vol = project.init_volume(data, geom)
         
-        project.settings['block_number'] = 20
-        project.FDK(data, vol, meta['geometry'])
+        project.settings['block_number'] = 10
+        project.FDK(data, vol, geom)
         
-        self.set_output(vol, meta, 0)                
+        if sirt:
+            project.settings['bounds'] = [0, 9999]
+            project.SIRT(data, vol, geom, iterations = sirt)    
+        
+        self.set_outputs(0, vol, geom, misc)                 
 
 class crop_node(Node):
     """
@@ -538,13 +642,13 @@ class crop_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
         (dim, width) = self.arguments
                
-        data = array.crop(data, dim, width, meta['geometry'])
+        data = array.crop(data, dim, width, geom)
   
-        self.set_output(data, meta, 0) 
+        self.set_outputs(0, data, geom, misc) 
         
 class bin_node(Node):
     """
@@ -556,13 +660,13 @@ class bin_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
         dim = self.arguments[0]
                
-        data = array.bin(data, dim)
+        data = array.bin(data, dim, geom)
   
-        self.set_output(data, meta, 0)          
+        self.set_outputs(0, data, geom, misc)         
 
 class pad_node(Node):
     """
@@ -574,13 +678,13 @@ class pad_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
         (width, dim, mode) = self.arguments
         
-        data = array.pad(data, dim, width, mode, meta['geometry'])
+        data = array.pad(data, dim, width, mode, geom)
         
-        self.set_output(data, meta, 0)               
+        self.set_outputs(0, data, geom, misc)              
 
 class beamhardening_node(Node):
     """
@@ -593,7 +697,7 @@ class beamhardening_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
         (file, compound, density) = self.arguments
                 
@@ -604,9 +708,9 @@ class beamhardening_node(Node):
         else:
             raise Exception('File not found:' + file)
         
-        data = process.equivalent_density(data, meta, spec['energy'], spec['spectrum'], compound = compound, density = density)
+        data = process.equivalent_density(data, geom, spec['energy'], spec['spectrum'], compound = compound, density = density)
                 
-        self.set_output(data, meta, 0)     
+        self.set_outputs(0, data, geom, misc)    
 
 class display_node(Node):
     """
@@ -618,18 +722,22 @@ class display_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
         display_type = self.arguments[0]
         args = self.arguments[1]
         
         # Find callback:        
         dictionary = {'slice': display.slice, 'max_projection': display.max_projection,'min_projection':display.min_projection,'pyqt_graph':display.pyqt_graph}
+        
+        if display_type not in dictionary.keys():
+            logger.error('Unknown display type!')
+            
         callback = dictionary[display_type]        
         
         callback(data, **args)
         
-        self.set_output(data, meta, 0)            
+        self.set_outputs(0, data, geom, misc)           
 
 class autocrop_node(Node):
     """
@@ -641,7 +749,7 @@ class autocrop_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
                         
         a,b,c = process.bounding_box(data)
         
@@ -649,16 +757,14 @@ class autocrop_node(Node):
         
         logger.print('Bounding box found: ' + str([a,b,c]))
         logger.print('Old dimensions are: ' + str(sz))
-        
-        geometry = meta['geometry']
-        
-        data = array.crop(data, 0, [a[0], sz[0] - a[1]], geometry)
-        data = array.crop(data, 1, [b[0], sz[1] - b[1]], geometry)
-        data = array.crop(data, 2, [c[0], sz[2] - c[1]], geometry)
+               
+        data = array.crop(data, 0, [a[0], sz[0] - a[1]], geom)
+        data = array.crop(data, 1, [b[0], sz[1] - b[1]], geom)
+        data = array.crop(data, 2, [c[0], sz[2] - c[1]], geom)
         
         logger.print('New dimensions are: ' + str(data.shape))
         
-        self.set_output(data, meta, 0)                
+        self.set_outputs(0, data, geom, misc)              
 
 class markernorm_node(Node):
     """
@@ -670,12 +776,12 @@ class markernorm_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
          
         norm, size = self.arguments[0]               
         
         # Find the marker:
-        a,b,c = process.find_marker(data, meta, size)    
+        a,b,c = process.find_marker(data, geom, size)    
         
         rho = data[a-1:a+1, b-1:b+1, c-1:c+1].mean()
     
@@ -687,7 +793,7 @@ class markernorm_node(Node):
         else:
             data *= (norm / rho)
         
-        self.set_output(data, meta, 0)  
+        self.set_outputs(0, data, geom, misc) 
         
 class threshold_node(Node):
     """
@@ -699,13 +805,13 @@ class threshold_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
         (mode, threshold) = self.arguments
         
         process.soft_threshold(data, mode, threshold)
 
-        self.set_output(data, meta, 0)                        
+        self.set_outputs(0, data, geom, misc)                     
         
 class cast2type_node(Node):
     """
@@ -717,7 +823,7 @@ class cast2type_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
         (dtype, bounds) = self.arguments
         
@@ -725,7 +831,7 @@ class cast2type_node(Node):
         
         data = array.cast2type(data, dtype, bounds)
         
-        self.set_output(data, meta, 0)  
+        self.set_outputs(0, data, geom, misc)  
         
 class flatlog_node(Node):
     """
@@ -737,7 +843,7 @@ class flatlog_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
         (usemax, flats, darks, sample, flipdim) = self.arguments
         
@@ -747,13 +853,13 @@ class flatlog_node(Node):
             
         else:
             
-            path = meta.get('path')
+            path = misc.get('path')
             if path == []:
                 logger.error('Path to data not found in the metadata.')
             
             # Read darks and flats:
             if darks:
-                dark = io.read_tiffs(path, darks, sample, sample)
+                dark = io.read_stack(path, darks, sample, sample)
                     
                 if dark.ndim > 2:
                     dark = dark.mean(0)
@@ -764,7 +870,7 @@ class flatlog_node(Node):
                 dark = 0
                 
             if flats:    
-                flat = io.read_tiffs(path, flats, sample, sample)
+                flat = io.read_stack(path, flats, sample, sample)
                 if flat.ndim > 2:
                     flat = flat.mean(0)
                 
@@ -779,7 +885,7 @@ class flatlog_node(Node):
         data[~numpy.isfinite(data)] = 10        
         
         # TODO: make sure that all functions return data!
-        self.set_output(data, meta, 0)        
+        self.set_outputs(0, data, geom, misc)         
       
 class vol_merge_node(Node):
     """
@@ -800,33 +906,32 @@ class vol_merge_node(Node):
         # Find bounds of the volumes:
         for ii in range(len(self.inputs)):
             
-            data, meta = self.get_input(ii)
-            geom = meta['geometry']
+            data, geom, misc = self.get_inputs(ii)
     
-            bounds = numpy.array(data.shape) * geom['img_pixel']
-            bounds = numpy.array([geom['vol_tra'] - bounds / 2, geom['vol_tra'] + bounds / 2]).T
+            bounds = geom.volume_bounds(data.shape)
             
             tot_bounds[:, 0] = numpy.min([bounds[:, 0], tot_bounds[:, 0]], axis = 0)
             tot_bounds[:, 1] = numpy.max([bounds[:, 1], tot_bounds[:, 1]], axis = 0)
         
-        meta = self.inputs[ii].get_meta()
-        tot_meta = deepcopy(meta)
-        tot_meta['geometry']['vol_tra'] = (tot_bounds[:, 1] + tot_bounds[:, 0]) / 2
+        geom = self.inputs[ii].get_geom()
+        
+        tot_geom = deepcopy(geom)
+        tot_geom['vol_tra'] = (tot_bounds[:, 1] + tot_bounds[:, 0]) / 2
         
         tot_bounds = tot_bounds[:, 1] - tot_bounds[:, 0]
-        tot_shape = (numpy.ceil(tot_bounds / tot_meta['geometry']['img_pixel'])).astype('int')
+        tot_shape = (numpy.ceil(tot_bounds / tot_geom['img_pixel'])).astype('int')
 
         # Update buffer shape and get a link to it:        
-        self.outputs[0].set_shape(tot_shape)
+        self.outputs[0].dshape = tot_shape
+        self.outputs[0].set_geom(tot_geom)
+        
         tot_data = self.outputs[0].get_data()
-        self.outputs[0].set_meta(tot_meta)
         
         # Append volumes:    
         for ii in range(len(self.inputs)):
             
-            data, meta = self.get_input(ii)
-            geom = meta['geometry']
-            process.append_volume(data, geom, tot_data, tot_meta['geometry'], ramp = data.shape[0]//10)
+            data, geom, misc = self.get_inputs(ii)
+            process.append_volume(data, geom, tot_data, tot_geom, ramp = data.shape[0]//10)
             
 class proj_merge_node(Node):
     """
@@ -846,9 +951,8 @@ class proj_merge_node(Node):
         # Create a separate sub-group of geometries for each source position.
         for ii in range(len(self.inputs)):
             
-            meta = self.inputs[ii].get_meta()
+            geom = self.inputs[ii].get_geom()
             
-            geom = meta.get('geometry')
             if geom is None:
                 logger.error('geometry record not found!')
             
@@ -874,43 +978,37 @@ class proj_merge_node(Node):
                 
     def runtime(self):
         
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         shape = data.shape        
         
         # Compute a total geometry for each source position:
         for ii, geoms in enumerate(self._geoms_list_):
             
             # Total geometry and shape for a single unique source position:
-            tot_shape, tot_geom = array.tiles_shape(shape, geoms)
+            tot_shape, tot_geom = geometry.tiles_shape(shape, geoms)
                     
             # Create outputs:
-            tot_meta = meta.copy()
-            tot_meta['geometry'] = tot_geom
-            
-            self.outputs[ii].set_shape(tot_shape)
-            self.outputs[ii].set_meta(tot_meta)
+            self.outputs[ii].dshape = tot_shape
+            self.outputs[ii].set_geom(tot_geom)
             
         # Retrieve a list of unique sources:
         sources = []
         for ii in range(len(self.outputs)):
             
-            meta = self.outputs[ii].get_meta()
-            geom = meta['geometry']
+            geom = self.outputs[ii].get_geom()
             sources.append([geom['src_vrt'], geom['src_mag'], geom['src_hrz']])
 
         # Add tiles one by one:            
         for ii in range(len(self.inputs)):
 
             # Find a unique source position:
-            data, meta = self.get_input(ii)
-            geom = meta['geometry']
+            data, geom, misc = self.get_inputs(ii)
             
             src = [geom['src_vrt'], geom['src_mag'], geom['src_hrz']]
             index = sources.index(src)
             
             # Get the corresponding output
-            tot_data, tot_meta = self.get_output(index)
-            tot_geom = tot_meta['geometry']
+            tot_data, tot_geom, tot_misc = self.get_outputs(index)
             
             # Derotate tile if needed:
             if geom['det_roll'] != 0:
@@ -941,13 +1039,16 @@ class optimize_node(Node):
         for ii in range(len(self.inputs)):
         
             # Read data form a single buffer:
-            data, meta = self.get_input(ii)
+            data, geom, misc = self.get_inputs(0)
             
             if (ii == tile_index) | (tile_index is None):
             
-                process.optimize_modifier(values + meta['geometry'][key], data, meta['geometry'], samp = sampling, key = key, metric = metric)
+                if not key in geom.parameters.keys():
+                    logger.error('Unrecognized geometry key: ' + key)
+                    
+                process.optimize_modifier(values + geom[key], data, geom, samp = sampling, key = key, metric = metric)
             
-            self.set_output(data, meta, ii)  
+            self.set_outputs(ii, data, geom)  
   
 class writer_node(Node):
     """
@@ -959,19 +1060,19 @@ class writer_node(Node):
     def runtime(self):
         
         # Read data form a single buffer:
-        data, meta = self.get_input(0)
+        data, geom, misc = self.get_inputs(0)
         
         (folder, name, dim, skip, compress) = self.arguments
             
-        path = meta['path']
+        path = misc['path']
         
         print('Writing data at:', os.path.join(path, folder))
-        io.write_tiffs(os.path.join(path, folder), name, data, dim = dim, skip = skip, zip = compress)
+        io.write_stack(os.path.join(path, folder), name, data, dim = dim, skip = skip, zip = compress)
         
-        print('Writing meta to:', os.path.join(path, folder, 'meta.toml'))
-        io.write_toml(os.path.join(path, folder, 'meta.toml'), meta)  
+        print('Writing meta to:', os.path.join(path, folder, 'geometry.toml'))
+        io.write_toml(os.path.join(path, folder, 'geometry.toml'), geom)  
 
-        self.set_output(data, meta, 0)  
+        self.set_outputs(0, data, geom, misc)  
         
 class reader_node(Node):
     
@@ -993,20 +1094,26 @@ class reader_node(Node):
           
             logger.print('Found data @ ' + path)
             
-            shape = io.stack_shape(path, name, sampling, sampling, [], [], shape, dtype, format)
+            shape = io.stack_shape(path, name, sampling, sampling, shape, dtype, format)
             
             # If present, read meta:
-            try:
-                meta = io.read_meta(path, sample = sampling)
+            if os.path.exists(os.path.join(path, 'metadata.toml')):
+                geom = io.read_flexraymeta(path, sampling)   
                 
-            except:
+            elif os.path.exists(os.path.join(path, 'scan settings.txt')):
+                geom = io.read_flexraylog(path, sampling)  
+                
+            elif os.path.exists(os.path.join(path, 'meta.toml')):
+                geom = io.read_metatoml(path, sampling)  
+                
+            else:
                 logger.warning('No meta data found.')
-                meta = {}
+                geom = None
                 
             # Remember the path to the data using meta:    
-            meta['path'] = path  
+            misc = {'path':path}
             
-            self.set_output(meta = meta, index = ii)
+            self.set_outputs(ii, None, geom, misc)
                         
     def runtime(self):
         # Get arguments:
@@ -1020,7 +1127,7 @@ class reader_node(Node):
           data = io.read_stack(path, name, sampling, sampling, shape = shape, dtype = dtype, format = format, flipdim = flipdim)
           #proj, meta = process.process_flex(path, sampling, sampling, proj_number = proj_number) 
             
-          self.set_output(data = data, index = ii)
+          self.set_outputs(ii, data)
    
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SCHEDULER CLASS >>>>>>>>>>>>>>>>>>>>>>>>>>>>
           
@@ -1256,10 +1363,19 @@ class scheduler:
      
       logger.print('%u pending | %u active | %u deactivated' % (pend, active, deactive))
       
+      # Switch nodes to offline:
+      for node in nodes:
+          node.offline()
+      
+      # Serialize using pickle:  
       file = os.path.join(self._scratch_path_, 'nodes.pickle')
       pickle_out = open(file, "wb")
       pickle.dump(nodes, pickle_out)
       pickle_out.close()
+      
+      # Put nodes back online:
+      for node in nodes:
+          node.online()
       
    def restore_nodes(self):
       """
@@ -1269,8 +1385,21 @@ class scheduler:
       
       file = os.path.join(self._scratch_path_, 'nodes.pickle')
       
+      if not os.path.exists(file):
+          logger.error('Backup file cannot be found!')
+      
       pickle_in = open(file,"rb")
       nodes = pickle.load(pickle_in)        
+      
+      # Get nodes to online state (link to memmaps):
+      for node in nodes:
+          node.online()
+          
+          # Clear outputbuffers, in case there is some garbage:
+          if node.state == _NSTATE_ACTIVE_:
+              for ii in range(len(self.outputs)):
+                  data = self.outputs[ii].get_data()
+                  data *= 0
       
       self.root_node = nodes[0]
               
@@ -1312,10 +1441,16 @@ class scheduler:
        # Pass the callback as the first argument for batch_node:
        self.schedule(batch_node, (callback, arguments))
 
-   def FDK(self, vol_shape = None):
+   def FDK(self, vol_shape = None, sirt = 0):
+       """
+       Schedule FDK reconstruction.
        
-      arguments = (vol_shape, )
-      self.schedule(fdk_node, arguments)   
+       Args:
+           vol_shape : force reconstruction volume shape
+           sirt      : run a few iterations of SIRT with non-negativity constraint
+       """
+       arguments = (vol_shape, sirt)
+       self.schedule(fdk_node, arguments)   
 
    def soft_threshold(self, mode, threshold = None):
       """
@@ -1418,22 +1553,7 @@ class scheduler:
    
    def display(self, display_type, **argin):
 
-       self.schedule(display_node, [display_type, argin])      
-   
-   def FDK(self, vol_shape = None):
-       
-      arguments = (vol_shape, )
-      self.schedule(fdk_node, arguments)      
-   
-   def cast2type(self, dtype, bounds = None):
-      """
-      Schedule a cast to type operation. 
-        Args:            
-            
-      """
-      arguments = (dtype, bounds)
-      
-      self.schedule(cast2type_node, arguments)       
+       self.schedule(display_node, [display_type, argin])           
 
    def merge(self, mode = 'projections'):
       """

@@ -16,33 +16,23 @@ from flexcalc import process
 #%% Read
 
 path = '/ufs/ciacc/flexbox/al_test/90KV_no_filt/'
-
-proj, meta = process.process_flex(path, sample = 4, skip = 4)
-
-#%% Use optimize_rotation_center:
-
-# Name and range of the parameter to optimize:
-key = 'det_roll'
-trial_values = numpy.linspace(-0.05, 0.05, 11)
-
-# Subsampling of data (vertical x 10)
-samp = [10, 1, 1]
-
-# Optimization:
-guess = process.optimize_modifier(trial_values, proj, meta['geometry'], samp = samp, key = key, preview = True)
+proj, geom = process.process_flex(path, sample = 4, skip = 4)
 
 #%% Reconstruct uncorrected:
 
 vol = project.init_volume(proj)
-project.FDK(proj, vol, meta['geometry'])
+project.FDK(proj, vol, geom)
 
 display.slice(vol, bounds = [], title = 'FDK Corrected')
 
-#%% REconstruct corrected:
+#%% Use optimize_rotation_center:
 
-meta['geometry'][key] = guess
+# Optimization by scanning -3..+3 degrees with 7 steps:
+guess = process.optimize_modifier(numpy.linspace(-3, 3, 7), proj, geom, samp = [10, 1, 1], key = 'det_roll', preview = False)
+
+#%% Reconstruct corrected:
 
 vol = project.init_volume(proj)
-project.FDK(proj, vol, meta['geometry'])
+project.FDK(proj, vol, geom)
 
 display.slice(vol, bounds = [], title = 'FDK Corrected')

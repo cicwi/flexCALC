@@ -14,22 +14,22 @@ from flexcalc import process
 
 path = '/ufs/ciacc/flexbox/al_test/90KV_no_filt/'
 
-proj, meta = process.process_flex(path)
+proj, geom = process.process_flex(path)
 
 #%% Reconstruct uncorrected:
 
 vol = project.init_volume(proj)
-project.FDK(proj, vol, meta['geometry'])
+project.FDK(proj, vol, geom)
 
 display.slice(vol, bounds = [], title = 'FDK Corrected')
 
 #%% Use optimize_rotation_center:
     
-guess = process.optimize_rotation_center(proj, meta['geometry'], subscale = 8)
+guess = process.optimize_rotation_center(proj, geom, subscale = 8, preview = True)
 
 #%% REconstruct corrected:
 
 vol = project.init_volume(proj)
-project.FDK(proj, vol, meta['geometry'])
+project.FDK(proj, vol, geom)
 
 display.slice(vol, bounds = [], title = 'FDK Corrected')

@@ -61,7 +61,7 @@ def generate_stl(data, geometry):
     
     # Create stl:    
     stl_mesh = mesh.Mesh(numpy.zeros(faces.shape[0], dtype=mesh.Mesh.dtype))
-    stl_mesh.vectors = verts[faces] * geometry['img_pixel']
+    stl_mesh.vectors = verts[faces] * geometry.voxel
     
     return stl_mesh
 
@@ -282,8 +282,8 @@ def find_marker(data, meta, d = 5):
     threshold = numpy.float32(data2 > t)
     
     # Create a circular kernel (take into account subsampling of data2):
-    kernel = -0.5 * phantom.sphere(data2.shape, meta['geometry'], r * 2, [0,0,0])
-    kernel += phantom.sphere(data2.shape, meta['geometry'], r, [0,0,0])
+    kernel = -0.5 * phantom.sphere(data2.shape, geometry, r * 2, [0,0,0])
+    kernel += phantom.sphere(data2.shape, geometry, r, [0,0,0])
 
     kernel[kernel > 0] *= (2**3 - 1)
     
@@ -676,7 +676,7 @@ def transform_to_geometry(R, T, geom):
     # Translate to flex geometry:
     geom = geom.copy()
     geom['vol_rot'] = transforms3d.euler.mat2euler(R.T, axes = 'sxyz')
-    geom['vol_tra'] = numpy.array(geom['vol_tra']) - numpy.dot(T, R.T)[[0,2,1]] * geom['img_pixel']
+    geom['vol_tra'] = numpy.array(geom['vol_tra']) - numpy.dot(T, R.T)[[0,2,1]] * geom.voxel
     
     return geom
     
@@ -1146,7 +1146,7 @@ def _sample_FDK_(projections, geometry, sample):
 
     # Apply subsampling to detector and volume:    
     geometry_['vol_sample'] = [sample[0], sample[1], sample[2]]
-    geometry_['proj_sample'] = [sample[0], sample[2], sample[2]]
+    geometry_['det_sample'] = [sample[0], sample[2], sample[2]]
     
     volume = project.init_volume(projections, geometry_)
     
@@ -1170,7 +1170,7 @@ def _modifier_l2cost_(projections, geometry, subsample, value, key, metric = 'gr
     vol[vol < 0] = 0
     
     # Crop to central part:
-    sz = numpy.array(vol.shape) // 4
+    sz = numpy.array(vol.shape) // 4 + 1
     vol = vol[sz[0]:-sz[0], sz[1]:-sz[1], sz[2]:-sz[2]]
     
     #vol /= vol.max()
@@ -1190,7 +1190,9 @@ def _modifier_l2cost_(projections, geometry, subsample, value, key, metric = 'gr
             
         elif metric == 'correlation':
             
-            im = numpy.fft.fft2(vol[ii, :, :])
+            im = vol[ii, :, :]
+            im = numpy.pad(im, ((im.shape[0],0), (im.shape[1],0)), mode = 'constant')
+            im = numpy.fft.fft2(im)
             l2 += numpy.abs(numpy.mean(im * numpy.conj(im)))
             
         else:
@@ -1201,7 +1203,7 @@ def _modifier_l2cost_(projections, geometry, subsample, value, key, metric = 'gr
             
     return -l2    
     
-def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'axs_hrz', metric = 'correlation', preview = False):  
+def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'axs_tan', metric = 'correlation', preview = False):  
     '''
     Optimize a geometry modifier using a particular sampling of the projection data.
     '''  
@@ -1212,12 +1214,12 @@ def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'ax
     
     print('Starting a full search from: %0.3f' % values.min(), 'to %0.3f'% values.max())
     
-    time.sleep(0.5) # To print TQDM properly
+    time.sleep(0.3) # To print TQDM properly
     
     ii = 0
     for val in tqdm(values, unit = 'point'):
         
-        func_values[ii] = _modifier_l2cost_(projections, geometry, samp, val, key, metric = 'correlation', preview = preview)
+        func_values[ii] = _modifier_l2cost_(projections, geometry, samp, val, key, metric = metric, preview = preview)
         
         ii += 1          
         
@@ -1257,26 +1259,13 @@ def optimize_detector_tilt(projections, geometry, amplitude = 1):
     
     return guess
      
-def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, centre_of_mass = False, preview = False):
-    '''
-    Find a center of rotation. If you can, use the center_of_mass option to get the initial guess.
-    If that fails - use a subscale larger than the potential deviation from the center. Usually, 8 or 16 works fine!
+def optimize_modifier_multires(projections, geometry, guess = None, subscale = 1, key = 'axs_tan', metric = 'correlation', preview = False):
     '''
     
-    # Usually a good initial guess is the center of mass of the projection data:
-    if  guess is None:  
-        if centre_of_mass:
-            
-            print('Computing centre of mass...')
-            guess = io.pixel2mm(centre(projections)[2], geometry)
-        
-        else:
-        
-            guess = geometry['axs_hrz']
-        
+    '''        
     img_pix = geometry['img_pixel']
     
-    print('The initial guess for the rotation axis shift is %0.3f mm' % guess)
+    print('The initial guess is %0.3f mm' % guess)
     
     # Downscale the data:
     while subscale >= 1:
@@ -1287,20 +1276,40 @@ def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, 
         print('Subscale factor %1d' % subscale)    
 
         # We will use constant subscale in the vertical direction but vary the horizontal subscale:
-        samp =  [10, subscale, subscale]
+        samp =  [5 * subscale, subscale, subscale]
 
         # Create a search space of 5 values around the initial guess:
         trial_values = numpy.linspace(guess - img_pix * subscale, guess + img_pix * subscale, 5)
         
-        guess = optimize_modifier(trial_values, projections, geometry, samp, key = 'axs_hrz', preview = preview)
+        guess = optimize_modifier(trial_values, projections, geometry, samp, key = key, preview = preview)
                 
         print('Current guess is %0.3f mm' % guess)
         
         subscale = subscale // 2
-        
-    geometry['axs_hrz'] = guess
     
-    print('Old value:%0.3f' % geometry['axs_hrz'], 'new value: %0.3f' % guess)        
+    print('Old value:%0.3f' % geometry[key], 'new value: %0.3f' % guess)          
+    geometry[key] = guess
+    
+    return guess
+
+def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, centre_of_mass = False, metric = 'correlation', preview = False):
+    '''
+    Find a center of rotation. If you can, use the center_of_mass option to get the initial guess.
+    If that fails - use a subscale larger than the potential deviation from the center. Usually, 8 or 16 works fine!
+    '''
+    
+    # Usually a good initial guess is the center of mass of the projection data:
+    if  guess is None:  
+        if centre_of_mass:
+            
+            print('Computing centre of mass...')
+            guess = centre(projections)[2] * geometry.voxel[2]
+        
+        else:
+        
+            guess = geometry['axs_tan']
+        
+    guess = optimize_modifier_multires(projections, geometry, guess = guess, subscale = subscale, key = 'axs_tan', metric = metric, preview = preview)
     
     return guess
 
@@ -1325,7 +1334,7 @@ def process_flex(path, sample = 1, skip = 1, memmap = None, index = None, proj_n
     print('Reading...')
     
     #index = []
-    proj, flat, dark, meta = io.read_flexray(path, sample = sample, skip = skip, memmap = memmap, proj_number = proj_number)
+    proj, flat, dark, geom = io.read_flexray(path, sample = sample, skip = skip, memmap = memmap, proj_number = proj_number)
                 
     # Show fow much memory we have:
     #flexUtil.print_memory()     
@@ -1356,20 +1365,21 @@ def process_flex(path, sample = 1, skip = 1, memmap = None, index = None, proj_n
         print(index[-1] + 1)
         print('Seemes like some files were corrupted or missing. We will try to correct thetas accordingly.')
         
-        thetas = numpy.linspace(meta['geometry']['theta_min'], meta['geometry']['theta_max'], index[-1]+1)
+        thetas = numpy.linspace(geom['range'][0], geom['range'][1], index[-1]+1)
         thetas = thetas[index]
         
-        meta['geometry']['_thetas_'] = thetas
+        geom['thetas'] = thetas
         
         import pylab
         pylab.plot(thetas, thetas ,'*')
         pylab.title('Thetas')
     '''
+    
     # Show fow much memory we have:
     # flexUtil.print_memory()             
     print('Done!')
     
-    return proj, meta
+    return proj, geom
 
 def medipix_quadrant_shift(data):
     '''
@@ -1544,15 +1554,15 @@ def append_tile(data, geom, tot_data, tot_geom):
     if tot_data.shape[1] != data.shape[1]:
         raise Exception('This data has different number of projections from the others. %u v.s. %u. Aborting!' % (data.shape[1], tot_data.shape[1]))
     
-    total_size = array.detector_size(total_shape, tot_geom)
-    det_size = array.detector_size(det_shape, geom)
+    total_size = tot_geom.detector_size(total_shape)
+    det_size = geom.detector_size(det_shape)
                     
     # Offset from the left top corner:
-    x0 = tot_geom['det_hrz']
-    y0 = tot_geom['det_vrt']
+    x0 = tot_geom['det_tan']
+    y0 = tot_geom['det_ort']
     
-    x = geom['det_hrz']
-    y = geom['det_vrt']
+    x = geom['det_tan']
+    y = geom['det_ort']
         
     x_offset = ((x - x0) + total_size[1] / 2 - det_size[1] / 2) / geom['det_pixel']
     y_offset = ((y - y0) + total_size[0] / 2 - det_size[0] / 2) / geom['det_pixel']
@@ -1657,28 +1667,28 @@ def data_to_spectrum(path, compound = 'Al', density = 2.7, energy_bin = 50):
     """
     Convert data with Al calibration object at path to a spectrum.txt.
     """
-    proj, meta = process_flex(path, skip = 2, sample = 2)
+    proj, geom = process_flex(path, skip = 2, sample = 2)
     
     display.slice(proj, dim=0,title = 'PROJECTIONS')
 
-    vol = project.init_volume(proj, meta['geometry'])
+    vol = project.init_volume(proj, geom)
     
     print('FDK reconstruction...')
     
-    project.FDK(proj, vol, meta['geometry'])
+    project.FDK(proj, vol, geom)
     display.slice(vol, title = 'Uncorrected FDK')
 
     print('Callibrating spectrum...')    
-    e, s = calibrate_spectrum(proj, vol, meta, compound = 'Al', density = 2.7, iterations = 1000, n_bin = energy_bin)   
+    e, s = calibrate_spectrum(proj, vol, geom, compound = 'Al', density = 2.7, iterations = 1000, n_bin = energy_bin)   
    
-    meta = {'energy':e, 'spectrum':s, 'settings':meta['settings']}
+    meta = {'energy':e, 'spectrum':s, 'description':geom.description}
     io.write_toml(os.path.join(path, 'spectrum.toml'), meta)
     
-    print('Spectrum computed.')
+    print('Spectrum computed and stored at: ' + os.path.join(path, 'spectrum.toml'))
         
     return e, s
     
-def calibrate_spectrum(projections, volume, meta, compound = 'Al', density = 2.7, threshold = None, iterations = 1000, n_bin = 10):
+def calibrate_spectrum(projections, volume, geometry, compound = 'Al', density = 2.7, threshold = None, iterations = 1000, n_bin = 10):
     '''
     Use the projection stack of a homogeneous object to estimate system's 
     effective spectrum.
@@ -1689,8 +1699,6 @@ def calibrate_spectrum(projections, volume, meta, compound = 'Al', density = 2.7
     
     #import random
     
-    geometry = meta['geometry']
-
     # Find the shape of the object:                                                    
     if threshold:
         t = binary_threshold(volume, mode = 'constant', threshold = threshold)
@@ -1780,8 +1788,8 @@ def calibrate_spectrum(projections, volume, meta, compound = 'Al', density = 2.7
     intensity_0 = intensity_0[rim:-rim]    
     
     # Dn't trust low counts!
-    length_0 = length_0[intensity_0 > 0.1]
-    intensity_0 = intensity_0[intensity_0 > 0.1]
+    length_0 = length_0[intensity_0 > 0.05]
+    intensity_0 = intensity_0[intensity_0 > 0.05]
     
     # Get rid of long rays (they are typically wrong...)   
     #intensity_0 = intensity_0[length_0 < 35]    
@@ -1797,13 +1805,16 @@ def calibrate_spectrum(projections, volume, meta, compound = 'Al', density = 2.7
         
     print('Computing the spectrum by Expectation Maximization.')
     
-    energy = numpy.linspace(5, max(100, meta['settings']['voltage']), n_bin)
+    volts = geometry.description.get('voltage')
+    if not volts: volts = 100
+    
+    energy = numpy.linspace(5, max(100, volts), n_bin)
     
     mu = spectrum.linear_attenuation(energy, compound, density)
     exp_matrix = numpy.exp(-numpy.outer(length_0, mu))
     
     # Initial guess of the spectrum:
-    spec = spectrum.bremsstrahlung(energy, meta['settings']['voltage']) 
+    spec = spectrum.bremsstrahlung(energy, volts) 
     spec *= spectrum.scintillator_efficiency(energy, 'Si', rho = 5, thickness = 0.5)
     spec *= spectrum.total_transmission(energy, 'H2O', 1, 1)
     spec *= energy
@@ -1866,7 +1877,7 @@ def calibrate_spectrum(projections, volume, meta, compound = 'Al', density = 2.7
     
     return energy, spec
     
-def equivalent_density(projections, meta, energy, spectr, compound, density, preview = False):
+def equivalent_density(projections, geometry, energy, spectr, compound, density, preview = False):
     '''
     Transfrom intensity values to projected density for a single material data
     '''
@@ -1883,7 +1894,6 @@ def equivalent_density(projections, meta, energy, spectr, compound, density, pre
     # Make thickness range that is sufficient for interpolation:
     #m = (geometry['src2obj'] + geometry['det2obj']) / geometry['src2obj']
     #img_pix = geometry['det_pixel'] / m
-    geometry = meta['geometry']
     img_pix = geometry['img_pixel']
 
     thickness_min = 0
