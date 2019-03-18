@@ -243,7 +243,7 @@ def rotate(array, angle, axis = 0):
     
     for ii in tqdm(range(sz), unit = 'Slices'):     
         
-        sl = array.anyslice(array, ii, axis)
+        sl = data.anyslice(array, ii, axis)
         
         array[sl] = ndimage.interpolation.rotate(array[sl], angle, reshape=False)
         
@@ -591,8 +591,8 @@ def _find_best_flip_(fixed, moving, Rfix, Tfix, Rmov, Tmov, use_CG = True, sampl
     moving = moving[::sample, ::sample, ::sample].astype('float32')
     
     # Apply filters to smooth erors somewhat:
-    fixed = ndimage.filters.gaussian_filter(fixed, sigma = 3)
-    moving = ndimage.filters.gaussian_filter(moving, sigma = 3)
+    fixed = ndimage.filters.gaussian_filter(fixed, sigma = 1)
+    moving = ndimage.filters.gaussian_filter(moving, sigma = 1)
     
     # Generate flips:
     Rs = _generate_flips_(Rfix)
@@ -610,7 +610,9 @@ def _find_best_flip_(fixed, moving, Rfix, Tfix, Rmov, Tmov, use_CG = True, sampl
             
             Ttot_, Rtot_, L = _itk_registration_(fixed, moving, Rtot_, Ttot_, shrink = [2,], smooth = [4,]) 
         
-        L = norm(fixed - affine(moving, Rtot_, Ttot_))
+        mo_ = affine(moving, Rtot_, Ttot_)                  
+    
+        L = norm(fixed - mo_)
         
         if Lmax > L:
             Rtot = Rtot_.copy()
@@ -618,7 +620,7 @@ def _find_best_flip_(fixed, moving, Rfix, Tfix, Rmov, Tmov, use_CG = True, sampl
             Lmax = L
             
             print('We found better flip(%u), L ='%ii, L)
-            display.projection(fixed - affine(moving, Rtot_, Ttot_), title = 'Diff (%u). L2 = %f' %(ii, L))
+            display.projection(fixed - mo_, title = 'Diff (%u). L2 = %f' %(ii, L))
     
     return Rtot, Ttot * sample 
     

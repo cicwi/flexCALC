@@ -151,7 +151,7 @@ def moment3(array, order, center = numpy.zeros(3), subsample = 1):
             m = numpy.arange(0, shape[dim], dtype = numpy.float32)
             m -= center[dim]
                 
-            data.mult_dim(array_, m[::subsample] ** order[dim])    
+            data.mult_dim(array_, m[::subsample] ** order[dim], dim)    
             
     return numpy.sum(array_) * (subsample**3)
     
@@ -382,17 +382,6 @@ def find_marker(array, geometry, d = 5):
     print('Found the marker at:', a, b, c)
     
     return a, b, c
-
-def transform_to_geometry(R, T, geom):
-    """
-    Transforms a rotationa matrix and translation vector. 
-    """    
-    # Translate to flex geometry:
-    geom = geom.copy()
-    geom['vol_rot'] = transforms3d.euler.mat2euler(R.T, axes = 'sxyz')
-    geom['vol_tra'] = numpy.array(geom['vol_tra']) - numpy.dot(T, R.T)[[0,2,1]] * geom.voxel
-    
-    return geom
     
 def moments_orientation(data, subsample = 1):
     '''
@@ -416,12 +405,12 @@ def moments_orientation(data, subsample = 1):
     T = [m100 / m000, m010 / m000, m001 / m000]
     
     # find central moments:
-    mu200 = moment3(data, [2, 0, 0], T)
-    mu020 = moment3(data, [0, 2, 0], T)
-    mu002 = moment3(data, [0, 0, 2], T)
-    mu110 = moment3(data, [1, 1, 0], T)
-    mu101 = moment3(data, [1, 0, 1], T)
-    mu011 = moment3(data, [0, 1, 1], T)
+    mu200 = moment3(data, [2, 0, 0], T) / m000
+    mu020 = moment3(data, [0, 2, 0], T) / m000
+    mu002 = moment3(data, [0, 0, 2], T) / m000
+    mu110 = moment3(data, [1, 1, 0], T) / m000
+    mu101 = moment3(data, [1, 0, 1], T) / m000
+    mu011 = moment3(data, [0, 1, 1], T) / m000
     
     # construct covariance matrix and compute rotation matrix:
     M = numpy.array([[mu200, mu110, mu101], [mu110, mu020, mu011], [mu101, mu011, mu002]])

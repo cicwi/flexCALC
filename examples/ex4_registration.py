@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Register two datasets and use them in a combined PWLS-type reconstruction.
+SImulate two datasets corresponsing to different orientations of the object.
+Register them and use in a multi-axis reconstruction.
 """
 #%% Imports
 
@@ -11,32 +12,30 @@ from flexdata import display
 from flextomo import projector
 from flextomo import phantom
 
-from flexcalc import analyse
+from flexcalc import process
 
-import transforms3d
 import numpy
 
 #%% Create volume and forward project into two orhogonal scans:
+
 # Define a simple projection geometry:
 geom_a = geometry.circular(src2obj = 100, det2obj = 100, det_pixel = 0.1, ang_range = [0, 360])
+
+# The saceon dataset willl be rotated and translated:
 geom_b = geom_a.copy()
-geom_b.parameters['axs_pitch'] = 90
+geom_b.parameters['vol_rot'] = [0.0,0.0,90.0]
+geom_b.parameters['vol_tra'] = [0, -0.5, 0]
 
-# Create phantom and project into proj:
-#vol = phantom.random_spheroids([128, 128, 128], geom_a, number = 10)
-vol = phantom.spheroid([128,]*3, geom_a, 3, 1, 0.5)
-display.slice(vol, title = 'Phantom')
+# Create a phantom:
+vol = phantom.random_spheroids([100, 100, 100], geom_a, 10)
 
-#%%
+display.slice(vol, dim = 1, title = 'Phantom')
 
-T, R = analyse.moments_orientation(vol)
-#geom_reg = process.transform_to_geometry(R, T, geom_a)
-transforms3d.euler.mat2euler(R.T, axes = 'sxyz')
+#%% Forward model:
 
-#%%
 # Initialize images:    
-proj_a = numpy.zeros([128, 16, 128], dtype = 'float32')
-proj_b = numpy.zeros([128, 16, 128], dtype = 'float32')
+proj_a = numpy.zeros([128, 32, 128], dtype = 'float32')
+proj_b = numpy.zeros([128, 32, 128], dtype = 'float32')
 
 # Forward project:
 projector.forwardproject(proj_a, vol, geom_a)
@@ -45,52 +44,40 @@ projector.forwardproject(proj_b, vol, geom_b)
 display.slice(proj_a, dim = 1, title = 'Proj A')
 display.slice(proj_b, dim = 1, title = 'Proj B')
 
-#%%
-
-
-
-
-
-
-
 #%% Preview reconstructions:
-geom1 = meta1['geometry']
-geom2 = meta2['geometry']
+geom_b = geom_a.copy()
 
 # First volume:
-vol1 = project.init_volume(proj1, geom1)
-project.FDK(proj1, vol1, geom1)
+vola = projector.init_volume(proj_a)
+projector.FDK(proj_a, vola, geom_a)
 
 # Second volume:
-vol2 = project.init_volume(proj2, geom2)
-project.FDK(proj2, vol2, geom2)
+volb = projector.init_volume(proj_b)
+projector.FDK(proj_b, volb, geom_b)
 
-display.max_projection(vol1, dim = 1,  title = 'Volume 1')
-display.max_projection(vol2, dim = 1, title = 'Volume 2')
+display.projection(vola, dim = 1,  title = 'Volume A')
+display.projection(volb, dim = 1, title = 'Volume B')
 
 #%% Register:
-
-# Get rotation and translation based on two datasets:
-R, T = process.register_astra_geometry(proj1, proj2, geom1, geom2)    
+R, T = process.register_volumes(vola, volb, subsamp = 1, use_moments = True, use_CG = True)
 
 # Convert to a new geometry:
-geom2_reg = process.transform_to_geometry(R, T, geom2)
+geom_r = geom_a.copy()
+geom_r.from_matrix(R, T)
     
 # Show the result of registration:
-vol2 *= 0
-project.FDK(proj2, vol2, geom2_reg)
-display.max_projection(vol2, dim = 1,  title = 'Volume 2 - registered')
+volb = projector.init_volume(proj_b)
+projector.FDK(proj_b, volb, geom_r)
+process.equalize_intensity(vola, volb)
 
-#%% FDK doens't compute the correct intensity in rotated system of coordinates. Here we will correct for that:
-
-process.equalize_intensity(vol1, vol2)
-display.max_projection(vol2, dim = 1,  title = 'Volume 2 - registered')
+display.projection(vola, dim = 1, title = 'Volume A')
+display.projection(volb, dim = 1, title = 'Volume B (registered)')
 
 #%% Use Multi-axis PWLS:
 
-vol1 *= 0
+vola = projector.init_volume(proj_a)
 
-project.settings['block_number'] = 20
-project.MULTI_PWLS([proj1, proj2], vol1, [geom1, geom2_reg], iterations = 20)
-    
-display.max_projection(vol1, dim = 1,  title = 'Volume combined PWLS')
+projector.settings.subsets = 1
+projector.PWLS([proj_a, proj_b], vola, [geom_a, geom_r], iterations = 10)
+
+display.projection(vola, dim = 1,  title = 'Volume combined PWLS')
