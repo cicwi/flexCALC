@@ -573,7 +573,8 @@ class batch_node(Node):
         args = self.arguments[1]
         
         if data != []:
-            out = callback(data, geom, **args)
+            #out = callback(data, geom, **args)
+            out = callback(data, **args)
             
             # If there is output pass it further down the pipeline:
             if out is None:
@@ -621,7 +622,7 @@ class fdk_node(Node):
             vol = numpy.zeros(vol_shape, dtype = 'float32')
             
         else:
-            vol = project.init_volume(data, geom)
+            vol = project.init_volume(data)
         
         project.settings['block_number'] = 10
         project.FDK(data, vol, geom)
@@ -859,28 +860,29 @@ class flatlog_node(Node):
             
             # Read darks and flats:
             if darks:
-                dark = io.read_stack(path, darks, sample, sample)
+                dark = io.read_stack(path, darks, sample, sample, dtype = 'float32')
                     
                 if dark.ndim > 2:
                     dark = dark.mean(0)
                     
-                data = (data - dark[:, None, :])
+                data -= dark[:, None, :]
                 
             else:
                 dark = 0
                 
             if flats:    
-                flat = io.read_stack(path, flats, sample, sample)
+                flat = io.read_stack(path, flats, sample, sample, dtype = 'float32')
                 if flat.ndim > 2:
                     flat = flat.mean(0)
                 
                 if flipdim:
-                    data = data / (flat - dark)[::-1, None, :]
+                    data /= (flat - dark)[::-1, None, :]
                 else:
-                    data = data / (flat - dark)[:, None, :]
+                    data /= (flat - dark)[:, None, :]
             
-        data = -numpy.log(data).astype('float32')
-        
+        numpy.log(data, out = data)    
+        data *= -1
+                
         # Fix nans and infs after log:
         data[~numpy.isfinite(data)] = 10        
         
@@ -1036,19 +1038,63 @@ class optimize_node(Node):
         (values, key, tile_index, sampling, metric) = self.arguments
         
         # Either optimize based on one tile or run all of them.
+        if tile_index is None:
+            for ii in range(len(self.inputs)):
+        
+                # Read data form a single buffer:
+                data, geom, misc = self.get_inputs(ii)
+            
+                process.optimize_modifier(values + geom[key], data, geom, samp = sampling, key = key, metric = metric)
+            
+                self.set_outputs(ii, data, geom, misc)  
+            
+        else:
+            # Read data form a single buffer:
+            data, geom, misc = self.get_inputs(tile_index)
+            val = process.optimize_modifier(values + geom[key], data, geom, samp = sampling, key = key, metric = metric)
+            
+            for ii in range(len(self.inputs)):
+                data, geom, misc = self.get_inputs(ii)
+                geom[key] = val
+                self.set_outputs(ii, data, geom, misc) 
+            
+class registration_node(Node):
+    """
+    Register volumes.
+    """      
+    node_name = 'Registration'
+    node_type = _NTYPE_GROUP_
+    
+    def initialize(self):
+        
+        # Initialize as many outputs as there are inputs:
+        self.init_outputs(len(self.inputs))
+            
+    def runtime(self):
+        
+        (subsamp, use_moments) = self.arguments
+        
+        # Either optimize based on one tile or run all of them.
         for ii in range(len(self.inputs)):
         
             # Read data form a single buffer:
-            data, geom, misc = self.get_inputs(0)
+            data, geom, misc = self.get_inputs(ii)
             
-            if (ii == tile_index) | (tile_index is None):
+            if ii == 0:
+                data0 = data
+                
+            else:
+                R, T = process.register_volumes(data0, data, subsamp = subsamp, use_moments = use_moments, use_CG = True)
+                
+                display.projection(data - data0, dim = 2, title = 'DIFF PRE')
+                
+                data = process.affine(data, R, T)
+                
+                display.projection(data - data0, dim = 2, title = 'DIFF POST')
+                
+                data0 = data
             
-                if not key in geom.parameters.keys():
-                    logger.error('Unrecognized geometry key: ' + key)
-                    
-                process.optimize_modifier(values + geom[key], data, geom, samp = sampling, key = key, metric = metric)
-            
-            self.set_outputs(ii, data, geom)  
+            self.set_outputs(ii, data, geom, misc)            
   
 class writer_node(Node):
     """
@@ -1105,7 +1151,10 @@ class reader_node(Node):
                 
             elif os.path.exists(os.path.join(path, 'meta.toml')):
                 geom = io.read_metatoml(path, sampling)  
-                
+            
+            elif os.path.exists(os.path.join(path, 'geometry.toml')):
+                geom = io.read_geometry(path, sampling)  
+            
             else:
                 logger.warning('No meta data found.')
                 geom = None
@@ -1434,9 +1483,9 @@ class scheduler:
          else:
             logger.error('Unknown node type:' + str(node_class.node_type))
    
-   def schedule_batch(self, callback, **arguments):
+   def generic(self, callback, **arguments):
        """
-       Schedule a standard batch node with one input and one output using the given callback function.
+       Schedule a generic batch node with one input and one output using any given callback function.
        """
        # Pass the callback as the first argument for batch_node:
        self.schedule(batch_node, (callback, arguments))
@@ -1532,7 +1581,7 @@ class scheduler:
        """
        self.schedule(info_node)
            
-   def read_data(self, paths, name, sampling = 1, shape = None, dtype = None, format = None, flipdim = True, proj_number = None):
+   def read_data(self, paths, name, sampling = 1, shape = None, dtype = 'float32', format = None, flipdim = True, proj_number = None):
       """
       Schedule an image stack reader. Often will be the first node in the queue.
         Args:
@@ -1577,12 +1626,19 @@ class scheduler:
        arguments = (usemax, flats, darks, sample, flipdim)
        self.schedule(flatlog_node, arguments)
    
-   def optimize(self, values, key = 'axs_hrz', tile_index = None, sampling = [10, 1, 1], metric = 'correlation'):
+   def optimize(self, values, key = 'axs_hrz', tile_index = None, sampling = [5, 1, 1], metric = 'correlation'):
        """
        Optimize a parameter using parameter range, geometry key, tile number and sub-sampling.
        """
        arguments = (values, key, tile_index, sampling, metric)
        self.schedule(optimize_node, arguments) 
+       
+   def registration(self, subsamp = 1, use_moments = False):
+       """
+       Register volumes.
+       """
+       arguments = (subsamp, use_moments)
+       self.schedule(registration_node, arguments)        
     
    def report(self):
       """

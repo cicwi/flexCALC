@@ -79,7 +79,7 @@ def bounding_box(data):
     integral = numpy.float32(data2).sum(0)
     
     # Filter noise:
-    integral = ndimage.gaussian_filter(integral, 10)
+    integral = ndimage.gaussian_filter(integral, integral.shape[0]//100)
     mean = numpy.mean(integral[integral > 0])
     integral[integral < mean / 10] = 0
     
@@ -92,7 +92,7 @@ def bounding_box(data):
     integral = numpy.float32(data2).sum(1)
         
     # Filter noise:
-    integral = ndimage.gaussian_filter(integral, 10)
+    integral = ndimage.gaussian_filter(integral, integral.shape[0]//100)
     mean = numpy.mean(integral[integral > 0])
     integral[integral < mean / 10] = 0
     
@@ -105,12 +105,12 @@ def bounding_box(data):
     b_int = (b[1] - b[0]) // 20
     c_int = (c[1] - c[0]) // 20
     
-    a[0] = a[0] - a_int
-    a[1] = a[1] + a_int
-    b[0] = b[0] - b_int
-    b[1] = b[1] + b_int
-    c[0] = c[0] - c_int
-    c[1] = c[1] + c_int
+    a[0] -= a_int
+    a[1] += a_int
+    b[0] -= b_int
+    b[1] += b_int
+    c[0] -= c_int
+    c[1] += c_int
     
     a[0] = max(0, a[0] * 4)
     a[1] = min(data.shape[0], a[1] * 4)
@@ -261,7 +261,7 @@ def convolve_kernel(data, kernel):
     
     return numpy.real(numpy.fft.ifftn(numpy.fft.fftn(data) * kernel))
 
-def find_marker(data, meta, d = 5):
+def find_marker(data, geometry, d = 5):
     """
     Find a marker in 3D volume by applying a circular kernel with an inner diameter d [mm].
     """
@@ -746,6 +746,15 @@ def rotate(data, angle, axis = 0):
     
     sz = data.shape[axis]
     
+    if angle == 90:
+       ax = [0,1,2]
+       ax.remove(axis)
+       return numpy.rot90(data, axes=ax) 
+    elif angle == -90:
+       ax = [0,1,2]
+       ax.remove(axis)
+       return numpy.rot90(data, k =3, axes=ax) 
+    
     for ii in tqdm(range(sz), unit = 'Slices'):     
         
         sl = array.anyslice(data, ii, axis)
@@ -763,7 +772,9 @@ def translate(data, shift, order = 1):
 
     pbar = tqdm(unit = 'Operation', total=1) 
     
-    ndimage.interpolation.shift(data, shift, output = data, order = order)
+    # implicit version doesnt work!
+    # ndimage.interpolation.shift(data, shift, output = data, order = order)
+    data = ndimage.interpolation.shift(data, shift, order = order)
         
     pbar.update(1)
     pbar.close()
@@ -1145,17 +1156,25 @@ def _sample_FDK_(projections, geometry, sample):
     geometry_ = geometry.copy()
 
     # Apply subsampling to detector and volume:    
-    geometry_['vol_sample'] = [sample[0], sample[1], sample[2]]
-    geometry_['det_sample'] = [sample[0], sample[2], sample[2]]
+    vol_sample = [sample[0], sample[1], sample[2]]
+    det_sample = [sample[0], sample[2], sample[2]]
     
-    volume = project.init_volume(projections, geometry_)
+    geometry_['vol_sample'] = vol_sample
+    geometry_['det_sample'] = det_sample
+    
+    if max(sample) == 1:
+        projections_ = projections
+    else:
+        projections_ = numpy.ascontiguousarray(projections[::sample[0],::sample[2],::sample[2]])
+        
+    volume_ = project.init_volume(projections_)
     
     # Do FDK without progress_bar:
     project.settings['progress_bar'] = False
-    project.FDK(projections, volume, geometry_)
+    project.FDK(projections_, volume_, geometry_)
     project.settings['progress_bar'] = True
     
-    return volume
+    return volume_
     
 def _modifier_l2cost_(projections, geometry, subsample, value, key, metric = 'gradient', preview = False):
     '''
@@ -1193,6 +1212,8 @@ def _modifier_l2cost_(projections, geometry, subsample, value, key, metric = 'gr
             im = vol[ii, :, :]
             im = numpy.pad(im, ((im.shape[0],0), (im.shape[1],0)), mode = 'constant')
             im = numpy.fft.fft2(im)
+            im = numpy.abs(numpy.fft.ifft2(im*numpy.conj(im)))
+            #l2 += im[0,0]
             l2 += numpy.abs(numpy.mean(im * numpy.conj(im)))
             
         else:
@@ -1203,7 +1224,7 @@ def _modifier_l2cost_(projections, geometry, subsample, value, key, metric = 'gr
             
     return -l2    
     
-def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'axs_tan', metric = 'correlation', preview = False):  
+def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'axs_tan', metric = 'correlation', update = True, preview = False):  
     '''
     Optimize a geometry modifier using a particular sampling of the projection data.
     '''  
@@ -1225,10 +1246,12 @@ def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'ax
         
     min_index = func_values.argmin()    
     
-    display.plot(values, func_values, title = 'Objective')
+    display.plot2d(values, func_values, title = 'Objective: ' + key)
     
     guess = _parabolic_min_(func_values, min_index, values)  
-    geometry[key] = guess
+    
+    if update:
+        geometry[key] = guess
     
     print('Optimum found at %2.2f' % guess)
     
@@ -1648,6 +1671,13 @@ def append_volume(data, geom, tot_data, tot_geom, ramp = 10):
     # Writable view on the total data:
     w_data = tot_data[s0, s1, s2]
     
+    # Find shift:
+    shift = find_shift(w_data, data)
+    
+    print('Found shift of :' + str(shift))
+    
+    if numpy.abs(shift).max() > 0: data = translate(data, -shift, order = 1)   
+    
     # Ramp weight:
     weight = numpy.ones_like(data)
     weight = array.ramp(weight, 0, [ramp, ramp], mode = 'linear')
@@ -1662,6 +1692,41 @@ def append_volume(data, geom, tot_data, tot_geom, ramp = 10):
     
     w_data *= (1 - weight)
     w_data += data
+    
+def find_shift(volume_m, volume_s):
+    
+    if volume_m.max() == 0 or volume_s.max() == 0:
+        return (0,0,0)
+        
+    # Find intersection:
+    #mask_m = binary_threshold(volume_m, mode = 'otsu')
+    #mask_s = binary_threshold(volume_s, mode = 'otsu')
+    
+    sect = volume_m * volume_s
+    
+    if sect.max() == 0:
+        print('WARNING! Find shift fails bacause of no intersecting regions.')
+        
+    a,b,c = bounding_box(sect)
+    
+    # Compute cross-correlation:
+    vol_m = volume_m[a[0]:a[1], b[0]:b[1], c[0]:c[1]]
+    vol_s = volume_s[a[0]:a[1], b[0]:b[1], c[0]:c[1]]
+    
+    vol_m = ndimage.filters.laplace(vol_m)
+    vol_s = ndimage.filters.laplace(vol_s)
+    
+    display.slice(vol_m, dim = 0, title = 'Master volume')
+    display.slice(vol_s, dim = 0, title = 'Slave volume')
+    
+    display.slice(vol_m- vol_s, dim = 0, title = 'Diff before')
+    
+    conv = numpy.abs(numpy.fft.ifftn(-numpy.fft.fftn(vol_m).conjugate() * numpy.fft.fftn(vol_s)))
+    shift = numpy.unravel_index(numpy.argmax(numpy.fft.fftshift(conv)), dims = conv.shape) - numpy.array(conv.shape)//2
+    
+    display.slice(vol_m- translate(vol_s, -shift, order = 1), dim = 0, title = 'Diff after')
+    
+    return shift
                
 def data_to_spectrum(path, compound = 'Al', density = 2.7, energy_bin = 50):
     """
@@ -1886,7 +1951,7 @@ def equivalent_density(projections, geometry, energy, spectr, compound, density,
     print('Generating the transfer function.')
     
     if preview:
-        display.plot(energy, spectrum, semilogy=False, title = 'Spectrum')
+        display.plot2d(energy, spectrum, semilogy=False, title = 'Spectrum')
     
     # Attenuation of 1 mm:
     mu = spectrum.linear_attenuation(energy, compound, density)
@@ -1911,7 +1976,7 @@ def equivalent_density(projections, geometry, energy, spectr, compound, density,
     #flexUtil.plot(synth_counts, title = 'synth_counts')
     
     if preview:
-        display.plot(thickness,synth_counts, semilogy=True, title = 'Attenuation v.s. thickness [mm].')
+        display.plot2d(thickness,synth_counts, semilogy=True, title = 'Attenuation v.s. thickness [mm].')
         
     synth_counts = -numpy.log(synth_counts)
     
