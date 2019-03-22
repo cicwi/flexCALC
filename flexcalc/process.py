@@ -1,53 +1,160 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov 2017
-@author: kostenko
-
-This module contains calculation routines for pre/post processing.
+@author: Alex Kostenko
+This module contains calculation routines for processing of the data.
 """
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>> Imports >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-import os
 import numpy
 import time
 
 from scipy import ndimage
-from scipy import signal
-from scipy import stats
+import scipy.ndimage.interpolation as interp
 
 import transforms3d
 
-import scipy.ndimage.interpolation as interp
-from scipy.interpolate import interp1d
-
 from tqdm import tqdm
-
-from skimage import measure
-from skimage.filters import threshold_otsu
-from skimage import feature
-    
-from stl import mesh
-
 import SimpleITK as sitk
 
-from flexdata import io
+from skimage import feature
+from stl import mesh
+from skimage import measure
+    
+from flexdata import data
 from flexdata import display
-from flexdata import array
+from flextomo import projector
+from flextomo import model
+from . import analyze
 
-from flextomo import phantom
-from flextomo import project
-
-from . import spectrum
+from flexdata.data import logger
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>> Methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+def process_flex(path, sample = 1, skip = 1, memmap = None, index = None, proj_number = None):
+    '''
+    Read and process the array.
+    
+    Args:
+        path:  path to the flexray array
+        sample:
+        skip:
+        memmap:
+        index:
+        proj_number (int): force projection number (treat lesser numbers as missing)
+        
+    Return:
+        proj: min-log projections
+        meta: meta array
+        
+    '''
+    # Read:    
+    print('Reading...')
+    
+    #index = []
+    proj, flat, dark, geom = data.read_flexray(path, sample = sample, skip = skip, memmap = memmap, proj_number = proj_number)
+    
+    # Prepro:            
+    proj = preprocess(proj, flat, dark, transpose = [1, 0, 2], updown = True)
+    
+    '''
+    index = numpy.array(index)
+    index //= skip
+    
+    if (index[-1] + 1) != index.size:
+        print(index.size)
+        print(index[-1] + 1)
+        print('Seemes like some files were corrupted or missing. We will try to correct thetas accordingly.')
+        
+        thetas = numpy.linspace(geom['range'][0], geom['range'][1], index[-1]+1)
+        thetas = thetas[index]
+        
+        geom['thetas'] = thetas
+        
+        import pylab
+        pylab.plot(thetas, thetas ,'*')
+        pylab.title('Thetas')
+    '''
+    
+    print('Done!')
+    
+    return proj, geom
+      
+def preprocess(array, flats = None, darks = None, mode = 'sides', transpose = [1, 0, 2], updown = True):
+    '''
+    Apply flatfield correction based on availability of flat- and dark-field.
+    
+    Args:
+        flats (ndarray): divide by flats
+        darks (ndarray): subtract darks
+        mode (str): "sides" to use maximum values of the detector sides to estimate the flat field or a mode of intensity distribution with "single".     
+    '''          
+    logger.print('Pre-processing...')
+    
+    # Cast to float if int:
+    if (array.dtype.kind == 'i') | (array.dtype.kind == 'u'):    
+            # In case array is mapped on disk, we need to rewrite the file as another type:
+            new = array.astype('float32')    
+            array = data.rewrite_memmap(array, new)    
+            
+    if darks is not None:
+        if darks.ndim > 2:
+            darks = darks.mean(0)
+        
+        array -= darks
+        flats = flats - darks
+    
+    if flats is not None:
+        if flats.ndim > 2:
+            flats = flats.mean(0)
+        
+        array /= flats
+        
+    numpy.log(array, out = array)
+    array *= -1
+    
+    # Fix nans and infs after log:
+    array[~numpy.isfinite(array)] = 0
+    
+    # Transpose if need to
+    array = data.flipdim(array, transpose, updown)    
+    
+    return array
 
-def generate_stl(data, geometry):
+def residual_rings(array, kernel=[3, 3]):
+    '''
+    Apply correction by computing outlayers .
+    '''
+    # Compute mean image of intensity variations that are < 5x5 pixels
+    logger.print('Our best agents are working on the case of the Residual Rings. This can take years if the kernel size is too big!')
+
+    tmp = numpy.zeros(array.shape[::2])
+    
+    for ii in tqdm(range(array.shape[1]), unit = 'images'):                 
+        
+        block = array[:, ii, :]
+
+        # Compute:
+        tmp += (block - ndimage.filters.median_filter(block, size = kernel)).sum(1)
+        
+    tmp /= array.shape[1]
+    
+    logger.print('Subtract residual rings.')
+    
+    for ii in tqdm(range(array.shape[1]), unit='images'):                 
+        
+        block = array[:, ii, :]
+        block -= tmp
+
+        array[:, ii, :] = block 
+    
+    logger.print('Residual ring correcion applied.')
+
+def generate_stl(array, geometry):
     """
     Make a mesh from a volume.
     """
     # Segment the volume:
-    threshold = data > binary_threshold(data, mode = 'otsu')
+    threshold = array > analyze.binary_threshold(array, mode = 'otsu')
     
     # Close small holes:
     print('Filling small holes...')
@@ -65,333 +172,108 @@ def generate_stl(data, geometry):
     
     return stl_mesh
 
-def bounding_box(data):
-    """
-    Find a bounding box for the volume based on intensity (use for auto_crop).
-    """
-    # Avoid memory overflow!
-    #data = data.copy()
-    data2 = data[::2, ::2, ::2].copy().astype('float32')
-    data2 = array.bin(data2)
-    
-    soft_threshold(data2, mode = 'otsu')
-
-    integral = numpy.float32(data2).sum(0)
-    
-    # Filter noise:
-    integral = ndimage.gaussian_filter(integral, integral.shape[0]//100)
-    mean = numpy.mean(integral[integral > 0])
-    integral[integral < mean / 10] = 0
-    
-    # Compute bounding box:
-    rows = numpy.any(integral, axis=1)
-    cols = numpy.any(integral, axis=0)
-    b = numpy.where(rows)[0][[0, -1]]
-    c = numpy.where(cols)[0][[0, -1]]
-    
-    integral = numpy.float32(data2).sum(1)
-        
-    # Filter noise:
-    integral = ndimage.gaussian_filter(integral, integral.shape[0]//100)
-    mean = numpy.mean(integral[integral > 0])
-    integral[integral < mean / 10] = 0
-    
-    # Compute bounding box:
-    rows = numpy.any(integral, axis=1)
-    a = numpy.where(rows)[0][[0, -1]]
-    
-    # Add a safe margin:
-    a_int = (a[1] - a[0]) // 20
-    b_int = (b[1] - b[0]) // 20
-    c_int = (c[1] - c[0]) // 20
-    
-    a[0] -= a_int
-    a[1] += a_int
-    b[0] -= b_int
-    b[1] += b_int
-    c[0] -= c_int
-    c[1] += c_int
-    
-    a[0] = max(0, a[0] * 4)
-    a[1] = min(data.shape[0], a[1] * 4)
-    
-    b[0] = max(0, b[0] * 4)
-    b[1] = min(data.shape[1], b[1] * 4)
-    
-    c[0] = max(0, c[0] * 4)
-    c[1] = min(data.shape[2], c[1] * 4)
-    
-    return a, b, c
-
-def soft_threshold(data, mode = 'histogram', threshold = 0):
+def soft_threshold(array, mode = 'histogram', threshold = 0):
     """
     Removes values smaller than the threshold value.
-    
+    Args:
+        array (ndarray)  : data array (implicit)
         mode (str)       : 'histogram', 'otsu' or 'constant'
         threshold (float): threshold value if mode = 'constant'
     """
     # Avoiding memory overflow:
-    thresh = binary_threshold(data, mode, threshold)
+    thresh = analyze.binary_threshold(array, mode, threshold)
     
-    for ii in range(data.shape[0]):
+    for ii in range(array.shape[0]):
         
-        img = data[ii, :, :]
+        img = array[ii, :, :]
         img[img < thresh] = 0
         
-        data[ii, :, :] = img
-    
-def binary_threshold(data, mode = 'histogram', threshold = 0):
-    '''
-    Compute binary threshold. Use 'histogram, 'otsu', or 'constant' mode.
-    '''
-    
-    import matplotlib.pyplot as plt
-    
-    print('Applying binary threshold...')
-    
-    if mode == 'otsu':
-        threshold = threshold_otsu(data[::2,::2,::2])    
-        
-    elif mode == 'histogram':
-        x, y = histogram(data[::2,::2,::2], log = True, plot = False)
-        
-        # Make sure there are no 0s:
-        y = numpy.log(y + 1)    
-        y = ndimage.filters.gaussian_filter1d(y, sigma=1)
-        
-        plt.figure()
-        plt.plot(x, y)
-            
-        # Find air maximum:
-        air_index = numpy.argmax(y)
-        
-        print('Air found at %0.3f' % x[air_index])
-    
-        # Find the first shoulder after air peak in the histogram spectrum:
-        x = x[air_index:]
-        
-        yd = abs(numpy.diff(y))
-        yd = yd[air_index:]
-        y = y[air_index:]
-        
-        # Minimum derivative = Saddle point or extremum:
-        ind = signal.argrelextrema(yd, numpy.less)[0][0]
-        min_ind = signal.argrelextrema(y, numpy.less)[0][0]
-    
-        plt.plot(x[ind], y[ind], '+')
-        plt.plot(x[min_ind], y[min_ind], '*')
-        plt.show()
-        
-        # Is it a Saddle point or extremum?
-        if abs(ind - min_ind) < 2:    
-            threshold = x[ind]         
-    
-            print('Minimum found next to the air peak at: %0.3f' % x[ind])        
-        else:            
-            # Move closer to the air peak since we are looking at some other material             
-            threshold = x[ind] - abs(x[ind] - x[0]) / 4 
-    
-            print('Saddle point found next to the air peak at: %0.3f' % x[ind])        
-            
-    elif mode == 'constant':
-        pass        
-            
-    else: raise ValueError('Wrong mode parameter. Can be histogram or otsu.')
-    
-    print('Threshold value is %0.3f' % threshold)
-    
-    return threshold
-    
-def _find_best_flip_(fixed, moving, Rfix, Tfix, Rmov, Tmov, use_CG = True, sample = 2):
+        array[ii, :, :] = img
+
+def hard_threshold(array, mode = 'histogram', threshold = 0):
     """
-    Find the orientation of the moving volume with the mallest L2 distance from the fixed volume, 
-    given that there is 180 degrees amiguity for each of three axes.
-    
+    Returns a binary map based on the threshold value.
     Args:
-        fixed(array): 3D volume
-        moving(array): 3D volume
-        centre(array): corrdinates of the center of rotation
-        area(int): radius around the center of rotation to look at
-        
-    Returns:
-        (array): rotation matrix corresponding to the best flip
-    
+        array (ndarray)  : data array (implicit)
+        mode (str)       : 'histogram', 'otsu' or 'constant'
+        threshold (float): threshold value if mode = 'constant'
     """
-    fixed = fixed[::sample, ::sample, ::sample].astype('float32')
-    moving = moving[::sample, ::sample, ::sample].astype('float32')
+    # Avoiding memory overflow:
+    thresh = analyze.binary_threshold(array, mode, threshold)
     
-    # Apply filters to smooth erors somewhat:
-    fixed = ndimage.filters.gaussian_filter(fixed, sigma = 3)
-    moving = ndimage.filters.gaussian_filter(moving, sigma = 3)
-    
-    # Generate flips:
-    Rs = _generate_flips_(Rfix)
-    
-    # Compute L2 norms:
-    Lmax = numpy.inf
-    
-    # Appliy flips:
-    for ii in range(len(Rs)):
-        
-        Rtot_ = Rmov.T.dot(Rfix).dot(Rs[ii])
-        Ttot_ = (Tfix - numpy.dot(Tmov, Rtot_)) / sample
-        
-        if use_CG:
-            
-            Ttot_, Rtot_, L = _itk_registration_(fixed, moving, Rtot_, Ttot_, shrink = [2,], smooth = [4,]) 
-        
-        L = norm(fixed - affine(moving, Rtot_, Ttot_))
-        
-        if Lmax > L:
-            Rtot = Rtot_.copy()
-            Ttot = Ttot_.copy()
-            Lmax = L
-            
-            print('We found better flip(%u), L ='%ii, L)
-            display.projection(fixed - affine(moving, Rtot_, Ttot_), title = 'Diff (%u). L2 = %f' %(ii, L))
-    
-    return Rtot, Ttot * sample 
+    binary = numpy.zeros(array.shape, dtype = 'bool')
+    for ii in range(array.shape[0]):
+        binary[ii, :, :] = array[ii, :, :] < thresh
 
-def convolve_kernel(data, kernel):
+def affine(array, matrix, shift):
     """
-    Compute convolution with a kernel using FFT.
+    Apply 3x3 rotation matrix and shift to a 3D arrayset.
     """
-    kernel = numpy.fft.fftshift(kernel)
-    kernel = numpy.fft.fftn(kernel).conj()
-    
-    return numpy.real(numpy.fft.ifftn(numpy.fft.fftn(data) * kernel))
+   
+    # Compute offset:
+    T0 = numpy.array(array.shape) // 2
+    T1 = numpy.dot(matrix, T0 + shift)
 
-def find_marker(data, geometry, d = 5):
-    """
-    Find a marker in 3D volume by applying a circular kernel with an inner diameter d [mm].
-    """
-    # TODO: it fail sometimes when the marker is adjuscent to something...
+    return ndimage.interpolation.affine_transform(array, matrix, offset = T0-T1, order = 1)
     
-    #data = data.copy()
-    # First subsample data to avoid memory overflow:
-    data2 = data[::2, ::2, ::2].copy().astype('float32')
-    
-    # Data will be binned further to avoid memory errors.
-    data2 = array.bin(data2)
-    data2[data2 < 0] = 0
-    
-    r = d / 4
-        
-    # Get areas with significant density:
-    t = binary_threshold(data2, mode = 'otsu')
-    threshold = numpy.float32(data2 > t)
-    
-    # Create a circular kernel (take into account subsampling of data2):
-    kernel = -0.5 * phantom.sphere(data2.shape, geometry, r * 2, [0,0,0])
-    kernel += phantom.sphere(data2.shape, geometry, r, [0,0,0])
-
-    kernel[kernel > 0] *= (2**3 - 1)
-    
-    print('Computing feature sizes...')
-    
-    # Map showing the relative size of feature
-    A = convolve_kernel(threshold, kernel)
-    A[A < 0] = 0
-    A /= A.max()
-    
-    display.max_projection(A, dim = 0, title = 'Feature size.')
-    
-    print('Estimating local variance...')
-    
-    # Now estimate the local variance:
-    B = ndimage.filters.laplace(data2) ** 2    
-    B /= (numpy.abs(data2) + data2.max()/100)
-    
-    # Make sure that boundaries don't affect variance estimation:
-    threshold = threshold == 0
-    
-    threshold = ndimage.morphology.binary_dilation(threshold)
-    
-    B[threshold] = 0
-    B = numpy.sqrt(B)
-    B = ndimage.filters.gaussian_filter(B, 4)
-    B /= B.max()
-    
-    display.max_projection(B, dim = 0, title = 'Variance.')
-    
-    # Compute final weight:    
-    A -= B
-    
-    # Make it dependent on absolote intensity: (could be dependent on distance from some value....)
-    A *= numpy.sqrt(data2)
-    #A -= numpy.sqrt((data2 - density)**2 + density / 10)
-    
-    print('A.max', A.max())
-    
-    print('A.mean', A[A > 0].mean())
-    
-    index = numpy.argmax(A)
-    
-    # Display:
-    display.max_projection(A, dim = 0, title = 'Marker map')
-    
-    # Coordinates:
-    a, b, c = numpy.unravel_index(index, A.shape)
-    
-    # Upsample:
-    a *= 4
-    b *= 4
-    c *= 4
-    
-    print('Found the marker at:', a, b, c)
-    
-    return a, b, c
-    
-def moments_orientation(data, subsample = 1):
+def scale(array, factor, order = 1):
     '''
-    Find the center of mass and the intensity axes of the image.
-    
-    Args:
-        data(array): 3D input
-        subsample: subsampling factor to to make it faster
-        
-    Returns:
-        T, R: translation vector to the center of mass and rotation matrix to intensity axes 
-    
+    Scales the volume via interpolation.
     '''
-    # find centroid:
-    m000 = moment3(data, [0, 0, 0])
-    m100 = moment3(data, [1, 0, 0])
-    m010 = moment3(data, [0, 1, 0])
-    m001 = moment3(data, [0, 0, 1])
-
-    # Somehow this system of coordinates and the system of ndimage.interpolate require negation of j:
-    T = [m100 / m000, m010 / m000, m001 / m000]
+    print('Applying scaling.')
+    time.sleep(0.3)
     
-    # find central moments:
-    mu200 = moment3(data, [2, 0, 0], T)
-    mu020 = moment3(data, [0, 2, 0], T)
-    mu002 = moment3(data, [0, 0, 2], T)
-    mu110 = moment3(data, [1, 1, 0], T)
-    mu101 = moment3(data, [1, 0, 1], T)
-    mu011 = moment3(data, [0, 1, 1], T)
+    pbar = tqdm(unit = 'Operations', total=1) 
     
-    # construct covariance matrix and compute rotation matrix:
-    M = numpy.array([[mu200, mu110, mu101], [mu110, mu020, mu011], [mu101, mu011, mu002]])
-
-    #Compute eigen vecors of the covariance matrix and sort by eigen values:
-    vec = numpy.linalg.eig(M)[1].T
-    lam = numpy.linalg.eig(M)[0]    
+    array = ndimage.interpolation.zoom(array, factor, order = order)
     
-    # Here we sort the eigen values:
-    ind = numpy.argsort(lam)
+    pbar.update(1)
+    pbar.close()      
     
-    # Matrix R is composed of basis vectors:
-    R = numpy.array(vec[ind[::-1]])
+    return array    
     
-    # Makes sure our basis always winds the same way:
-    R[2, :] = numpy.cross(R[0, :], R[1, :])     
-    
-    # Centroid:
-    T = numpy.array(T) - numpy.array(data.shape) // 2
-    
-    return T, R
+def rotate(array, angle, axis = 0):
+    '''
+    Rotates the volume via interpolation.
+    '''
+    print('Applying rotation.')
         
+    sz = array.shape[axis]
+    
+    if angle == 90:
+       ax = [0,1,2]
+       ax.remove(axis)
+       return numpy.rot90(data, axes=ax) 
+    elif angle == -90:
+       ax = [0,1,2]
+       ax.remove(axis)
+       return numpy.rot90(data, k =3, axes=ax) 
+        
+    pbar = tqdm(unit = 'slices', total=1) 
+    for ii in range(sz):     
+        
+        sl = data.anyslice(array, ii, axis)
+        
+        array[sl] = ndimage.interpolation.rotate(array[sl], angle, reshape=False)
+        
+    return array
+        
+def translate(array, shift, order = 1):
+    """
+    Apply a 3D tranlation.
+    """
+    print('Applying translation.')
+    time.sleep(0.3)
+
+    pbar = tqdm(unit = 'Operation', total=1) 
+    ndimage.interpolation.shift(array, shift, output = array, order = order)
+        
+    pbar.update(1)
+    pbar.close()
+
+    return array
+
+
 def _itk2mat_(transform, shape):
     """
     Transform ITK to matrix and a translation vector.
@@ -448,8 +330,8 @@ def _moments_registration_(fixed, moving):
 
     """
     # Positions of the volumes:
-    Tfix, Rfix  = moments_orientation(fixed)
-    Tmov, Rmov  = moments_orientation(moving)
+    Tfix, Rfix  = analyze.moments_orientation(fixed)
+    Tmov, Rmov  = analyze.moments_orientation(moving)
     
     # Total rotation and shift:
     Rtot = numpy.dot(Rmov, Rfix.T)
@@ -541,18 +423,7 @@ def _itk_registration_(fixed, moving, R_init = None, T_init = None, shrink = [4,
     #flexUtil.projection(fixed - moving, dim = 1, title = 'native diff')  
     
     return T, R, registration_method.GetMetricValue()
-    
-def affine(data, matrix, shift):
-    """
-    Apply 3x3 rotation matrix and shift to a 3D dataset.
-    """
-   
-    # Compute offset:
-    T0 = numpy.array(data.shape) // 2
-    T1 = numpy.dot(matrix, T0 + shift)
 
-    return ndimage.interpolation.affine_transform(data, matrix, offset = T0-T1, order = 1)
-    
 def _generate_flips_(Rfix):
     """
     Generate number of rotation and translation vectors.
@@ -595,7 +466,7 @@ def register_volumes(fixed, moving, subsamp = 2, use_moments = True, use_CG = Tr
         # We use Otsu here instead of binary_threshold to make sure that the same 
         # threshold is applied to both images:
         
-        threshold = threshold_otsu(numpy.append(fixed_0[::2, ::2, ::2], moving_0[::2, ::2, ::2]))
+        threshold = analyze.threshold_otsu(numpy.append(fixed_0[::2, ::2, ::2], moving_0[::2, ::2, ::2]))
         fixed_0[fixed_0 < threshold] = 0
         moving_0[moving_0 < threshold] = 0
         
@@ -613,8 +484,8 @@ def register_volumes(fixed, moving, subsamp = 2, use_moments = True, use_CG = Tr
         pbar = tqdm(unit = 'Operations', total=1) 
     
         # Positions of the volumes:
-        Tfix, Rfix  = moments_orientation(fixed_0)
-        Tmov, Rmov  = moments_orientation(moving_0)
+        Tfix, Rfix  = analyze.moments_orientation(fixed_0)
+        Tmov, Rmov  = analyze.moments_orientation(moving_0)
                
         # Total rotation and shift:
         #Rtot = numpy.dot(Rmov, Rfix.T)
@@ -635,8 +506,8 @@ def register_volumes(fixed, moving, subsamp = 2, use_moments = True, use_CG = Tr
         Rtot[2, 2] = 1
         
         # Positions of the volumes:
-        Tfix, Rfix  = moments_orientation(fixed_0)
-        Tmov, Rmov  = moments_orientation(moving_0)
+        Tfix, Rfix  = analyze.moments_orientation(fixed_0)
+        Tmov, Rmov  = analyze.moments_orientation(moving_0)
         
         Ttot = Tfix - Tmov#numpy.zeros(3)
             
@@ -668,18 +539,7 @@ def register_volumes(fixed, moving, subsamp = 2, use_moments = True, use_CG = Tr
     print('Found Euler rotations:', transforms3d.euler.mat2euler(Rtot))        
     
     return Rtot, Ttot * subsamp 
-    
-def transform_to_geometry(R, T, geom):
-    """
-    Transforms a rotationa matrix and translation vector. 
-    """    
-    # Translate to flex geometry:
-    geom = geom.copy()
-    geom['vol_rot'] = transforms3d.euler.mat2euler(R.T, axes = 'sxyz')
-    geom['vol_tra'] = numpy.array(geom['vol_tra']) - numpy.dot(T, R.T)[[0,2,1]] * geom.voxel
-    
-    return geom
-    
+        
 def register_astra_geometry(proj_fix, proj_mov, geom_fix, geom_mov, subsamp = 1):
     """
     Compute a rigid transformation that makes sure that two reconstruction volumes are alligned.
@@ -702,15 +562,15 @@ def register_astra_geometry(proj_fix, proj_mov, geom_fix, geom_mov, subsamp = 1)
     vol1 = numpy.zeros(sz, dtype = 'float32')
     vol2 = numpy.zeros(sz, dtype = 'float32')
     
-    project.settings['bounds'] = [0, 5]
-    project.settings['block_number'] = 20
-    project.settings['mode'] = 'sequential'
+    projector.settings.bounds = [0, 10]
+    projector.settings.subsets = 10
+    projector.settings['mode'] = 'sequential'
     
-    project.FDK(proj_fix, vol1, geom_fix)    
-    project.SIRT(proj_fix, vol1, geom_fix, iterations = 5)
+    projector.FDK(proj_fix, vol1, geom_fix)    
+    projector.SIRT(proj_fix, vol1, geom_fix, iterations = 5)
     
-    project.FDK(proj_mov, vol2, geom_mov)
-    project.SIRT(proj_mov, vol2, geom_mov, iterations = 5)
+    projector.FDK(proj_mov, vol2, geom_mov)
+    projector.SIRT(proj_mov, vol2, geom_mov, iterations = 5)
     
     display.slice(vol1, title = 'Fixed volume preview')
     display.slice(vol1, title = 'Moving volume preview')
@@ -720,92 +580,58 @@ def register_astra_geometry(proj_fix, proj_mov, geom_fix, geom_mov, subsamp = 1)
     
     return R, T
 
-def scale(data, factor, order = 1):
-    '''
-    Scales the volume via interpolation.
-    '''
-    print('Applying scaling.')
-    
-    pbar = tqdm(unit = 'Operations', total=1) 
-    
-    data = ndimage.interpolation.zoom(data, factor, order = order)
-    
-    pbar.update(1)
-    pbar.close()      
-    
-    return data    
-    
-def rotate(data, angle, axis = 0):
-    '''
-    Rotates the volume via interpolation.
-    '''
-    
-    print('Applying rotation.')
-    
-    time.sleep(0.3)
-    
-    sz = data.shape[axis]
-    
-    if angle == 90:
-       ax = [0,1,2]
-       ax.remove(axis)
-       return numpy.rot90(data, axes=ax) 
-    elif angle == -90:
-       ax = [0,1,2]
-       ax.remove(axis)
-       return numpy.rot90(data, k =3, axes=ax) 
-    
-    for ii in tqdm(range(sz), unit = 'Slices'):     
-        
-        sl = array.anyslice(data, ii, axis)
-        
-        data[sl] = ndimage.interpolation.rotate(data[sl], angle, reshape=False)
-        
-    return data
-        
-def translate(data, shift, order = 1):
+def _find_best_flip_(fixed, moving, Rfix, Tfix, Rmov, Tmov, use_CG = True, sample = 2):
     """
-    Apply a 3D tranlation.
-    """
+    Find the orientation of the moving volume with the mallest L2 distance from the fixed volume, 
+    given that there is 180 degrees amiguity for each of three axes.
     
-    print('Applying translation.')
-
-    pbar = tqdm(unit = 'Operation', total=1) 
-    
-    # implicit version doesnt work!
-    # ndimage.interpolation.shift(data, shift, output = data, order = order)
-    data = ndimage.interpolation.shift(data, shift, order = order)
+    Args:
+        fixed(array): 3D volume
+        moving(array): 3D volume
+        centre(array): corrdinates of the center of rotation
+        area(int): radius around the center of rotation to look at
         
-    pbar.update(1)
-    pbar.close()
-
-    return data
+    Returns:
+        (array): rotation matrix corresponding to the best flip
     
-def histogram(data, nbin = 256, rng = [], plot = True, log = False):
     """
-    Compute histogram of the data.
-    """
+    fixed = fixed[::sample, ::sample, ::sample].astype('float32')
+    moving = moving[::sample, ::sample, ::sample].astype('float32')
     
-    #print('Calculating histogram...')
+    # Apply filters to smooth erors somewhat:
+    fixed = ndimage.filters.gaussian_filter(fixed, sigma = 1)
+    moving = ndimage.filters.gaussian_filter(moving, sigma = 1)
     
-    if rng == []:
-        mi = min(data.min(), 0)
+    # Generate flips:
+    Rs = _generate_flips_(Rfix)
+    
+    # Compute L2 norms:
+    Lmax = numpy.inf
+    
+    # Appliy flips:
+    for ii in range(len(Rs)):
         
-        ma = numpy.percentile(data, 99.99)
-    else:
-        mi = rng[0]
-        ma = rng[1]
-
-    y, x = numpy.histogram(data, bins = nbin, range = [mi, ma])
+        Rtot_ = Rmov.T.dot(Rfix).dot(Rs[ii])
+        Ttot_ = (Tfix - numpy.dot(Tmov, Rtot_)) / sample
+        
+        if use_CG:
+            
+            Ttot_, Rtot_, L = _itk_registration_(fixed, moving, Rtot_, Ttot_, shrink = [2,], smooth = [4,]) 
+        
+        mo_ = affine(moving, Rtot_, Ttot_)                  
     
-    # Set bin values to the middle of the bin:
-    x = (x[0:-1] + x[1:]) / 2
-
-    if plot:
-        display.plot(x, y, semilogy = log, title = 'Histogram')
+        L = norm(fixed - mo_)
+        
+        if Lmax > L:
+            Rtot = Rtot_.copy()
+            Ttot = Ttot_.copy()
+            Lmax = L
+            
+            print('We found better flip(%u), L ='%ii, L)
+            display.projection(fixed - mo_, title = 'Diff (%u). L2 = %f' %(ii, L))
     
-    return x, y
-
+    return Rtot, Ttot * sample
+                
 def equalize_intensity(master, slave, mode = 'percentile'):
     """
     Compute 99.99th percentile of two volumes and use it to renormalize the slave volume.
@@ -817,112 +643,12 @@ def equalize_intensity(master, slave, mode = 'percentile'):
         slave *= (m / s)
     elif mode == 'histogram':
         
-        a1, b1, c1 = intensity_range(master[::2, ::2, ::2])
-        a2, b2, c2 = intensity_range(slave[::2, ::2, ::2])
+        a1, b1, c1 = analyze.intensity_range(master[::2, ::2, ::2])
+        a2, b2, c2 = analyze.intensity_range(slave[::2, ::2, ::2])
         
         slave *= (c1 / c2)
         
     else: raise Exception('Unknown mode:' + mode)
-
-def intensity_range(data):
-    """
-    Compute intensity range based on the histogram.
-    
-    Returns:
-        a: position of the highest spike (typically air)
-        b: 99.99th percentile
-        c: center of mass of the histogram
-    """
-    # 256 bins should be sufficient for our dynamic range:
-    x, y = histogram(data, nbin = 256, plot = False)
-    
-    # Smooth and find the first and the third maximum:
-    y = ndimage.filters.gaussian_filter(numpy.log(y + 0.1), sigma = 1)
-    
-    # Air:
-    a = x[numpy.argmax(y)]
-    
-    # Most of the other stuff:
-    b = numpy.percentile(data, 99.99) 
-    
-    # Compute the center of mass excluding the high air spike +10% and outlayers:
-    y = y[(x > a + (b-a)/10) & (x < b)]    
-    x = x[(x > a + (b-a)/10) & (x < b)]
-          
-    c = numpy.sum(y * x) / numpy.sum(y)  
-    
-    return [a, b, c] 
-    
-def centre(data):
-        """
-        Compute the centre of the square of mass.
-        """
-        data2 = data[::2, ::2, ::2].copy().astype('float32')**2
-        
-        M00 = data2.sum()
-                
-        return [moment2(data2, 1, 0) / M00 * 2, moment2(data2, 1, 1) / M00 * 2, moment2(data2, 1, 2) / M00 * 2]
-
-def moment3(data, order, center = numpy.zeros(3), subsample = 1):
-    '''
-    Compute 3D image moments $mu_{ijk}$.
-    
-    Args:
-        data(array): 3D dataset
-        order(int): order of the moment
-        center(array): coordinates of the center
-        subsample: subsampling factor - 1,2,4...
-        
-    Returns:
-        float: image moment
-    
-    '''
-    # Create central indexes:
-    shape = data.shape
-       
-    data_ = data[::subsample, ::subsample, ::subsample].copy()
-    
-    for dim in range(3):
-        if order[dim] > 0:
-            
-            # Define moment:
-            m = numpy.arange(0, shape[dim], dtype = numpy.float32)
-            m -= center[dim]
-                
-            array.mult_dim(data_, m[::subsample] ** order[dim])    
-            
-    return numpy.sum(data_) * (subsample**3)
-    
-def moment2(data, power, dim, centered = True):
-    """
-    Compute 2D image moments (weighed averages) of the data. 
-    
-    sum( (x - x0) ** power * data ) 
-    
-    Args:
-        power (float): power of the image moment
-        dim (uint): dimension along which to compute the moment
-        centered (bool): if centered, center of coordinates is in the middle of array.
-        
-    """
-    
-    
-    # Create central indexes:
-    shape = data.shape
-
-    # Index:        
-    x = numpy.arange(0, shape[dim])    
-    if centered:
-        x -= shape[dim] // 2
-    
-    x **= power
-    
-    if dim == 0:
-        return numpy.sum(x[:, None, None] * data)
-    elif dim == 1:
-        return numpy.sum(x[None, :, None] * data)
-    else:
-        return numpy.sum(x[None, None, :] * data)
     
 def interpolate_lines(proj):
     '''
@@ -942,7 +668,7 @@ def interpolate_lines(proj):
 
     interpolate_holes(proj, lines, kernel = [1,1])   
           
-def interpolate_holes(data, mask2d, kernel = [1,1]):
+def interpolate_holes(array, mask2d, kernel = [1,1]):
     '''
     Fill in the holes, for instance, saturated pixels.
     
@@ -953,21 +679,21 @@ def interpolate_holes(data, mask2d, kernel = [1,1]):
     mask_norm = ndimage.filters.gaussian_filter(numpy.float32(mask2d), sigma = kernel)
     #flexUtil.slice(mask_norm, title = 'mask_norm')
     
-    sh = data.shape[1]
+    sh = array.shape[1]
     
     for ii in tqdm(range(sh), unit='images'):    
             
-        data[:, ii, :] = data[:, ii, :] * mask2d           
+        array[:, ii, :] = array[:, ii, :] * mask2d           
 
         # Compute the filler:
-        tmp = ndimage.filters.gaussian_filter(data[:, ii, :], sigma = kernel) / mask_norm      
+        tmp = ndimage.filters.gaussian_filter(array[:, ii, :], sigma = kernel) / mask_norm      
                                               
         #flexUtil.slice(tmp, title = 'tmp')
 
         # Apply filler:                 
-        data[:, ii, :][~mask2d] = tmp[~mask2d]
+        array[:, ii, :][~mask2d] = tmp[~mask2d]
          
-def interpolate_zeros(data, kernel = [1,1], epsilon = 1e-9):
+def interpolate_zeros(array, kernel = [1,1], epsilon = 1e-9):
     '''
     Fill in zero volues, for instance, blank pixels.
     
@@ -975,30 +701,32 @@ def interpolate_zeros(data, kernel = [1,1], epsilon = 1e-9):
         kernel: Size of the interpolation kernel
         epsilon: if less than epsilon -> interpolate
     '''
-    sh = data.shape[1]
+    sh = array.shape[1]
     
     for ii in tqdm(range(sh), unit='images'):    
            
-        mask = data[:, ii, :] > epsilon 
+        mask = array[:, ii, :] > epsilon 
         mask_norm = ndimage.filters.gaussian_filter(numpy.float32(mask), sigma = kernel)
         
         # Compute the filler:
-        tmp = ndimage.filters.gaussian_filter(data[:, ii, :], sigma = kernel) / mask_norm      
+        tmp = ndimage.filters.gaussian_filter(array[:, ii, :], sigma = kernel) / mask_norm      
         
         # Apply filler:                 
-        data[:, ii, :][~mask] = tmp[~mask]        
+        array[:, ii, :][~mask] = tmp[~mask]        
         
-def expand_medipix(data):
-    
+def expand_medipix(array):
+    '''
+    Get the correct image size for a MEDIPIX data (fill in extra central lines)
+    '''
     # Bigger array:
-    sz = numpy.array(data.shape)
+    sz = numpy.array(array.shape)
     sz[0] += 4
     sz[2] += 4
-    new = numpy.zeros(sz, dtype = data.dtype)
+    new = numpy.zeros(sz, dtype = array.dtype)
     
-    for ii in range(data.shape[1]):
+    for ii in range(array.shape[1]):
         
-        img = numpy.insert(data[: ,ii, :], 257, -1, axis = 0)
+        img = numpy.insert(array[: ,ii, :], 257, -1, axis = 0)
         img = numpy.insert(img, 256, -1, axis = 0)
         img = numpy.insert(img, 256, -1, axis = 0)
         img = numpy.insert(img, 255, -1, axis = 0)
@@ -1014,113 +742,6 @@ def expand_medipix(data):
     interpolate_holes(new, mask, kernel = [1,1])        
         
     return new  
-
-def flatfield(data, mode = 'sides'):
-    '''
-    Apply simple flatfield correction.
-    
-    Args:
-        mode (str): use "sides" to use maximum values of the detector sides to estimate the flat field or a single maximum value with "single".     
-    '''          
-    if mode == 'single':
-        
-        values = data[:,:, 0]
-        values.extend(data[:,:, -1])
-        
-        flat = stat.mode(values)
-        data /= flat
-        
-    elif mode == 'sides':
-        pr = data.max(1)    
-        
-        # compute side intensities:
-        left = ndimage.filters.gaussian_filter1d(pr[:, 0], sigma = 11)
-        right = ndimage.filters.gaussian_filter1d(pr[:, -1], sigma = 11)
-        
-        linfit = interp1d([0,1], numpy.vstack([left, right]).T, axis=1)
-        
-        flat = linfit(numpy.linspace(0, 1, data.shape[2]))
-        flat = flat.astype(data.dtype)
-        display.slice(flat, title = 'Estimated flat field')
-        
-        # If data is int need to use // instead of /:
-        if (data.dtype.kind == 'i') | (data.dtype.kind == 'u'):    
-            
-            # in case data is mapped on disk, we need to rewrite the file as another type:
-            new = (data / flat[:, None, :]).astype('float32')    
-            data = array.rewrite_memmap(data, new)    
-
-        else:
-            data /= flat[:, None, :]
-    else:
-        raise Exception('Wrong mode: ' + mode)
-        
-    return data
-
-def residual_rings(data, kernel=[3, 3]):
-    '''
-    Apply correction by computing outlayers .
-    '''
-    # Compute mean image of intensity variations that are < 5x5 pixels
-    print('Our best agents are working on the case of the Residual Rings. This can take years if the kernel size is too big!')
-
-    tmp = numpy.zeros(data.shape[::2])
-    
-    for ii in tqdm(range(data.shape[1]), unit = 'images'):                 
-        
-        block = data[:, ii, :]
-
-        # Compute:
-        tmp += (block - ndimage.filters.median_filter(block, size = kernel)).sum(1)
-        
-    tmp /= data.shape[1]
-    
-    print('Subtract residual rings.')
-    
-    for ii in tqdm(range(data.shape[1]), unit='images'):                 
-        
-        block = data[:, ii, :]
-        block -= tmp
-
-        data[:, ii, :] = block 
-    
-    print('Residual ring correcion applied.')
-
-def subtract_air(data, air_val = None):
-    '''
-    Subtracts a coeffificient from each projection, that equals to the intensity of air.
-    We are assuming that air will produce highest peak on the histogram.
-    '''
-    print('Air intensity will be derived from 10 pixel wide border.')
-    
-    # Compute air if needed:
-    if air_val is None:  
-        
-        air_val = -numpy.inf
-        
-        for ii in range(data.shape[1]): 
-            # Take pixels that belong to the 5 pixel-wide margin.
-            
-            block = data[:, ii, :]
-
-            border = numpy.concatenate((block[:10, :].ravel(), block[-10:, :].ravel(), block[:, -10:].ravel(), block[:, :10].ravel()))
-          
-            y, x = numpy.histogram(border, 1024, range = [-0.1, 0.1])
-            x = (x[0:-1] + x[1:]) / 2
-    
-            # Subtract maximum argument:    
-            air_val = numpy.max([air_val, x[y.argmax()]])
-    
-    print('Subtracting %f' % air_val)  
-    
-    for ii in tqdm(range(data.shape[1]), unit='images'):  
-        
-        block = data[:, ii, :]
-
-        block = block - air_val
-        block[block < 0] = 0
-        
-        data[:, ii, :] = block
 
 def _parabolic_min_(values, index, space):    
     '''
@@ -1154,7 +775,8 @@ def _sample_FDK_(projections, geometry, sample):
     Compute a subsampled version of FDK
     '''
     geometry_ = geometry.copy()
-
+    projections_ = projections[::sample[0], ::sample[2], ::sample[2]]
+    
     # Apply subsampling to detector and volume:    
     vol_sample = [sample[0], sample[1], sample[2]]
     det_sample = [sample[0], sample[2], sample[2]]
@@ -1162,19 +784,14 @@ def _sample_FDK_(projections, geometry, sample):
     geometry_['vol_sample'] = vol_sample
     geometry_['det_sample'] = det_sample
     
-    if max(sample) == 1:
-        projections_ = projections
-    else:
-        projections_ = numpy.ascontiguousarray(projections[::sample[0],::sample[2],::sample[2]])
-        
-    volume_ = project.init_volume(projections_)
+    volume = projector.init_volume(projections_)
     
     # Do FDK without progress_bar:
-    project.settings['progress_bar'] = False
-    project.FDK(projections_, volume_, geometry_)
-    project.settings['progress_bar'] = True
+    projector.settings.progress_bar = False
+    projector.FDK(projections_, volume, geometry_)
+    projector.settings.progress_bar = True
     
-    return volume_
+    return volume
     
 def _modifier_l2cost_(projections, geometry, subsample, value, key, metric = 'gradient', preview = False):
     '''
@@ -1189,8 +806,11 @@ def _modifier_l2cost_(projections, geometry, subsample, value, key, metric = 'gr
     vol[vol < 0] = 0
     
     # Crop to central part:
-    sz = numpy.array(vol.shape) // 4 + 1
-    vol = vol[sz[0]:-sz[0], sz[1]:-sz[1], sz[2]:-sz[2]]
+    sz = numpy.array(vol.shape) // 8 + 1
+    if vol.shape[0] < 3:
+        vol = vol[:, sz[1]:-sz[1], sz[2]:-sz[2]]
+    else:
+        vol = vol[sz[0]:-sz[0], sz[1]:-sz[1], sz[2]:-sz[2]]
     
     #vol /= vol.max()
 
@@ -1226,7 +846,7 @@ def _modifier_l2cost_(projections, geometry, subsample, value, key, metric = 'gr
     
 def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'axs_tan', metric = 'correlation', update = True, preview = False):  
     '''
-    Optimize a geometry modifier using a particular sampling of the projection data.
+    Optimize a geometry modifier using a particular sampling of the projection array.
     '''  
     maxiter = values.size
     
@@ -1253,44 +873,17 @@ def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'ax
     if update:
         geometry[key] = guess
     
-    print('Optimum found at %2.2f' % guess)
+    print('Optimum found at %3.3f' % guess)
     
     return guess
-   
-def optimize_detector_tilt(projections, geometry, amplitude = 1):
-    '''
-    Find the detector rotation within +-1deg range:
-    '''
-    amplitude = numpy.deg2rad(amplitude)
-    
-    # Find how an amplitude will translate into pixels:
-    nstep = int(projections.shape[2] * numpy.sin(amplitude))
-    
-    # Name and range of the parameter to optimize:
-    key = 'det_roll'
-    trial_values = numpy.linspace(-amplitude, amplitude, nstep)
-
-    # Subsampling of data (vertical x 10)
-    samp = [10, 1, 1]
-    
-    # Optimization:
-    print('Searching for a correct detector tilt...')
-    guess = optimize_modifier(trial_values, projections, geometry, samp = samp, key = key, preview = False)
-    geometry[key] = guess
-    
-    print('Tilt found at %2.2f degrees.' % numpy.rad2deg(guess))
-    
-    return guess
-     
-def optimize_modifier_multires(projections, geometry, guess = None, subscale = 1, key = 'axs_tan', metric = 'correlation', preview = False):
+        
+def optimize_modifier_multires(projections, geometry, step, guess = None, subscale = 1, key = 'axs_tan', metric = 'correlation', preview = False):
     '''
     
     '''        
-    img_pix = geometry['img_pixel']
-    
     print('The initial guess is %0.3f mm' % guess)
     
-    # Downscale the data:
+    # Downscale the array:
     while subscale >= 1:
         
         # Check that subscale is 1 or divisible by 2:
@@ -1302,12 +895,10 @@ def optimize_modifier_multires(projections, geometry, guess = None, subscale = 1
         samp =  [5 * subscale, subscale, subscale]
 
         # Create a search space of 5 values around the initial guess:
-        trial_values = numpy.linspace(guess - img_pix * subscale, guess + img_pix * subscale, 5)
+        trial_values = numpy.linspace(guess - step * subscale, guess + step * subscale, 5)
         
         guess = optimize_modifier(trial_values, projections, geometry, samp, key = key, preview = preview)
                 
-        print('Current guess is %0.3f mm' % guess)
-        
         subscale = subscale // 2
     
     print('Old value:%0.3f' % geometry[key], 'new value: %0.3f' % guess)          
@@ -1315,161 +906,86 @@ def optimize_modifier_multires(projections, geometry, guess = None, subscale = 1
     
     return guess
 
-def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, centre_of_mass = False, metric = 'correlation', preview = False):
+def optimize_rotation_center(projections, geometry, guess = None, subscale = 1, centre_of_mass = False, metric = 'highpass', preview = False):
     '''
     Find a center of rotation. If you can, use the center_of_mass option to get the initial guess.
     If that fails - use a subscale larger than the potential deviation from the center. Usually, 8 or 16 works fine!
     '''
     
-    # Usually a good initial guess is the center of mass of the projection data:
+    # Usually a good initial guess is the center of mass of the projection array:
     if  guess is None:  
         if centre_of_mass:
             
             print('Computing centre of mass...')
-            guess = centre(projections)[2] * geometry.voxel[2]
+            guess = analyze.centre(projections)[2] * geometry.voxel[2]
         
         else:
         
             guess = geometry['axs_tan']
         
-    guess = optimize_modifier_multires(projections, geometry, guess = guess, subscale = subscale, key = 'axs_tan', metric = metric, preview = preview)
+    guess = optimize_modifier_multires(projections, geometry, step = geometry.voxel[2], guess = guess, 
+                                       subscale = subscale, key = 'axs_tan', metric = metric, preview = preview)
     
     return guess
 
-def process_flex(path, sample = 1, skip = 1, memmap = None, index = None, proj_number = None):
-    '''
-    Read and process the data.
+def find_shift(volume_m, volume_s):
     
-    Args:
-        path:  path to the flexray data
-        sample:
-        skip:
-        memmap:
-        index:
-        proj_number (int): force projection number (treat lesser numbers as missing)
+    if volume_m.max() == 0 or volume_s.max() == 0:
+        return (0,0,0)
         
-    Return:
-        proj: min-log projections
-        meta: meta data
+    # Find intersection:
+    #mask_m = binary_threshold(volume_m, mode = 'otsu')
+    #mask_s = binary_threshold(volume_s, mode = 'otsu')
+    
+    sect = volume_m * volume_s
+    
+    if sect.max() == 0:
+        print('WARNING! Find shift fails bacause of no intersecting regions.')
         
-    '''
-    # Read:    
-    print('Reading...')
+    a,b,c = analyze.bounding_box(sect)
     
-    #index = []
-    proj, flat, dark, geom = io.read_flexray(path, sample = sample, skip = skip, memmap = memmap, proj_number = proj_number)
-                
-    # Show fow much memory we have:
-    #flexUtil.print_memory()     
+    # Compute cross-correlation:
+    vol_m = volume_m[a[0]:a[1], b[0]:b[1], c[0]:c[1]]
+    vol_s = volume_s[a[0]:a[1], b[0]:b[1], c[0]:c[1]]
     
-    # Prepro:
-    print('Processing...')
-    if dark.ndim > 2:
-        dark = dark.mean(0)
-        
-    proj -= dark
-    proj /= (flat.mean(0) - dark)
-        
-    numpy.log(proj, out = proj)
-    proj *= -1
+    vol_m = ndimage.filters.laplace(vol_m)
+    vol_s = ndimage.filters.laplace(vol_s)
     
-    # Fix nans and infs after log:
-    proj[~numpy.isfinite(proj)] = 10
+    display.slice(vol_m, dim = 0, title = 'Master volume')
+    display.slice(vol_s, dim = 0, title = 'Slave volume')
     
-    proj = array.raw2astra(proj)    
+    display.slice(vol_m- vol_s, dim = 0, title = 'Diff before')
     
-    # Here we will also check whether all files were read and if not - modify thetas accordingly:
-    '''
-    index = numpy.array(index)
-    index //= skip
+    conv = numpy.abs(numpy.fft.ifftn(-numpy.fft.fftn(vol_m).conjugate() * numpy.fft.fftn(vol_s)))
+    shift = numpy.unravel_index(numpy.argmax(numpy.fft.fftshift(conv)), dims = conv.shape) - numpy.array(conv.shape)//2
     
-    if (index[-1] + 1) != index.size:
-        print(index.size)
-        print(index[-1] + 1)
-        print('Seemes like some files were corrupted or missing. We will try to correct thetas accordingly.')
-        
-        thetas = numpy.linspace(geom['range'][0], geom['range'][1], index[-1]+1)
-        thetas = thetas[index]
-        
-        geom['thetas'] = thetas
-        
-        import pylab
-        pylab.plot(thetas, thetas ,'*')
-        pylab.title('Thetas')
-    '''
+    display.slice(vol_m- translate(vol_s, -shift, order = 1), dim = 0, title = 'Diff after')
     
-    # Show fow much memory we have:
-    # flexUtil.print_memory()             
-    print('Done!')
-    
-    return proj, geom
+    return shift
 
-def medipix_quadrant_shift(data):
-    '''
-    Expand the middle line
-    '''
-    
-    print('Applying medipix pixel shift.')
-    
-    # this one has to be applied to the whole dataset as it changes its size
-    
-    pbar = tqdm(unit = 'Operations', total=3) 
-    
-    data[:,:, 0:data.shape[2]//2 - 2] = data[:,:, 2:data.shape[2]/2]
-    data[:,:, data.shape[2]//2 + 2:] = data[:,:, data.shape[2]//2:-2]
-
-    pbar.update(1)
-
-    # Fill in two extra pixels:
-    for ii in range(-2,2):
-        closest_offset = -3 if (numpy.abs(-3-ii) < numpy.abs(2-ii)) else 2
-        data[:,:, data.shape[2]//2 - ii] = data[:,:, data.shape[2]//2 + closest_offset]
-
-    pbar.update(1)
-    
-    # Then in columns
-    data[0:data.shape[0]//2 - 2,:,:] = data[2:data.shape[0]//2,:,:]
-    data[data.shape[0]//2 + 2:, :, :] = data[data.shape[0]//2:-2,:,:]
-
-    # Fill in two extra pixels:
-    for jj in range(-2,2):
-        closest_offset = -3 if (numpy.abs(-3-jj) < numpy.abs(2-jj)) else 2
-        data[data.shape[0]//2 - jj,:,:] = data[data.shape[0]//2 + closest_offset,:,:]
-
-    pbar.update(1)
-    pbar.close()
-    
-    print('Medipix quadrant shift applied.')    
-    
-def _find_shift_(data_ref, data_slave, offset, dim = 1):    
+def _find_shift_(array_ref, array_slave, offset, dim = 1):    
     """
     Find a small 2D shift between two 3d images.
     """ 
     shifts = []
     
     # Look at a few slices along the dimension dim:
-    for ii in numpy.arange(0, data_slave.shape[dim], 10):
+    for ii in numpy.arange(0, array_slave.shape[dim], 10):
         
         # Take a single slice:
-        sl = array.anyslice(data_ref, ii, dim)    
-        im_ref = numpy.squeeze(data_ref[sl]).copy()
-        sl = array.anyslice(data_slave, ii, dim)    
-        im_slv = numpy.squeeze(data_slave[sl]).copy()
+        sl = data.anyslice(array_ref, ii, dim)    
+        im_ref = numpy.squeeze(array_ref[sl]).copy()
+        sl = data.anyslice(array_slave, ii, dim)    
+        im_slv = numpy.squeeze(array_slave[sl]).copy()
         
-        # Make sure that the data we compare is the same size:.        
+        # Make sure that the array we compare is the same size:.        
         if (min(offset) < 0):
-            print(offset)
-            print(im_ref.shape)
-            print(im_slv.shape)
             raise Exception('Offset is too small!')
             
         if (offset[1] + im_slv.shape[1] > im_ref.shape[1])|(offset[0] + im_slv.shape[0] > im_ref.shape[0]):            
-            print(offset)
-            print(im_ref.shape)
-            print(im_slv.shape)
             raise Exception('Offset is too large!')
             
-            # TODO: make formula for smaller total size of the total data
+            # TODO: make formula for smaller total size of the total array
             
         im_ref = im_ref[offset[0]:offset[0] + im_slv.shape[0], offset[1]:offset[1] + im_slv.shape[1]]
             
@@ -1553,14 +1069,14 @@ def _append_(total, new, x_offset, y_offset, pad_x, pad_y, base_dist, new_dist):
     # Create distances to edge:
     return ((base_dist * total) + (new_dist * new)) / norm
     
-def append_tile(data, geom, tot_data, tot_geom):
+def append_tile(array, geom, tot_array, tot_geom):
     """
-    Append a tile to a larger dataset.
+    Append a tile to a larger arrayset.
     Args:
         
-        data: projection stack
+        array: projection stack
         geom: geometry descritption
-        tot_data: output array
+        tot_array: output array
         tot_geom: output geometry
         
     """ 
@@ -1568,44 +1084,41 @@ def append_tile(data, geom, tot_data, tot_geom):
     print('Stitching a tile...')               
     
     # Assuming all projections have equal number of angles and same pixel sizes
-    total_shape = tot_data.shape[::2]
-    det_shape = data.shape[::2]
+    total_shape = tot_array.shape[::2]
+    det_shape = array.shape[::2]
     
     if tot_geom['det_pixel'] != geom['det_pixel']:
-        raise Exception('This data has different detector pixels! %u v.s. %u. Aborting!' % (geom['det_pixel'], tot_geom['det_pixel']))
+        raise Exception('This array has different detector pixels! %u v.s. %u. Aborting!' % (geom['det_pixel'], tot_geom['det_pixel']))
     
-    if tot_data.shape[1] != data.shape[1]:
-        raise Exception('This data has different number of projections from the others. %u v.s. %u. Aborting!' % (data.shape[1], tot_data.shape[1]))
+    if tot_array.shape[1] != array.shape[1]:
+        raise Exception('This array has different number of projections from the others. %u v.s. %u. Aborting!' % (array.shape[1], tot_array.shape[1]))
     
     total_size = tot_geom.detector_size(total_shape)
     det_size = geom.detector_size(det_shape)
                     
     # Offset from the left top corner:
-    x0 = tot_geom['det_tan']
-    y0 = tot_geom['det_ort']
+    y0, x0 = tot_geom.detector_centre()   
+    y, x = geom.detector_centre()
     
-    x = geom['det_tan']
-    y = geom['det_ort']
-        
-    x_offset = ((x - x0) + total_size[1] / 2 - det_size[1] / 2) / geom['det_pixel']
-    y_offset = ((y - y0) + total_size[0] / 2 - det_size[0] / 2) / geom['det_pixel']
+    x_offset = ((x - x0) + total_size[1] / 2 - det_size[1] / 2) / geom.pixel[1]
+    y_offset = ((y - y0) + total_size[0] / 2 - det_size[0] / 2) / geom.pixel[0]
     
     # Round em up!            
     x_offset = int(numpy.round(x_offset))                   
     y_offset = int(numpy.round(y_offset))                   
                 
     # Pad image to get the same size as the total_slice:        
-    pad_x = tot_data.shape[2] - data.shape[2]
-    pad_y = tot_data.shape[0] - data.shape[0]  
+    pad_x = tot_array.shape[2] - array.shape[2]
+    pad_y = tot_array.shape[0] - array.shape[0]  
     
-    # Collapce both datasets and compute residual shift
-    shift = _find_shift_(tot_data, data, [y_offset, x_offset])
+    # Collapce both arraysets and compute residual shift
+    shift = _find_shift_(tot_array, array, [y_offset, x_offset])
     
     x_offset += shift[1]
     y_offset += shift[0]
            
     # Precompute weights:
-    base0 = (tot_data[:, ::100, :].mean(1)) != 0
+    base0 = (tot_array[:, ::100, :].mean(1)) != 0
     
     new0 = numpy.zeros_like(base0)
     # Shift image:
@@ -1628,10 +1141,10 @@ def append_tile(data, geom, tot_data, tot_geom):
     time.sleep(0.5)
     
     # Apply offsets:
-    for ii in tqdm(range(tot_data.shape[1]), unit='img'):   
+    for ii in tqdm(range(tot_array.shape[1]), unit='img'):   
         
         # Pad to match sizes:
-        new = numpy.pad(data[:, ii, :], ((0, pad_y), (0, pad_x)), mode = 'constant')  
+        new = numpy.pad(array[:, ii, :], ((0, pad_y), (0, pad_x)), mode = 'constant')  
         
         # Apply shift:
         if (x_offset != 0) | (y_offset != 0):   
@@ -1640,321 +1153,72 @@ def append_tile(data, geom, tot_data, tot_geom):
             new = interp.shift(new, [y_offset, x_offset], order = 1)
                     
         # Add two images in a smart way:
-        base = tot_data[:, ii, :]  
+        base = tot_array[:, ii, :]  
         
         # Create distances to edge:
-        tot_data[:, ii, :] = ((base_dist * base) + (new_dist * new)) / norm
+        tot_array[:, ii, :] = ((base_dist * base) + (new_dist * new)) / norm
         
-def append_volume(data, geom, tot_data, tot_geom, ramp = 10):
+def append_volume(array, geom, tot_array, tot_geom, ramp = 10):
     """
-    Append a volume array to a larger dataset.
+    Append a volume array to a larger arrayset.
     Args:
         
-        data: projection stack
+        array: projection stack
         geom: geometry descritption
-        tot_data: output array
+        tot_array: output array
         tot_geom: output geometry
         
     """ 
     print('Stitching a volume block...')               
     
     # Offset (pixel precision):   
-    offset = numpy.array(geom['vol_tra']) / geom['img_pixel'] - numpy.array(data.shape) / 2
-    offset -= numpy.array(tot_geom['vol_tra']) / tot_geom['img_pixel'] - numpy.array(tot_data.shape) / 2
+    offset = numpy.array(geom['vol_tra']) / geom['img_pixel'] - numpy.array(array.shape) / 2
+    offset -= numpy.array(tot_geom['vol_tra']) / tot_geom['img_pixel'] - numpy.array(tot_array.shape) / 2
     offset = numpy.round(offset).astype('int')
     
-    # Create a slice of the big dataset:
-    s0 = slice(offset[0], offset[0] + data.shape[0])
-    s1 = slice(offset[1], offset[1] + data.shape[1])
-    s2 = slice(offset[2], offset[2] + data.shape[2])
+    # Create a slice of the big arrayset:
+    s0 = slice(offset[0], offset[0] + array.shape[0])
+    s1 = slice(offset[1], offset[1] + array.shape[1])
+    s2 = slice(offset[2], offset[2] + array.shape[2])
     
-    # Writable view on the total data:
-    w_data = tot_data[s0, s1, s2]
+    # Writable view on the total array:
+    w_array = tot_array[s0, s1, s2]
     
     # Find shift:
-    shift = find_shift(w_data, data)
+    shift = find_shift(w_array, array)
     
     print('Found shift of :' + str(shift))
     
-    if numpy.abs(shift).max() > 0: data = translate(data, -shift, order = 1)   
+    if numpy.abs(shift).max() > 0: array = translate(array, -shift, order = 1)   
     
     # Ramp weight:
-    weight = numpy.ones_like(data)
+    weight = numpy.ones_like(array)
     weight = array.ramp(weight, 0, [ramp, ramp], mode = 'linear')
     weight = array.ramp(weight, 1, [ramp, ramp], mode = 'linear')
     weight = array.ramp(weight, 2, [ramp, ramp], mode = 'linear')
     
-    # Weight can be 100% where no prior data exists:
-    weight[w_data == 0] = 1
+    # Weight can be 100% where no prior array exists:
+    weight[w_array == 0] = 1
     
     # Apply weights and add:
-    data *= weight
+    array *= weight
     
-    w_data *= (1 - weight)
-    w_data += data
-    
-def find_shift(volume_m, volume_s):
-    
-    if volume_m.max() == 0 or volume_s.max() == 0:
-        return (0,0,0)
-        
-    # Find intersection:
-    #mask_m = binary_threshold(volume_m, mode = 'otsu')
-    #mask_s = binary_threshold(volume_s, mode = 'otsu')
-    
-    sect = volume_m * volume_s
-    
-    if sect.max() == 0:
-        print('WARNING! Find shift fails bacause of no intersecting regions.')
-        
-    a,b,c = bounding_box(sect)
-    
-    # Compute cross-correlation:
-    vol_m = volume_m[a[0]:a[1], b[0]:b[1], c[0]:c[1]]
-    vol_s = volume_s[a[0]:a[1], b[0]:b[1], c[0]:c[1]]
-    
-    vol_m = ndimage.filters.laplace(vol_m)
-    vol_s = ndimage.filters.laplace(vol_s)
-    
-    display.slice(vol_m, dim = 0, title = 'Master volume')
-    display.slice(vol_s, dim = 0, title = 'Slave volume')
-    
-    display.slice(vol_m- vol_s, dim = 0, title = 'Diff before')
-    
-    conv = numpy.abs(numpy.fft.ifftn(-numpy.fft.fftn(vol_m).conjugate() * numpy.fft.fftn(vol_s)))
-    shift = numpy.unravel_index(numpy.argmax(numpy.fft.fftshift(conv)), dims = conv.shape) - numpy.array(conv.shape)//2
-    
-    display.slice(vol_m- translate(vol_s, -shift, order = 1), dim = 0, title = 'Diff after')
-    
-    return shift
-               
-def data_to_spectrum(path, compound = 'Al', density = 2.7, energy_bin = 50):
-    """
-    Convert data with Al calibration object at path to a spectrum.txt.
-    """
-    proj, geom = process_flex(path, skip = 2, sample = 2)
-    
-    display.slice(proj, dim=0,title = 'PROJECTIONS')
-
-    vol = project.init_volume(proj, geom)
-    
-    print('FDK reconstruction...')
-    
-    project.FDK(proj, vol, geom)
-    display.slice(vol, title = 'Uncorrected FDK')
-
-    print('Callibrating spectrum...')    
-    e, s = calibrate_spectrum(proj, vol, geom, compound = 'Al', density = 2.7, iterations = 1000, n_bin = energy_bin)   
-   
-    meta = {'energy':e, 'spectrum':s, 'description':geom.description}
-    io.write_toml(os.path.join(path, 'spectrum.toml'), meta)
-    
-    print('Spectrum computed and stored at: ' + os.path.join(path, 'spectrum.toml'))
-        
-    return e, s
-    
-def calibrate_spectrum(projections, volume, geometry, compound = 'Al', density = 2.7, threshold = None, iterations = 1000, n_bin = 10):
-    '''
-    Use the projection stack of a homogeneous object to estimate system's 
-    effective spectrum.
-    Can be used by process.equivalent_thickness to produce an equivalent 
-    thickness projection stack.
-    Please, use conventional geometry. 
-    ''' 
-    
-    #import random
-    
-    # Find the shape of the object:                                                    
-    if threshold:
-        t = binary_threshold(volume, mode = 'constant', threshold = threshold)
-        
-        segmentation = numpy.float32()
-    else:
-        t = binary_threshold(volume, mode = 'otsu')
-        segmentation = numpy.float32(volume > t)
-        
-    display.slice(segmentation, dim=0,title = 'Segmentation')        
-        
-    # Crop:    
-    #height = segmentation.shape[0]   
-    #w = 15
-
-    #length = length[height//2-w:height//2 + w, : ,:]    
-    
-    # Forward project the shape:                  
-    print('Calculating the attenuation length.')  
-    
-    length = numpy.zeros_like(projections)    
-    length = numpy.ascontiguousarray(length)
-    project.forwardproject(length, segmentation, geometry)
-        
-    projections[projections < 0] = 0
-    intensity = numpy.exp(-projections)
-    
-    # Crop to avoid cone artefacts:
-    height = intensity.shape[0]//2
-    window = 10
-    intensity = intensity[height-window:height+window,:,:]
-    length = length[height-window:height+window,:,:]
-    
-    # Make 1D:
-    intensity = intensity[length > 0].ravel()
-    length = length[length > 0].ravel()
-    
-    lmax = length.max()
-    lmin = length.min()    
-    
-    print('Maximum reprojected length:', lmax)
-    print('Minimum reprojected length:', lmin)
-    
-    print('Selecting a random subset of points.')  
-    
-    # Rare the sample to avoid slow times:
-    #index = random.sample(range(length.size), 1000000)
-    #length = length[index]
-    #intensity = intensity[index]
-    
-    print('Computing the intensity-length transfer function.')
-    
-    # Bin number for lengthes:
-    bin_n = 128
-    bins = numpy.linspace(lmin, lmax, bin_n)
-    
-    # Sample the midslice:
-    #segmentation = segmentation[height//2-w:height//2 + w, : ,:]    
-    #projections_ = projections[height//2-w:height//2 + w, : ,:]
-    
-    
-    #import flexModel
-    #ctf = flexModel.get_ctf(length.shape[::2], 'gaussian', [1, 1])
-    #length = flexModel.apply_ctf(length, ctf)  
-            
-    # TODO: Some cropping might be needed to avoid artefacts at the edges
-    
-    #flexUtil.slice(length, title = 'length sinogram')
-    #flexUtil.slice(projections_, title = 'apparent sinogram')
-        
-    # Rebin:
-    idx  = numpy.digitize(length, bins)
-    
-    # Rebin length and intensity:        
-    length_0 = bins + (bins[1] - bins[0]) / 2
-    intensity_0 = [numpy.median(intensity[idx==k]) for k in range(bin_n)]
-    
-    # In case some bins are empty:
-    intensity_0 = numpy.array(intensity_0)
-    length_0 = numpy.array(length_0)
-    length_0 = length_0[numpy.isfinite(intensity_0)]
-    intensity_0 = intensity_0[numpy.isfinite(intensity_0)]
-    
-    # Get rid of tales:
-    rim = len(length_0) // 20
-    length_0 = length_0[rim:-rim]    
-    intensity_0 = intensity_0[rim:-rim]    
-    
-    # Dn't trust low counts!
-    length_0 = length_0[intensity_0 > 0.05]
-    intensity_0 = intensity_0[intensity_0 > 0.05]
-    
-    # Get rid of long rays (they are typically wrong...)   
-    #intensity_0 = intensity_0[length_0 < 35]    
-    #length_0 = length_0[length_0 < 35]    
-    
-    # Enforce zero-one values:
-    length_0 = numpy.insert(length_0, 0, 0)
-    intensity_0 = numpy.insert(intensity_0, 0, 1)
-    
-    #flexUtil.plot(length_0, intensity_0, title = 'Length v.s. Intensity')
-        
-    print('Intensity-length curve rebinned.')
-        
-    print('Computing the spectrum by Expectation Maximization.')
-    
-    volts = geometry.description.get('voltage')
-    if not volts: volts = 100
-    
-    energy = numpy.linspace(5, max(100, volts), n_bin)
-    
-    mu = spectrum.linear_attenuation(energy, compound, density)
-    exp_matrix = numpy.exp(-numpy.outer(length_0, mu))
-    
-    # Initial guess of the spectrum:
-    spec = spectrum.bremsstrahlung(energy, volts) 
-    spec *= spectrum.scintillator_efficiency(energy, 'Si', rho = 5, thickness = 0.5)
-    spec *= spectrum.total_transmission(energy, 'H2O', 1, 1)
-    spec *= energy
-    spec /= spec.sum()
-    
-    #spec = numpy.ones_like(energy)
-    #spec[0] = 0
-    #spec[-1] = 0
-    
-    norm_sum = exp_matrix.sum(0)
-    spec0 = spec.copy()
-    #spec *= 0
-    
-    # exp_matrix at length == 0 is == 1. Sum of that is n_bin
-    
-    # EM type:   
-    for ii in range(iterations): 
-        frw = exp_matrix.dot(spec)
-
-        epsilon = frw.max() / 100
-        frw[frw < epsilon] = epsilon
-        
-        spec = spec * exp_matrix.T.dot(intensity_0 / frw) / norm_sum
-        
-        # Make sure that the total count of spec is 1 - that means intensity at length = 0 is equal to 1
-        spec = spec / spec.sum()
-        
-    print('Spectrum computed.')
-        
-    #flexUtil.plot(length_0, title = 'thickness')
-    #flexUtil.plot(mu, title = 'mu')
-    #flexUtil.plot(_intensity, title = 'synth_counts')
-    
-    # synthetic intensity for a check:
-    _intensity = exp_matrix.dot(spec)
-    
-    import matplotlib.pyplot as plt
-    
-    # Display:   
-    plt.figure()
-    plt.semilogy(length[::200], intensity[::200], 'b.', lw=4, alpha=.8)
-    plt.semilogy(length_0, intensity_0, 'g--')
-    plt.semilogy(length_0, _intensity, 'r-', lw=3, alpha=.6)
-    
-    #plt.scatter(length[::100], -numpy.log(intensity[::100]), color='b', alpha=.2, s=4)
-    plt.axis('tight')
-    plt.title('Log intensity v.s. absorption length.')
-    plt.legend(['raw','binned','solution'])
-    plt.show() 
-    
-    # Display:
-    plt.figure()
-    plt.plot(energy, spec, 'b')
-    plt.plot(energy, spec0, 'r:')
-    plt.axis('tight')
-    plt.title('Calculated spectrum')
-    plt.legend(['computed','initial guess'])
-    plt.show() 
-            
-    
-    return energy, spec
+    w_array *= (1 - weight)
+    w_array += array                   
     
 def equivalent_density(projections, geometry, energy, spectr, compound, density, preview = False):
     '''
-    Transfrom intensity values to projected density for a single material data
+    Transfrom intensity values to projected density for a single material array
     '''
-    # Assuming that we have log data!
+    # Assuming that we have log array!
 
     print('Generating the transfer function.')
     
     if preview:
-        display.plot2d(energy, spectrum, semilogy=False, title = 'Spectrum')
+        display.plot2d(energy, spectr, semilogy=False, title = 'Spectrum')
     
     # Attenuation of 1 mm:
-    mu = spectrum.linear_attenuation(energy, compound, density)
+    mu = model.linear_attenuation(energy, compound, density)
     
     # Make thickness range that is sufficient for interpolation:
     #m = (geometry['src2obj'] + geometry['det2obj']) / geometry['src2obj']
@@ -1981,7 +1245,7 @@ def equivalent_density(projections, geometry, energy, spectr, compound, density,
     synth_counts = -numpy.log(synth_counts)
     
     print('Callibration attenuation range:', [synth_counts[0], synth_counts[-1]])
-    print('Data attenuation range:', [projections.min(), projections.max()])
+    print('array attenuation range:', [projections.min(), projections.max()])
 
     print('Applying transfer function.')    
     

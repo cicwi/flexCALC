@@ -16,7 +16,7 @@ requirements = [
     "tqdm",
     "simpleitk",
     "pygraphviz",
-    "scipy",
+    "scipy",	
     "numpy-stl",
     "scikit-image",
     "transforms3d",

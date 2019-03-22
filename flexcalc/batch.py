@@ -4,59 +4,26 @@ import numpy
 import gc
 import os
 import re
-import warnings
 import pickle
 import time
 from copy import deepcopy
 
 #from glob import glob        
 
-from flexdata import io
+from flexdata import data as dt
 from flexdata import geometry
-from flexdata import array
 from flexdata import display
-from flextomo import project
+
+from flextomo import projector
 from flexcalc import process
 
 import networkx
 import matplotlib.pyplot as plt
+from flexdata.data import logger
 
 # >>> Classes >>>
 
-class logger:
-   """
-   A class for logging and printing messages.
-   """  
-   @staticmethod
-   def print(message):
-      """
-      Simply prints and saves a message.
-      """
-      print(message)   
 
-   @staticmethod
-   def title(message):
-      """
-      Print something important.
-      """
-      print('')
-      print(message)   
-      print('')
-
-   @staticmethod
-   def warning(message):
-      """
-      Raise a warning.
-      """
-      warnings.warn(message)
-      
-   @staticmethod   
-   def error(message):
-      """
-      Raise an error.
-      """
-      raise Exception(message)
-         
 class Buffer:
     """
     Each node has an input and output buffer. It will be in read-only or write-only state.
@@ -107,7 +74,7 @@ class Buffer:
         if not os.path.exists(self.path): os.mkdir(self.path)    
         
         # Get all files to add one at the end of the list:
-        files = io.get_files_sorted(self.path, 'scratch')
+        files = dt.get_files_sorted(self.path, 'scratch')
       
         # Get the new index:
         if files == []:
@@ -252,7 +219,7 @@ class Buffer:
                 
         # Check free space:
         buffer_gb = data.nbytes / 1e9 
-        free_gb = array.free_disk(self.filename)
+        free_gb = dt.free_disk(self.filename)
         logger.print('Writing buffer of %1.1fGB (%u%% of current disk space).' % (buffer_gb, 100 * buffer_gb / free_gb))
         
         # We will open data here again in case the shape or type changed:
@@ -275,7 +242,7 @@ class Buffer:
         
         # Check free space:        
         buffer_gb = self._data_.nbytes / 1e9 
-        free_gb = array.free_memory(False)                
+        free_gb = dt.free_memory(False)                
         logger.print('Retrieving buffer of %1.1fGB (%u%% of current RAM).' % (buffer_gb, 100 * buffer_gb / free_gb))
         
         return self._data_
@@ -622,14 +589,14 @@ class fdk_node(Node):
             vol = numpy.zeros(vol_shape, dtype = 'float32')
             
         else:
-            vol = project.init_volume(data)
+            vol = projector.init_volume(data)
         
-        project.settings['block_number'] = 10
-        project.FDK(data, vol, geom)
+        projector.settings.subsets = 10
+        projector.FDK(data, vol, geom)
         
         if sirt:
-            project.settings['bounds'] = [0, 9999]
-            project.SIRT(data, vol, geom, iterations = sirt)    
+            projector.settings.bounds = [0, 9999]
+            projector.SIRT(data, vol, geom, iterations = sirt)    
         
         self.set_outputs(0, vol, geom, misc)                 
 
@@ -647,7 +614,7 @@ class crop_node(Node):
         
         (dim, width) = self.arguments
                
-        data = array.crop(data, dim, width, geom)
+        data = dt.crop(data, dim, width, geom)
   
         self.set_outputs(0, data, geom, misc) 
         
@@ -665,7 +632,7 @@ class bin_node(Node):
         
         dim = self.arguments[0]
                
-        data = array.bin(data, dim, geom)
+        data = dt.bin(data, dim, geom)
   
         self.set_outputs(0, data, geom, misc)         
 
@@ -683,7 +650,7 @@ class pad_node(Node):
         
         (width, dim, mode) = self.arguments
         
-        data = array.pad(data, dim, width, mode, geom)
+        data = dt.pad(data, dim, width, mode, geom)
         
         self.set_outputs(0, data, geom, misc)              
 
@@ -704,7 +671,7 @@ class beamhardening_node(Node):
                 
         # Use toml files:
         if os.path.exists(file):
-            spec = io.read_toml(file)
+            spec = dt.read_toml(file)
             
         else:
             raise Exception('File not found:' + file)
@@ -754,14 +721,14 @@ class autocrop_node(Node):
                         
         a,b,c = process.bounding_box(data)
         
-        sz = data.data.shape
+        sz = data.shape
         
         logger.print('Bounding box found: ' + str([a,b,c]))
         logger.print('Old dimensions are: ' + str(sz))
                
-        data = array.crop(data, 0, [a[0], sz[0] - a[1]], geom)
-        data = array.crop(data, 1, [b[0], sz[1] - b[1]], geom)
-        data = array.crop(data, 2, [c[0], sz[2] - c[1]], geom)
+        data = dt.crop(data, 0, [a[0], sz[0] - a[1]], geom)
+        data = dt.crop(data, 1, [b[0], sz[1] - b[1]], geom)
+        data = dt.crop(data, 2, [c[0], sz[2] - c[1]], geom)
         
         logger.print('New dimensions are: ' + str(data.shape))
         
@@ -830,7 +797,7 @@ class cast2type_node(Node):
         
         logger.print('Casting data to ' + str(dtype))
         
-        data = array.cast2type(data, dtype, bounds)
+        data = dt.cast2type(data, dtype, bounds)
         
         self.set_outputs(0, data, geom, misc)  
         
@@ -846,7 +813,7 @@ class flatlog_node(Node):
         # Read data form a single buffer:
         data, geom, misc = self.get_inputs(0)
         
-        (usemax, flats, darks, sample, flipdim) = self.arguments
+        (usemax, flats, darks, sample, transpose, updown) = self.arguments
         
         if usemax:
             # Use data-driven flat field correction:
@@ -860,10 +827,10 @@ class flatlog_node(Node):
             
             # Read darks and flats:
             if darks:
-                dark = io.read_stack(path, darks, sample, sample, dtype = 'float32')
+                dark = dt.read_stack(path, darks, sample, sample, dtype = 'float32', transpose = transpose, updown = updown)
                     
                 if dark.ndim > 2:
-                    dark = dark.mean(0)
+                    dark = dark.mean(1)
                     
                 data -= dark[:, None, :]
                 
@@ -871,13 +838,10 @@ class flatlog_node(Node):
                 dark = 0
                 
             if flats:    
-                flat = io.read_stack(path, flats, sample, sample, dtype = 'float32')
+                flat = dt.read_stack(path, flats, sample, sample, dtype = 'float32', transpose = transpose, updown = updown)
+
                 if flat.ndim > 2:
-                    flat = flat.mean(0)
-                
-                if flipdim:
-                    data /= (flat - dark)[::-1, None, :]
-                else:
+                    flat = flat.mean(1)                
                     data /= (flat - dark)[:, None, :]
             
         numpy.log(data, out = data)    
@@ -1113,10 +1077,10 @@ class writer_node(Node):
         path = misc['path']
         
         print('Writing data at:', os.path.join(path, folder))
-        io.write_stack(os.path.join(path, folder), name, data, dim = dim, skip = skip, zip = compress)
+        dt.write_stack(os.path.join(path, folder), name, data, dim = dim, skip = skip, zip = compress)
         
         print('Writing meta to:', os.path.join(path, folder, 'geometry.toml'))
-        io.write_toml(os.path.join(path, folder, 'geometry.toml'), geom)  
+        dt.write_toml(os.path.join(path, folder, 'geometry.toml'), geom)  
 
         self.set_outputs(0, data, geom, misc)  
         
@@ -1130,8 +1094,8 @@ class reader_node(Node):
         Initiallization callback of read_data. 
         '''
         # Get arguments:
-        paths, name, sampling, shape, dtype, format, flipdim, proj_number = self.arguments
-        paths = io.get_folders_sorted(paths)
+        paths, name, sampling, shape, dtype, format, transpose, updown, proj_number = self.arguments
+        paths = dt.get_folders_sorted(paths)
        
         # Create as many output buffers as there are paths:
         self.init_outputs(len(paths))
@@ -1140,21 +1104,21 @@ class reader_node(Node):
           
             logger.print('Found data @ ' + path)
             
-            shape = io.stack_shape(path, name, sampling, sampling, shape, dtype, format)
+            #shape = dt.stack_shape(path, name, sampling, sampling, shape, dtype, format, transpose, updown)
             
             # If present, read meta:
             if os.path.exists(os.path.join(path, 'metadata.toml')):
-                geom = io.read_flexraymeta(path, sampling)   
+                geom = dt.read_flexraymeta(path, sampling)   
                 
             elif os.path.exists(os.path.join(path, 'scan settings.txt')):
-                geom = io.read_flexraylog(path, sampling)  
+                geom = dt.read_flexraylog(path, sampling)  
                 
             elif os.path.exists(os.path.join(path, 'meta.toml')):
-                geom = io.read_metatoml(path, sampling)  
+                geom = dt.read_metatoml(path, sampling)  
             
             elif os.path.exists(os.path.join(path, 'geometry.toml')):
-                geom = io.read_geometry(path, sampling)  
-            
+                geom = dt.read_geometry(path, sampling)  
+
             else:
                 logger.warning('No meta data found.')
                 geom = None
@@ -1166,17 +1130,17 @@ class reader_node(Node):
                         
     def runtime(self):
         # Get arguments:
-        paths, name, sampling, shape, dtype, format, flipdim, proj_number = self.arguments
-        paths = io.get_folders_sorted(paths)
+        paths, name, sampling, shape, dtype, format, transpose, updown, proj_number = self.arguments
+        paths = dt.get_folders_sorted(paths)
            
         # Read!
         for ii, path in enumerate(paths):
        
           logger.print('Reading data @ ' + path)
-          data = io.read_stack(path, name, sampling, sampling, shape = shape, dtype = dtype, format = format, flipdim = flipdim)
+          array = dt.read_stack(path, name, sampling, sampling, shape = shape, dtype = dtype, format = format, transpose= transpose, updown = updown)
           #proj, meta = process.process_flex(path, sampling, sampling, proj_number = proj_number) 
             
-          self.set_outputs(ii, data)
+          self.set_outputs(ii, array)
    
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SCHEDULER CLASS >>>>>>>>>>>>>>>>>>>>>>>>>>>>
           
@@ -1581,13 +1545,13 @@ class scheduler:
        """
        self.schedule(info_node)
            
-   def read_data(self, paths, name, sampling = 1, shape = None, dtype = 'float32', format = None, flipdim = True, proj_number = None):
+   def read_data(self, paths, name, sampling = 1, shape = None, dtype = 'float32', format = None, transpose = [1, 0, 2], updown = True, proj_number = None):
       """
       Schedule an image stack reader. Often will be the first node in the queue.
         Args:
             
       """
-      arguments = (paths, name, sampling, shape, dtype, format, flipdim, proj_number)
+      arguments = (paths, name, sampling, shape, dtype, format, transpose, updown, proj_number)
       self.schedule(reader_node, arguments)
       
    def write_data(self, path, name, dim = 0, skip = 1, compress = True):
@@ -1619,14 +1583,14 @@ class scheduler:
       else:
           logger.error('Unknown mode!')
       
-   def flatlog(self, usemax = False, flats = '', darks = '', sample = 1, flipdim = False):
+   def flatlog(self, usemax = False, flats = '', darks = '', sample = 1, transpose = [1, 0, 2], updown = True):
        """
        Read flats and darks and apply them to projection data or use 'usemax' mode to perform a data-driven correction.
        """
-       arguments = (usemax, flats, darks, sample, flipdim)
+       arguments = (usemax, flats, darks, sample, transpose, updown)
        self.schedule(flatlog_node, arguments)
    
-   def optimize(self, values, key = 'axs_hrz', tile_index = None, sampling = [5, 1, 1], metric = 'correlation'):
+   def optimize(self, values, key = 'axs_hrz', tile_index = None, sampling = [5, 1, 1], metric = 'highpass'):
        """
        Optimize a parameter using parameter range, geometry key, tile number and sub-sampling.
        """
