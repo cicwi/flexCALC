@@ -15,7 +15,7 @@ import numpy
 #%% Simulate data with shifted rotation axis
     
 # Initialize images:    
-proj = numpy.zeros([1, 64, 128], dtype = 'float32')
+proj = numpy.zeros([1, 128, 128], dtype = 'float32')
 
 # Define a simple projection geometry:
 geom = geometry.circular(src2obj = 100, det2obj = 100, det_pixel = 0.1, ang_range = [0, 360])
@@ -35,7 +35,7 @@ display.slice(proj, title = 'Sinogram')
 geom = geometry.circular(src2obj = 100, det2obj = 100, det_pixel = 0.1, ang_range = [0, 360])
 
 # Optimization:    
-process.optimize_rotation_center(proj, geom, subscale = 4, preview = True)
+process.optimize_rotation_center(proj, geom, subscale = 2)
 
 #%% Reconstruct:
 

@@ -77,7 +77,7 @@ display.projection(volb, dim = 1, title = 'Volume B (registered)')
 
 vola = projector.init_volume(proj_a)
 
-projector.settings.subsets = 1
+projector.settings.subsets = 10
 projector.PWLS([proj_a, proj_b], vola, [geom_a, geom_r], iterations = 10)
 
 display.projection(vola, dim = 1,  title = 'Volume combined PWLS')

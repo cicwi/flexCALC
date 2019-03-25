@@ -198,7 +198,7 @@ def bounding_box(array):
     integral = numpy.float32(data2).sum(0)
     
     # Filter noise:
-    integral = ndimage.gaussian_filter(integral, 10)
+    integral = ndimage.gaussian_filter(integral, 3)
     mean = numpy.mean(integral[integral > 0])
     integral[integral < mean / 10] = 0
     
@@ -211,7 +211,7 @@ def bounding_box(array):
     integral = numpy.float32(data2).sum(1)
         
     # Filter noise:
-    integral = ndimage.gaussian_filter(integral, 10)
+    integral = ndimage.gaussian_filter(integral, 3)
     mean = numpy.mean(integral[integral > 0])
     integral[integral < mean / 10] = 0
     
@@ -232,13 +232,13 @@ def bounding_box(array):
     c[1] = c[1] + c_int
     
     a[0] = max(0, a[0] * 4)
-    a[1] = min(data.shape[0], a[1] * 4)
+    a[1] = min(array.shape[0], a[1] * 4)
     
     b[0] = max(0, b[0] * 4)
-    b[1] = min(data.shape[1], b[1] * 4)
+    b[1] = min(array.shape[1], b[1] * 4)
     
     c[0] = max(0, c[0] * 4)
-    c[1] = min(data.shape[2], c[1] * 4)
+    c[1] = min(array.shape[2], c[1] * 4)
     
     return a, b, c
 

@@ -16,6 +16,7 @@ from flexdata import display
 
 from flextomo import projector
 from flexcalc import process
+from flexcalc import analyze
 
 import networkx
 import matplotlib.pyplot as plt
@@ -719,7 +720,7 @@ class autocrop_node(Node):
         # Read data form a single buffer:
         data, geom, misc = self.get_inputs(0)
                         
-        a,b,c = process.bounding_box(data)
+        a,b,c = analyze.bounding_box(data)
         
         sz = data.shape
         
@@ -749,7 +750,7 @@ class markernorm_node(Node):
         norm, size = self.arguments[0]               
         
         # Find the marker:
-        a,b,c = process.find_marker(data, geom, size)    
+        a,b,c = analyze.find_marker(data, geom, size)    
         
         rho = data[a-1:a+1, b-1:b+1, c-1:c+1].mean()
     
@@ -922,7 +923,7 @@ class proj_merge_node(Node):
             if geom is None:
                 logger.error('geometry record not found!')
             
-            src = [geom['src_vrt'], geom['src_mag'], geom['src_hrz']]
+            src = [geom['src_ort'], geom['src_tan']]
             
             if src_list is []:
                 src_list.append(src)
@@ -962,7 +963,7 @@ class proj_merge_node(Node):
         for ii in range(len(self.outputs)):
             
             geom = self.outputs[ii].get_geom()
-            sources.append([geom['src_vrt'], geom['src_mag'], geom['src_hrz']])
+            sources.append([geom['src_ort'], geom['src_tan']])
 
         # Add tiles one by one:            
         for ii in range(len(self.inputs)):
@@ -970,7 +971,7 @@ class proj_merge_node(Node):
             # Find a unique source position:
             data, geom, misc = self.get_inputs(ii)
             
-            src = [geom['src_vrt'], geom['src_mag'], geom['src_hrz']]
+            src = [geom['src_ort'], geom['src_tan']]
             index = sources.index(src)
             
             # Get the corresponding output

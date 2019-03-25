@@ -12,7 +12,7 @@ from flextomo import phantom   # Simulate
 from flextomo import model
 from flextomo import projector # Reconstruct
 
-from flexcalc import analyse
+from flexcalc import analyze
 from flexcalc import process
 
 import numpy
@@ -59,7 +59,7 @@ display.plot(vol_rec[0, 64], title = 'Crossection')
 #%% Estimate system spectrum:
 
 print('Callibrating spectrum...')    
-energy, spec = analyse.calibrate_spectrum(proj, vol, geom, compound = 'Al', density = 2.7)   
+energy, spec = analyze.calibrate_spectrum(proj, vol, geom, compound = 'Al', density = 2.7)   
    
 #meta = {'energy':e, 'spectrum':s, 'description':geom.description}
 #data.write_toml(os.path.join(path, 'spectrum.toml'), meta)

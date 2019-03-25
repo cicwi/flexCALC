@@ -14,20 +14,20 @@ from flexcalc import process
 
 #%% Read (short version for FlexRay data)
 
-path = 'D:\data\skull'
+path = '/ufs/ciacc/flexbox/good'
 proj, geom = process.process_flex(path, sample = 4, skip = 4)
 
 #%% Read (longer, more general approach)
 
 # Read:
-path = 'D:\data\skull'
+path = '/ufs/ciacc/flexbox/good'
 dark = data.read_stack(path, 'di00', sample = 4)
 flat = data.read_stack(path, 'io00', sample = 4)    
 proj = data.read_stack(path, 'scan_', sample = 4, skip = 4)
-geom = data.read_flexraylog(path)   
+geom = data.read_flexraylog(path, sample = 4)   
 
 # Process:
-proj = process.preprocess(proj, flat, dark, transpose = [1, 0, 2], updown = True)
+proj = process.preprocess(proj, flat, dark, dim = 1)
 display.slice(proj, dim = 0, bounds = [], title = 'Sinogram')
 
 #%% Reconstruct uncorrected:

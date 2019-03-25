@@ -54,8 +54,8 @@ def process_flex(path, sample = 1, skip = 1, memmap = None, index = None, proj_n
     proj, flat, dark, geom = data.read_flexray(path, sample = sample, skip = skip, memmap = memmap, proj_number = proj_number)
     
     # Prepro:            
-    proj = preprocess(proj, flat, dark, transpose = [1, 0, 2], updown = True)
-    
+    proj = preprocess(proj, flat, dark)
+        
     '''
     index = numpy.array(index)
     index //= skip
@@ -79,7 +79,7 @@ def process_flex(path, sample = 1, skip = 1, memmap = None, index = None, proj_n
     
     return proj, geom
       
-def preprocess(array, flats = None, darks = None, mode = 'sides', transpose = [1, 0, 2], updown = True):
+def preprocess(array, flats = None, darks = None, mode = 'sides', dim = 1):
     '''
     Apply flatfield correction based on availability of flat- and dark-field.
     
@@ -87,6 +87,7 @@ def preprocess(array, flats = None, darks = None, mode = 'sides', transpose = [1
         flats (ndarray): divide by flats
         darks (ndarray): subtract darks
         mode (str): "sides" to use maximum values of the detector sides to estimate the flat field or a mode of intensity distribution with "single".     
+        dim  (int): dimension that represents the projection number
     '''          
     logger.print('Pre-processing...')
     
@@ -97,26 +98,35 @@ def preprocess(array, flats = None, darks = None, mode = 'sides', transpose = [1
             array = data.rewrite_memmap(array, new)    
             
     if darks is not None:
+        
+        darks = darks.astype('float32')
+        
         if darks.ndim > 2:
-            darks = darks.mean(0)
+            darks = darks.mean(dim)
         
-        array -= darks
-        flats = flats - darks
-    
+        # Subtract:
+        data.add_dim(array, -darks, dim)
+        
+    else:
+        
+        darks = numpy.zeros(1, dtype = 'float32')
+            
     if flats is not None:
-        if flats.ndim > 2:
-            flats = flats.mean(0)
         
-        array /= flats
+        flats = flats.astype('float32')
+        
+        if flats.ndim > 2:
+            flats = flats.mean(dim)
+        
+        # Subtract:
+        data.add_dim(flats, -darks, dim) 
+        data.mult_dim(array, 1 / flats, dim)
         
     numpy.log(array, out = array)
     array *= -1
     
     # Fix nans and infs after log:
     array[~numpy.isfinite(array)] = 0
-    
-    # Transpose if need to
-    array = data.flipdim(array, transpose, updown)    
     
     return array
 
@@ -1193,9 +1203,9 @@ def append_volume(array, geom, tot_array, tot_geom, ramp = 10):
     
     # Ramp weight:
     weight = numpy.ones_like(array)
-    weight = array.ramp(weight, 0, [ramp, ramp], mode = 'linear')
-    weight = array.ramp(weight, 1, [ramp, ramp], mode = 'linear')
-    weight = array.ramp(weight, 2, [ramp, ramp], mode = 'linear')
+    weight = data.ramp(weight, 0, [ramp, ramp], mode = 'linear')
+    weight = data.ramp(weight, 1, [ramp, ramp], mode = 'linear')
+    weight = data.ramp(weight, 2, [ramp, ramp], mode = 'linear')
     
     # Weight can be 100% where no prior array exists:
     weight[w_array == 0] = 1
