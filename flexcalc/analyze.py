@@ -312,8 +312,7 @@ def find_marker(array, geometry, d = 5):
     
     #data = data.copy()
     # First subsample data to avoid memory overflow:
-    data2 = array.bin(array)
-    data2 = array.bin(data2)
+    data2 = array[::4, ::4, ::4]
     data2[data2 < 0] = 0
     
     r = d / 4
@@ -331,7 +330,10 @@ def find_marker(array, geometry, d = 5):
     print('Computing feature sizes...')
     
     # Map showing the relative size of feature
-    A = data.convolve_kernel(threshold, kernel)
+    data.convolve_kernel(threshold, kernel)
+    
+    A = threshold
+    
     A[A < 0] = 0
     A /= A.max()
     
@@ -396,21 +398,21 @@ def moments_orientation(data, subsample = 1):
     
     '''
     # find centroid:
-    m000 = moment3(data, [0, 0, 0])
-    m100 = moment3(data, [1, 0, 0])
-    m010 = moment3(data, [0, 1, 0])
-    m001 = moment3(data, [0, 0, 1])
+    m000 = moment3(data, [0, 0, 0], subsample = subsample)
+    m100 = moment3(data, [1, 0, 0], subsample = subsample)
+    m010 = moment3(data, [0, 1, 0], subsample = subsample)
+    m001 = moment3(data, [0, 0, 1], subsample = subsample)
 
     # Somehow this system of coordinates and the system of ndimage.interpolate require negation of j:
     T = [m100 / m000, m010 / m000, m001 / m000]
     
     # find central moments:
-    mu200 = moment3(data, [2, 0, 0], T) / m000
-    mu020 = moment3(data, [0, 2, 0], T) / m000
-    mu002 = moment3(data, [0, 0, 2], T) / m000
-    mu110 = moment3(data, [1, 1, 0], T) / m000
-    mu101 = moment3(data, [1, 0, 1], T) / m000
-    mu011 = moment3(data, [0, 1, 1], T) / m000
+    mu200 = moment3(data, [2, 0, 0], T, subsample = subsample) / m000
+    mu020 = moment3(data, [0, 2, 0], T, subsample = subsample) / m000
+    mu002 = moment3(data, [0, 0, 2], T, subsample = subsample) / m000
+    mu110 = moment3(data, [1, 1, 0], T, subsample = subsample) / m000
+    mu101 = moment3(data, [1, 0, 1], T, subsample = subsample) / m000
+    mu011 = moment3(data, [0, 1, 1], T, subsample = subsample) / m000
     
     # construct covariance matrix and compute rotation matrix:
     M = numpy.array([[mu200, mu110, mu101], [mu110, mu020, mu011], [mu101, mu011, mu002]])

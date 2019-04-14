@@ -219,12 +219,21 @@ def affine(array, matrix, shift):
     """
     Apply 3x3 rotation matrix and shift to a 3D arrayset.
     """
+    print('Applying affine transformation.')
+    time.sleep(0.3)
+    
+    pbar = tqdm(unit = 'Operations', total=1) 
    
     # Compute offset:
     T0 = numpy.array(array.shape) // 2
     T1 = numpy.dot(matrix, T0 + shift)
 
-    return ndimage.interpolation.affine_transform(array, matrix, offset = T0-T1, order = 1)
+    array = ndimage.interpolation.affine_transform(array, matrix, offset = T0-T1, order = 1)
+
+    pbar.update(1)
+    pbar.close()      
+    
+    return array
     
 def scale(array, factor, order = 1):
     '''
@@ -240,14 +249,48 @@ def scale(array, factor, order = 1):
     pbar.update(1)
     pbar.close()      
     
-    return array    
+    return array  
+
+def autocrop(array, geom = None):
+    '''
+    Auto_crop the volume and update the geometry record.
+    '''
+    a,b,c = analyze.bounding_box(array)
+        
+    sz = array.shape
+    
+    print('Old dimensions are: ' + str(sz))
+           
+    array = data.crop(array, 0, [a[0], sz[0] - a[1]], geom)
+    array = data.crop(array, 1, [b[0], sz[1] - b[1]], geom)
+    array = data.crop(array, 2, [c[0], sz[2] - c[1]], geom)
+    
+    print('New dimensions are: ' + str(array.shape))
+    
+    return array
+
+def allign_moments(array):
+    '''
+    Compute orientations of the volume intensity moments and allign them with XYZ.
+    '''
+    
+    print('Alligning volume moments.')
+    
+    # Moments orintations:
+    T, R = analyze.moments_orientation(array, 8)
+    
+    R_90 = R.T.dot(transforms3d.euler.euler2mat(numpy.pi / 2, numpy.pi / 2, 0))
+
+    # Apply transformation:
+    return affine(array, R_90, [0,0,0])
+
     
 def rotate(array, angle, axis = 0):
     '''
     Rotates the volume via interpolation.
     '''
     print('Applying rotation.')
-        
+    time.sleep(0.3)    
     sz = array.shape[axis]
     
     if angle == 90:
@@ -259,12 +302,15 @@ def rotate(array, angle, axis = 0):
        ax.remove(axis)
        return numpy.rot90(data, k =3, axes=ax) 
         
-    pbar = tqdm(unit = 'slices', total=1) 
+    pbar = tqdm(unit = 'slices', total=sz) 
     for ii in range(sz):     
         
         sl = data.anyslice(array, ii, axis)
         
         array[sl] = ndimage.interpolation.rotate(array[sl], angle, reshape=False)
+        
+        pbar.update(1)
+    pbar.close()
         
     return array
         
@@ -276,8 +322,11 @@ def translate(array, shift, order = 1):
     time.sleep(0.3)
 
     pbar = tqdm(unit = 'Operation', total=1) 
-    ndimage.interpolation.shift(array, shift, output = array, order = order)
-        
+    
+    #ndimage.interpolation.shift(array, shift, output = array, order = order)
+    # for some reason may return zeros in this implementation
+    array = ndimage.interpolation.shift(array, shift, order = order)    
+    
     pbar.update(1)
     pbar.close()
 
@@ -947,12 +996,15 @@ def find_shift(volume_m, volume_s):
     #mask_m = binary_threshold(volume_m, mode = 'otsu')
     #mask_s = binary_threshold(volume_s, mode = 'otsu')
     
-    sect = volume_m * volume_s
+    sect = volume_m[::2,::2,::2] * volume_s[::2,::2,::2]
     
     if sect.max() == 0:
         print('WARNING! Find shift fails bacause of no intersecting regions.')
         
     a,b,c = analyze.bounding_box(sect)
+    a *= 2
+    b *= 2
+    c *= 2
     
     # Compute cross-correlation:
     vol_m = volume_m[a[0]:a[1], b[0]:b[1], c[0]:c[1]]
@@ -961,16 +1013,21 @@ def find_shift(volume_m, volume_s):
     vol_m = ndimage.filters.laplace(vol_m)
     vol_s = ndimage.filters.laplace(vol_s)
     
-    display.slice(vol_m, dim = 0, title = 'Master volume')
-    display.slice(vol_s, dim = 0, title = 'Slave volume')
+    #display.slice(vol_m, dim = 0, title = 'Master volume')
+    #display.slice(vol_s, dim = 0, title = 'Slave volume')
     
-    display.slice(vol_m- vol_s, dim = 0, title = 'Diff before')
+    #display.slice(vol_m- vol_s, dim = 0, title = 'Diff before')
     
-    conv = numpy.abs(numpy.fft.ifftn(-numpy.fft.fftn(vol_m).conjugate() * numpy.fft.fftn(vol_s)))
-    shift = numpy.unravel_index(numpy.argmax(numpy.fft.fftshift(conv)), dims = conv.shape) - numpy.array(conv.shape)//2
+    vol_m = numpy.fft.fftn(vol_m)
+    vol_m = -vol_m.conjugate()
     
-    display.slice(vol_m- translate(vol_s, -shift, order = 1), dim = 0, title = 'Diff after')
+    vol_s = numpy.fft.fftn(vol_s)
     
+    vol_m *= vol_s
+    vol_m = numpy.abs(numpy.fft.ifftn(vol_m))
+    vol_m = numpy.fft.fftshift(vol_m)
+    shift = numpy.unravel_index(numpy.argmax(vol_m), dims = vol_m.shape) - numpy.array(vol_m.shape)//2
+        
     return shift
 
 def _find_shift_(array_ref, array_slave, offset, dim = 1):    
@@ -1181,6 +1238,9 @@ def append_volume(array, geom, tot_array, tot_geom, ramp = 10):
     """ 
     print('Stitching a volume block...')               
     
+    display.slice(array, dim = 2, title = 'Append')
+    display.slice(tot_array, dim = 2, title = 'Total')
+    
     # Offset (pixel precision):   
     offset = numpy.array(geom['vol_tra']) / geom['img_pixel'] - numpy.array(array.shape) / 2
     offset -= numpy.array(tot_geom['vol_tra']) / tot_geom['img_pixel'] - numpy.array(tot_array.shape) / 2
@@ -1200,21 +1260,27 @@ def append_volume(array, geom, tot_array, tot_geom, ramp = 10):
     print('Found shift of :' + str(shift))
     
     if numpy.abs(shift).max() > 0: array = translate(array, -shift, order = 1)   
-    
+    print('Computing weigths.')
     # Ramp weight:
-    weight = numpy.ones_like(array)
+    weight = numpy.ones(array.shape, dtype = 'float16')
     weight = data.ramp(weight, 0, [ramp, ramp], mode = 'linear')
     weight = data.ramp(weight, 1, [ramp, ramp], mode = 'linear')
     weight = data.ramp(weight, 2, [ramp, ramp], mode = 'linear')
     
     # Weight can be 100% where no prior array exists:
-    weight[w_array == 0] = 1
-    
-    # Apply weights and add:
+    for ii in range(weight.shape[0]):
+        weight[ii][w_array[ii] == 0] = 1
+    print('Adding volumes.')
+    # Apply weights and add (save memory):
     array *= weight
     
-    w_array *= (1 - weight)
+    weight -= 1
+    weight *= -1
+    
+    w_array *= weight
     w_array += array                   
+    
+    display.slice(tot_array, dim = 2, title = 'Total')
     
 def equivalent_density(projections, geometry, energy, spectr, compound, density, preview = False):
     '''

@@ -1,0 +1,813 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>flexcalc.analyze &mdash; flexcalc  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> flexcalc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">flexcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">flexcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">flexcalc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>flexcalc.analyze</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for flexcalc.analyze</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author: Alex Kostenko</span>
+<span class="sd">This module contains data analysis routines.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Imports &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">ndimage</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">signal</span>
+
+<span class="kn">from</span> <span class="nn">skimage.filters</span> <span class="k">import</span> <span class="n">threshold_otsu</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">interp1d</span>
+    
+<span class="kn">from</span> <span class="nn">flexdata</span> <span class="k">import</span> <span class="n">display</span>
+<span class="kn">from</span> <span class="nn">flexdata</span> <span class="k">import</span> <span class="n">data</span>
+
+<span class="kn">import</span> <span class="nn">transforms3d</span>
+
+<span class="kn">from</span> <span class="nn">flextomo</span> <span class="k">import</span> <span class="n">phantom</span>
+<span class="kn">from</span> <span class="nn">flextomo</span> <span class="k">import</span> <span class="n">projector</span>
+<span class="kn">from</span> <span class="nn">flextomo</span> <span class="k">import</span> <span class="n">model</span>
+
+<span class="kn">from</span> <span class="nn">flexdata.data</span> <span class="k">import</span> <span class="n">logger</span>
+
+<span class="c1"># &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Methods &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+
+<div class="viewcode-block" id="get_background"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.get_background">[docs]</a><span class="k">def</span> <span class="nf">get_background</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;histogram&#39;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Get the background intensity.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Compute air if needed:</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;histogram&#39;</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">histogram</span><span class="p">(</span><span class="n">array</span><span class="p">[::</span><span class="mi">2</span><span class="p">,::</span><span class="mi">2</span><span class="p">,::</span><span class="mi">2</span><span class="p">],</span> <span class="n">log</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">plot</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+        
+        <span class="c1"># Make sure there are no 0s:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>    
+        <span class="n">y</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">gaussian_filter1d</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># Find air maximum:</span>
+        <span class="n">air_index</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        
+        <span class="n">flat</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">air_index</span><span class="p">]</span>
+    
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;sides&#39;</span><span class="p">:</span>    
+        
+        <span class="c1"># Get the intensity of the sides:</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        
+        <span class="n">left</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">linfit</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">flat</span> <span class="o">=</span> <span class="n">linfit</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">flat</span> <span class="o">=</span> <span class="n">flat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unknown mode: &#39;</span> <span class="o">+</span> <span class="n">mode</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">flat</span>  </div>
+
+<div class="viewcode-block" id="histogram"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.histogram">[docs]</a><span class="k">def</span> <span class="nf">histogram</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">nbin</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">plot</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute histogram of the data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1">#print(&#39;Calculating histogram...&#39;)</span>
+    
+    <span class="k">if</span> <span class="n">rng</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">mi</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="n">ma</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mf">99.99</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mi</span> <span class="o">=</span> <span class="n">rng</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ma</span> <span class="o">=</span> <span class="n">rng</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">nbin</span><span class="p">,</span> <span class="nb">range</span> <span class="o">=</span> <span class="p">[</span><span class="n">mi</span><span class="p">,</span> <span class="n">ma</span><span class="p">])</span>
+    
+    <span class="c1"># Set bin values to the middle of the bin:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="n">display</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">semilogy</span> <span class="o">=</span> <span class="n">log</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Histogram&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="intensity_range"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.intensity_range">[docs]</a><span class="k">def</span> <span class="nf">intensity_range</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute intensity range based on the histogram.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        a: position of the highest spike (typically air)</span>
+<span class="sd">        b: 99.99th percentile</span>
+<span class="sd">        c: center of mass of the histogram</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># 256 bins should be sufficient for our dynamic range:</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">histogram</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">nbin</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">plot</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+    
+    <span class="c1"># Smooth and find the first and the third maximum:</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="mf">0.1</span><span class="p">),</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1"># Air:</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">y</span><span class="p">)]</span>
+    
+    <span class="c1"># Most of the other stuff:</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mf">99.99</span><span class="p">)</span> 
+    
+    <span class="c1"># Compute the center of mass excluding the high air spike +10% and outlayers:</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">)]</span>    
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">)]</span>
+          
+    <span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>  
+    
+    <span class="k">return</span> <span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> </div>
+    
+<div class="viewcode-block" id="centre"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.centre">[docs]</a><span class="k">def</span> <span class="nf">centre</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the centre of the square of mass.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data2</span> <span class="o">=</span> <span class="n">array</span><span class="p">[::</span><span class="mi">2</span><span class="p">,</span> <span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">::</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    
+    <span class="n">M00</span> <span class="o">=</span> <span class="n">data2</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            
+    <span class="k">return</span> <span class="p">[</span><span class="n">moment2</span><span class="p">(</span><span class="n">data2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">M00</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">moment2</span><span class="p">(</span><span class="n">data2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">M00</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">moment2</span><span class="p">(</span><span class="n">data2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">M00</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="moment3"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.moment3">[docs]</a><span class="k">def</span> <span class="nf">moment3</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">center</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">subsample</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compute 3D image moments $mu_{ijk}$.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        data(array): 3D dataset</span>
+<span class="sd">        order(int): order of the moment</span>
+<span class="sd">        center(array): coordinates of the center</span>
+<span class="sd">        subsample: subsampling factor - 1,2,4...</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        float: image moment</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Create central indexes:</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+       
+    <span class="n">array_</span> <span class="o">=</span> <span class="n">array</span><span class="p">[::</span><span class="n">subsample</span><span class="p">,</span> <span class="p">::</span><span class="n">subsample</span><span class="p">,</span> <span class="p">::</span><span class="n">subsample</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">order</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            
+            <span class="c1"># Define moment:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">shape</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">-=</span> <span class="n">center</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+                
+            <span class="n">data</span><span class="o">.</span><span class="n">mult_dim</span><span class="p">(</span><span class="n">array_</span><span class="p">,</span> <span class="n">m</span><span class="p">[::</span><span class="n">subsample</span><span class="p">]</span> <span class="o">**</span> <span class="n">order</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="n">dim</span><span class="p">)</span>    
+            
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array_</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">subsample</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="moment2"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.moment2">[docs]</a><span class="k">def</span> <span class="nf">moment2</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">centered</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute 2D image moments (weighed averages) of the data. </span>
+<span class="sd">    </span>
+<span class="sd">    sum( (x - x0) ** power * data ) </span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        power (float): power of the image moment</span>
+<span class="sd">        dim (uint): dimension along which to compute the moment</span>
+<span class="sd">        centered (bool): if centered, center of coordinates is in the middle of array.</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create central indexes:</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c1"># Index:        </span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">shape</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>    
+    <span class="k">if</span> <span class="n">centered</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">-=</span> <span class="n">shape</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+    
+    <span class="n">x</span> <span class="o">**=</span> <span class="n">power</span>
+    
+    <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">array</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">array</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">array</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="bounding_box"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.bounding_box">[docs]</a><span class="k">def</span> <span class="nf">bounding_box</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find a bounding box for the volume based on intensity (use for auto_crop).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Avoid memory overflow!</span>
+    <span class="c1">#data = data.copy()</span>
+    <span class="n">data2</span> <span class="o">=</span> <span class="n">array</span><span class="p">[::</span><span class="mi">2</span><span class="p">,</span> <span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">::</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">data2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span>
+    
+    <span class="n">data2</span><span class="p">[</span><span class="n">data2</span> <span class="o">&lt;</span> <span class="n">binary_threshold</span><span class="p">(</span><span class="n">data2</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;otsu&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">integral</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># Filter noise:</span>
+    <span class="n">integral</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">integral</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">integral</span><span class="p">[</span><span class="n">integral</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">integral</span><span class="p">[</span><span class="n">integral</span> <span class="o">&lt;</span> <span class="n">mean</span> <span class="o">/</span> <span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="c1"># Compute bounding box:</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">integral</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">integral</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rows</span><span class="p">)[</span><span class="mi">0</span><span class="p">][[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cols</span><span class="p">)[</span><span class="mi">0</span><span class="p">][[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+    
+    <span class="n">integral</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
+    <span class="c1"># Filter noise:</span>
+    <span class="n">integral</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">integral</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">integral</span><span class="p">[</span><span class="n">integral</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">integral</span><span class="p">[</span><span class="n">integral</span> <span class="o">&lt;</span> <span class="n">mean</span> <span class="o">/</span> <span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="c1"># Compute bounding box:</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">integral</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rows</span><span class="p">)[</span><span class="mi">0</span><span class="p">][[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+    
+    <span class="c1"># Add a safe margin:</span>
+    <span class="n">a_int</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">//</span> <span class="mi">20</span>
+    <span class="n">b_int</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">//</span> <span class="mi">20</span>
+    <span class="n">c_int</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">//</span> <span class="mi">20</span>
+    
+    <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a_int</span>
+    <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a_int</span>
+    <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">b_int</span>
+    <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">b_int</span>
+    <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">c_int</span>
+    <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">c_int</span>
+    
+    <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+    
+    <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+    
+    <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span></div>
+
+<div class="viewcode-block" id="binary_threshold"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.binary_threshold">[docs]</a><span class="k">def</span> <span class="nf">binary_threshold</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;histogram&#39;</span><span class="p">,</span> <span class="n">threshold</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compute binary threshold. Use &#39;histogram, &#39;otsu&#39;, or &#39;constant&#39; mode.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Applying binary threshold...&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;otsu&#39;</span><span class="p">:</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold_otsu</span><span class="p">(</span><span class="n">data</span><span class="p">[::</span><span class="mi">2</span><span class="p">,::</span><span class="mi">2</span><span class="p">,::</span><span class="mi">2</span><span class="p">])</span>    
+        
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;histogram&#39;</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">histogram</span><span class="p">(</span><span class="n">data</span><span class="p">[::</span><span class="mi">2</span><span class="p">,::</span><span class="mi">2</span><span class="p">,::</span><span class="mi">2</span><span class="p">],</span> <span class="n">log</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">plot</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+        
+        <span class="c1"># Make sure there are no 0s:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>    
+        <span class="n">y</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">gaussian_filter1d</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            
+        <span class="c1"># Find air maximum:</span>
+        <span class="n">air_index</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Air found at </span><span class="si">%0.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">x</span><span class="p">[</span><span class="n">air_index</span><span class="p">])</span>
+    
+        <span class="c1"># Find the first shoulder after air peak in the histogram spectrum:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">air_index</span><span class="p">:]</span>
+        
+        <span class="n">yd</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+        <span class="n">yd</span> <span class="o">=</span> <span class="n">yd</span><span class="p">[</span><span class="n">air_index</span><span class="p">:]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">air_index</span><span class="p">:]</span>
+        
+        <span class="c1"># Minimum derivative = Saddle point or extremum:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">argrelextrema</span><span class="p">(</span><span class="n">yd</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">less</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">min_ind</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">argrelextrema</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">less</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="s1">&#39;+&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">min_ind</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">min_ind</span><span class="p">],</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        
+        <span class="c1"># Is it a Saddle point or extremum?</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ind</span> <span class="o">-</span> <span class="n">min_ind</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>    
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>         
+    
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Minimum found next to the air peak at: </span><span class="si">%0.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>        
+        <span class="k">else</span><span class="p">:</span>            
+            <span class="c1"># Move closer to the air peak since we are looking at some other material             </span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">4</span> 
+    
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saddle point found next to the air peak at: </span><span class="si">%0.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">x</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>        
+            
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;constant&#39;</span><span class="p">:</span>
+        <span class="k">pass</span>        
+            
+    <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Wrong mode parameter. Can be histogram or otsu.&#39;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Threshold value is </span><span class="si">%0.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">threshold</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">threshold</span></div>
+
+<div class="viewcode-block" id="find_marker"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.find_marker">[docs]</a><span class="k">def</span> <span class="nf">find_marker</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find a marker in 3D volume by applying a circular kernel with an inner diameter d [mm].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: it fail sometimes when the marker is adjuscent to something...</span>
+    
+    <span class="c1">#data = data.copy()</span>
+    <span class="c1"># First subsample data to avoid memory overflow:</span>
+    <span class="n">data2</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">data2</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">bin</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span>
+    <span class="n">data2</span><span class="p">[</span><span class="n">data2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">r</span> <span class="o">=</span> <span class="n">d</span> <span class="o">/</span> <span class="mi">4</span>
+        
+    <span class="c1"># Get areas with significant density:</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">binary_threshold</span><span class="p">(</span><span class="n">data2</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;otsu&#39;</span><span class="p">)</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">data2</span> <span class="o">&gt;</span> <span class="n">t</span><span class="p">)</span>
+    
+    <span class="c1"># Create a circular kernel (take into account subsampling of data2):</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">phantom</span><span class="o">.</span><span class="n">sphere</span><span class="p">(</span><span class="n">data2</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">r</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">kernel</span> <span class="o">+=</span> <span class="n">phantom</span><span class="o">.</span><span class="n">sphere</span><span class="p">(</span><span class="n">data2</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">kernel</span><span class="p">[</span><span class="n">kernel</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing feature sizes...&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Map showing the relative size of feature</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">convolve_kernel</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">A</span><span class="p">[</span><span class="n">A</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">A</span> <span class="o">/=</span> <span class="n">A</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    
+    <span class="n">display</span><span class="o">.</span><span class="n">max_projection</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Feature size.&#39;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Estimating local variance...&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Now estimate the local variance:</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">laplace</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>    
+    <span class="n">B</span> <span class="o">/=</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span> <span class="o">+</span> <span class="n">data2</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
+    
+    <span class="c1"># Make sure that boundaries don&#39;t affect variance estimation:</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span> <span class="o">==</span> <span class="mi">0</span>
+    
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">morphology</span><span class="o">.</span><span class="n">binary_dilation</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+    
+    <span class="n">B</span><span class="p">[</span><span class="n">threshold</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">B</span> <span class="o">/=</span> <span class="n">B</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    
+    <span class="n">display</span><span class="o">.</span><span class="n">max_projection</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Variance.&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Compute final weight:    </span>
+    <span class="n">A</span> <span class="o">-=</span> <span class="n">B</span>
+    
+    <span class="c1"># Make it dependent on absolote intensity: (could be dependent on distance from some value....)</span>
+    <span class="n">A</span> <span class="o">*=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span>
+    <span class="c1">#A -= numpy.sqrt((data2 - density)**2 + density / 10)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;A.max&#39;</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;A.mean&#39;</span><span class="p">,</span> <span class="n">A</span><span class="p">[</span><span class="n">A</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    
+    <span class="n">index</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    
+    <span class="c1"># Display:</span>
+    <span class="n">display</span><span class="o">.</span><span class="n">max_projection</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Marker map&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Coordinates:</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    
+    <span class="c1"># Upsample:</span>
+    <span class="n">a</span> <span class="o">*=</span> <span class="mi">4</span>
+    <span class="n">b</span> <span class="o">*=</span> <span class="mi">4</span>
+    <span class="n">c</span> <span class="o">*=</span> <span class="mi">4</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found the marker at:&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span></div>
+    
+<div class="viewcode-block" id="moments_orientation"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.moments_orientation">[docs]</a><span class="k">def</span> <span class="nf">moments_orientation</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">subsample</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Find the center of mass and the intensity axes of the image.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        data(array): 3D input</span>
+<span class="sd">        subsample: subsampling factor to to make it faster</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        T, R: translation vector to the center of mass and rotation matrix to intensity axes </span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># find centroid:</span>
+    <span class="n">m000</span> <span class="o">=</span> <span class="n">moment3</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">m100</span> <span class="o">=</span> <span class="n">moment3</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">m010</span> <span class="o">=</span> <span class="n">moment3</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">m001</span> <span class="o">=</span> <span class="n">moment3</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Somehow this system of coordinates and the system of ndimage.interpolate require negation of j:</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="p">[</span><span class="n">m100</span> <span class="o">/</span> <span class="n">m000</span><span class="p">,</span> <span class="n">m010</span> <span class="o">/</span> <span class="n">m000</span><span class="p">,</span> <span class="n">m001</span> <span class="o">/</span> <span class="n">m000</span><span class="p">]</span>
+    
+    <span class="c1"># find central moments:</span>
+    <span class="n">mu200</span> <span class="o">=</span> <span class="n">moment3</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">m000</span>
+    <span class="n">mu020</span> <span class="o">=</span> <span class="n">moment3</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">m000</span>
+    <span class="n">mu002</span> <span class="o">=</span> <span class="n">moment3</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">m000</span>
+    <span class="n">mu110</span> <span class="o">=</span> <span class="n">moment3</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">m000</span>
+    <span class="n">mu101</span> <span class="o">=</span> <span class="n">moment3</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">m000</span>
+    <span class="n">mu011</span> <span class="o">=</span> <span class="n">moment3</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="n">m000</span>
+    
+    <span class="c1"># construct covariance matrix and compute rotation matrix:</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">mu200</span><span class="p">,</span> <span class="n">mu110</span><span class="p">,</span> <span class="n">mu101</span><span class="p">],</span> <span class="p">[</span><span class="n">mu110</span><span class="p">,</span> <span class="n">mu020</span><span class="p">,</span> <span class="n">mu011</span><span class="p">],</span> <span class="p">[</span><span class="n">mu101</span><span class="p">,</span> <span class="n">mu011</span><span class="p">,</span> <span class="n">mu002</span><span class="p">]])</span>
+
+    <span class="c1">#Compute eigen vecors of the covariance matrix and sort by eigen values:</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">M</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">M</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>    
+    
+    <span class="c1"># Here we sort the eigen values:</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+    
+    <span class="c1"># Matrix R is composed of basis vectors:</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vec</span><span class="p">[</span><span class="n">ind</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    
+    <span class="c1"># Makes sure our basis always winds the same way:</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>     
+    
+    <span class="c1"># Centroid:</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    
+    <span class="k">return</span> <span class="n">T</span><span class="p">,</span> <span class="n">R</span></div>
+
+<div class="viewcode-block" id="calibrate_spectrum"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.analyze.calibrate_spectrum">[docs]</a><span class="k">def</span> <span class="nf">calibrate_spectrum</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="n">volume</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">compound</span> <span class="o">=</span> <span class="s1">&#39;Al&#39;</span><span class="p">,</span> <span class="n">density</span> <span class="o">=</span> <span class="mf">2.7</span><span class="p">,</span> <span class="n">threshold</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">iterations</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">n_bin</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Use the projection stack of a homogeneous object to estimate system&#39;s </span>
+<span class="sd">    effective spectrum.</span>
+<span class="sd">    Can be used by process.equivalent_thickness to produce an equivalent </span>
+<span class="sd">    thickness projection stack.</span>
+<span class="sd">    Please, use conventional geometry. </span>
+<span class="sd">    &#39;&#39;&#39;</span> 
+    
+    <span class="c1">#import random</span>
+    
+    <span class="c1"># Find the shape of the object:                                                    </span>
+    <span class="k">if</span> <span class="n">threshold</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">binary_threshold</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span><span class="p">)</span>
+        
+        <span class="n">segmentation</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">binary_threshold</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;otsu&#39;</span><span class="p">)</span>
+        <span class="n">segmentation</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">volume</span> <span class="o">&gt;</span> <span class="n">t</span><span class="p">)</span>
+        
+    <span class="n">display</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">segmentation</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Segmentation&#39;</span><span class="p">)</span>        
+        
+    <span class="c1"># Crop:    </span>
+    <span class="c1">#height = segmentation.shape[0]   </span>
+    <span class="c1">#w = 15</span>
+
+    <span class="c1">#length = length[height//2-w:height//2 + w, : ,:]    </span>
+    
+    <span class="c1"># Forward project the shape:                  </span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating the attenuation length.&#39;</span><span class="p">)</span>  
+    
+    <span class="n">length</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">projections</span><span class="p">)</span>    
+    <span class="n">length</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+    <span class="n">projector</span><span class="o">.</span><span class="n">forwardproject</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">segmentation</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
+        
+    <span class="n">projections</span><span class="p">[</span><span class="n">projections</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">intensity</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">projections</span><span class="p">)</span>
+    
+    <span class="c1"># Crop to avoid cone artefacts:</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="n">intensity</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="mi">2</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">intensity</span> <span class="o">=</span> <span class="n">intensity</span><span class="p">[</span><span class="n">height</span><span class="o">-</span><span class="n">window</span><span class="p">:</span><span class="n">height</span><span class="o">+</span><span class="n">window</span><span class="p">,:,:]</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">length</span><span class="p">[</span><span class="n">height</span><span class="o">-</span><span class="n">window</span><span class="p">:</span><span class="n">height</span><span class="o">+</span><span class="n">window</span><span class="p">,:,:]</span>
+    
+    <span class="c1"># Make 1D:</span>
+    <span class="n">intensity</span> <span class="o">=</span> <span class="n">intensity</span><span class="p">[</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">length</span><span class="p">[</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    
+    <span class="n">lmax</span> <span class="o">=</span> <span class="n">length</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">lmin</span> <span class="o">=</span> <span class="n">length</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>    
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Maximum reprojected length:&#39;</span><span class="p">,</span> <span class="n">lmax</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Minimum reprojected length:&#39;</span><span class="p">,</span> <span class="n">lmin</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Selecting a random subset of points.&#39;</span><span class="p">)</span>  
+    
+    <span class="c1"># Rare the sample to avoid slow times:</span>
+    <span class="c1">#index = random.sample(range(length.size), 1000000)</span>
+    <span class="c1">#length = length[index]</span>
+    <span class="c1">#intensity = intensity[index]</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing the intensity-length transfer function.&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Bin number for lengthes:</span>
+    <span class="n">bin_n</span> <span class="o">=</span> <span class="mi">128</span>
+    <span class="n">bins</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lmin</span><span class="p">,</span> <span class="n">lmax</span><span class="p">,</span> <span class="n">bin_n</span><span class="p">)</span>
+    
+    <span class="c1"># Sample the midslice:</span>
+    <span class="c1">#segmentation = segmentation[height//2-w:height//2 + w, : ,:]    </span>
+    <span class="c1">#projections_ = projections[height//2-w:height//2 + w, : ,:]</span>
+    
+    
+    <span class="c1">#import flexModel</span>
+    <span class="c1">#ctf = flexModel.get_ctf(length.shape[::2], &#39;gaussian&#39;, [1, 1])</span>
+    <span class="c1">#length = flexModel.apply_ctf(length, ctf)  </span>
+            
+    <span class="c1"># TODO: Some cropping might be needed to avoid artefacts at the edges</span>
+    
+    <span class="c1">#flexUtil.slice(length, title = &#39;length sinogram&#39;)</span>
+    <span class="c1">#flexUtil.slice(projections_, title = &#39;apparent sinogram&#39;)</span>
+        
+    <span class="c1"># Rebin:</span>
+    <span class="n">idx</span>  <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+    
+    <span class="c1"># Rebin length and intensity:        </span>
+    <span class="n">length_0</span> <span class="o">=</span> <span class="n">bins</span> <span class="o">+</span> <span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">intensity_0</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">intensity</span><span class="p">[</span><span class="n">idx</span><span class="o">==</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bin_n</span><span class="p">)]</span>
+    
+    <span class="c1"># In case some bins are empty:</span>
+    <span class="n">intensity_0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">intensity_0</span><span class="p">)</span>
+    <span class="n">length_0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">length_0</span><span class="p">)</span>
+    <span class="n">length_0</span> <span class="o">=</span> <span class="n">length_0</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">intensity_0</span><span class="p">)]</span>
+    <span class="n">intensity_0</span> <span class="o">=</span> <span class="n">intensity_0</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">intensity_0</span><span class="p">)]</span>
+    
+    <span class="c1"># Get rid of tales:</span>
+    <span class="n">rim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">length_0</span><span class="p">)</span> <span class="o">//</span> <span class="mi">20</span>
+    <span class="n">length_0</span> <span class="o">=</span> <span class="n">length_0</span><span class="p">[</span><span class="n">rim</span><span class="p">:</span><span class="o">-</span><span class="n">rim</span><span class="p">]</span>    
+    <span class="n">intensity_0</span> <span class="o">=</span> <span class="n">intensity_0</span><span class="p">[</span><span class="n">rim</span><span class="p">:</span><span class="o">-</span><span class="n">rim</span><span class="p">]</span>    
+    
+    <span class="c1"># Dn&#39;t trust low counts!</span>
+    <span class="n">length_0</span> <span class="o">=</span> <span class="n">length_0</span><span class="p">[</span><span class="n">intensity_0</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">]</span>
+    <span class="n">intensity_0</span> <span class="o">=</span> <span class="n">intensity_0</span><span class="p">[</span><span class="n">intensity_0</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">]</span>
+    
+    <span class="c1"># Get rid of long rays (they are typically wrong...)   </span>
+    <span class="c1">#intensity_0 = intensity_0[length_0 &lt; 35]    </span>
+    <span class="c1">#length_0 = length_0[length_0 &lt; 35]    </span>
+    
+    <span class="c1"># Enforce zero-one values:</span>
+    <span class="n">length_0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">length_0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">intensity_0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">intensity_0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1">#flexUtil.plot(length_0, intensity_0, title = &#39;Length v.s. Intensity&#39;)</span>
+        
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Intensity-length curve rebinned.&#39;</span><span class="p">)</span>
+        
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing the spectrum by Expectation Maximization.&#39;</span><span class="p">)</span>
+    
+    <span class="n">volts</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;voltage&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">volts</span><span class="p">:</span> <span class="n">volts</span> <span class="o">=</span> <span class="mi">100</span>
+    
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">volts</span><span class="p">),</span> <span class="n">n_bin</span><span class="p">)</span>
+    
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">linear_attenuation</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">compound</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
+    <span class="n">exp_matrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">length_0</span><span class="p">,</span> <span class="n">mu</span><span class="p">))</span>
+    
+    <span class="c1"># Initial guess of the spectrum:</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">bremsstrahlung</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">volts</span><span class="p">)</span> 
+    <span class="n">spec</span> <span class="o">*=</span> <span class="n">model</span><span class="o">.</span><span class="n">scintillator_efficiency</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="s1">&#39;Si&#39;</span><span class="p">,</span> <span class="n">rho</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">thickness</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">spec</span> <span class="o">*=</span> <span class="n">model</span><span class="o">.</span><span class="n">total_transmission</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">spec</span> <span class="o">*=</span> <span class="n">energy</span>
+    <span class="n">spec</span> <span class="o">/=</span> <span class="n">spec</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    
+    <span class="c1">#spec = numpy.ones_like(energy)</span>
+    <span class="c1">#spec[0] = 0</span>
+    <span class="c1">#spec[-1] = 0</span>
+    
+    <span class="n">norm_sum</span> <span class="o">=</span> <span class="n">exp_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">spec0</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1">#spec *= 0</span>
+    
+    <span class="c1"># exp_matrix at length == 0 is == 1. Sum of that is n_bin</span>
+    
+    <span class="c1"># EM type:   </span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span> 
+        <span class="n">frw</span> <span class="o">=</span> <span class="n">exp_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="n">frw</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="mi">100</span>
+        <span class="n">frw</span><span class="p">[</span><span class="n">frw</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">]</span> <span class="o">=</span> <span class="n">epsilon</span>
+        
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span> <span class="o">*</span> <span class="n">exp_matrix</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">intensity_0</span> <span class="o">/</span> <span class="n">frw</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm_sum</span>
+        
+        <span class="c1"># Make sure that the total count of spec is 1 - that means intensity at length = 0 is equal to 1</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span> <span class="o">/</span> <span class="n">spec</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Spectrum computed.&#39;</span><span class="p">)</span>
+        
+    <span class="c1">#flexUtil.plot(length_0, title = &#39;thickness&#39;)</span>
+    <span class="c1">#flexUtil.plot(mu, title = &#39;mu&#39;)</span>
+    <span class="c1">#flexUtil.plot(_intensity, title = &#39;synth_counts&#39;)</span>
+    
+    <span class="c1"># synthetic intensity for a check:</span>
+    <span class="n">_intensity</span> <span class="o">=</span> <span class="n">exp_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+    
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    
+    <span class="c1"># Display:   </span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">length</span><span class="p">[::</span><span class="mi">200</span><span class="p">],</span> <span class="n">intensity</span><span class="p">[::</span><span class="mi">200</span><span class="p">],</span> <span class="s1">&#39;b.&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">length_0</span><span class="p">,</span> <span class="n">intensity_0</span><span class="p">,</span> <span class="s1">&#39;g--&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">length_0</span><span class="p">,</span> <span class="n">_intensity</span><span class="p">,</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">6</span><span class="p">)</span>
+    
+    <span class="c1">#plt.scatter(length[::100], -numpy.log(intensity[::100]), color=&#39;b&#39;, alpha=.2, s=4)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Log intensity v.s. absorption length.&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;raw&#39;</span><span class="p">,</span><span class="s1">&#39;binned&#39;</span><span class="p">,</span><span class="s1">&#39;solution&#39;</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span> 
+    
+    <span class="c1"># Display:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">spec0</span><span class="p">,</span> <span class="s1">&#39;r:&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Calculated spectrum&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;computed&#39;</span><span class="p">,</span><span class="s1">&#39;initial guess&#39;</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span> 
+            
+    
+    <span class="k">return</span> <span class="n">energy</span><span class="p">,</span> <span class="n">spec</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Author
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

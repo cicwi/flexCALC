@@ -214,7 +214,7 @@ class Buffer:
     
     def set_data(self, data):
         '''
-        Write the data data.
+        Write the data array.
         '''
         if self.readonly: logger.error('Attempt to write into read-only block!')
                 
@@ -236,7 +236,7 @@ class Buffer:
     
     def get_data(self):
         '''
-        Read the data data.
+        Read the data array.
         '''
         if self._data_ is None:
             logger.error('Attempt to read an empty buffer!')
@@ -549,7 +549,10 @@ class batch_node(Node):
                 out = data
                 
             self.set_outputs(0, out, geom, misc)    
-
+            
+            data = None
+            gc.collect()
+        
 class info_node(Node):
     """
     Print data info.
@@ -570,8 +573,11 @@ class info_node(Node):
             logger.print('Geometry:')
             logger.print(geom)
             
-            self.set_outputs(ii, data, geom, misc)    
-                                
+            self.set_outputs(ii, data, geom, misc)  
+            
+            data = None
+            gc.collect()
+            
 class fdk_node(Node):
     """
     Feldkamp reconstruction.
@@ -720,18 +726,7 @@ class autocrop_node(Node):
         # Read data form a single buffer:
         data, geom, misc = self.get_inputs(0)
                         
-        a,b,c = analyze.bounding_box(data)
-        
-        sz = data.shape
-        
-        logger.print('Bounding box found: ' + str([a,b,c]))
-        logger.print('Old dimensions are: ' + str(sz))
-               
-        data = dt.crop(data, 0, [a[0], sz[0] - a[1]], geom)
-        data = dt.crop(data, 1, [b[0], sz[1] - b[1]], geom)
-        data = dt.crop(data, 2, [c[0], sz[2] - c[1]], geom)
-        
-        logger.print('New dimensions are: ' + str(data.shape))
+        data = process.autocrop(data)
         
         self.set_outputs(0, data, geom, misc)              
 
@@ -747,7 +742,7 @@ class markernorm_node(Node):
         # Read data form a single buffer:
         data, geom, misc = self.get_inputs(0)
          
-        norm, size = self.arguments[0]               
+        norm, size = self.arguments               
         
         # Find the marker:
         a,b,c = analyze.find_marker(data, geom, size)    
@@ -899,7 +894,29 @@ class vol_merge_node(Node):
             
             data, geom, misc = self.get_inputs(ii)
             process.append_volume(data, geom, tot_data, tot_geom, ramp = data.shape[0]//10)
-            
+         
+class derotate_node(Node):
+    """
+    Derotate projections by geom['det_roll'].
+    """      
+    node_name = 'Derotate projections'
+    node_type = _NTYPE_BATCH_
+                    
+    def runtime(self):
+        
+        data, geom, misc = self.get_inputs(0)  
+        angle = self.arguments
+        
+        if angle is None: angle = geom['det_roll']
+        
+        if angle != 0:
+            logger.print('Derotating the detector image!')
+            angle = numpy.rad2deg(angle)
+            process.rotate(data, -angle, axis = 1)
+            geom['det_roll'] = 0
+    
+        self.set_outputs(0, data, geom, misc) 
+        
 class proj_merge_node(Node):
     """
     Merge projections node.
@@ -979,6 +996,7 @@ class proj_merge_node(Node):
             
             # Derotate tile if needed:
             if geom['det_roll'] != 0:
+                logger.print('Derotating the detector image!')
                 angle = numpy.rad2deg(geom['det_roll'])
                 process.rotate(data, -angle, axis = 1)
                 geom['det_roll'] = 0
@@ -1011,7 +1029,9 @@ class optimize_node(Node):
             
                 process.optimize_modifier(values + geom[key], data, geom, samp = sampling, key = key, metric = metric)
             
-                self.set_outputs(ii, data, geom, misc)  
+                self.set_outputs(ii, data, geom, misc) 
+                data = None
+                gc.collect()
             
         else:
             # Read data form a single buffer:
@@ -1022,6 +1042,8 @@ class optimize_node(Node):
                 data, geom, misc = self.get_inputs(ii)
                 geom[key] = val
                 self.set_outputs(ii, data, geom, misc) 
+                data = None
+                gc.collect()
             
 class registration_node(Node):
     """
@@ -1059,7 +1081,9 @@ class registration_node(Node):
                 
                 data0 = data
             
-            self.set_outputs(ii, data, geom, misc)            
+            self.set_outputs(ii, data, geom, misc) 
+            data = None
+            gc.collect()
   
 class writer_node(Node):
     """
@@ -1142,6 +1166,8 @@ class reader_node(Node):
           #proj, meta = process.process_flex(path, sampling, sampling, proj_number = proj_number) 
             
           self.set_outputs(ii, array)
+          array = None
+          gc.collect()
    
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SCHEDULER CLASS >>>>>>>>>>>>>>>>>>>>>>>>>>>>
           
@@ -1568,6 +1594,15 @@ class scheduler:
    def display(self, display_type, **argin):
 
        self.schedule(display_node, [display_type, argin])           
+
+   def derotate(self, ang = None):
+      """
+      Schedule a to derotate the detector.
+      
+        Args:
+            ang: angle to derotate with, if None - get it from geom['det_roll'].
+      """
+      self.schedule(derotate_node, ang)       
 
    def merge(self, mode = 'projections'):
       """
