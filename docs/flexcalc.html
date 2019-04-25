@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>flexcalc package &mdash; flexcalc  documentation</title>
+  <title>Modules &mdash; flexcalc  documentation</title>
   
 
   
@@ -36,7 +36,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Changelog" href="changelog.html" />
-    <link rel="prev" title="flexcalc" href="modules.html" /> 
+    <link rel="prev" title="flexCALC" href="readme.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -81,17 +81,12 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="readme.html">flexcalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">flexcalc</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">flexcalc package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-flexcalc.analyze">flexcalc.analyze module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-flexcalc.batch">flexcalc.batch module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-flexcalc.process">flexcalc.process module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-flexcalc">Module contents</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">flexCALC</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-flexcalc.process">flexcalc.process module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flexcalc.analyze">flexcalc.analyze module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flexcalc.batch">flexcalc.batch module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flexcalc">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -140,9 +135,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="modules.html">flexcalc</a> &raquo;</li>
-        
-      <li>flexcalc package</li>
+      <li>Modules</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -161,10 +154,246 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="flexcalc-package">
-<h1>flexcalc package<a class="headerlink" href="#flexcalc-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="modules">
+<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h1>
+<p>flexCALC includes three modules: process, analyze and batch.</p>
+<p>Verious preprocessing utilities are available via modules process and analyze. Module batch allows to build a pipeline for processing larege amounts of data on a single workstation.</p>
+<div class="section" id="module-flexcalc.process">
+<span id="flexcalc-process-module"></span><h2>flexcalc.process module<a class="headerlink" href="#module-flexcalc.process" title="Permalink to this headline">¶</a></h2>
+<p>&#64;author: Alex Kostenko
+This module contains calculation routines for processing of the data.</p>
+<dl class="function">
+<dt id="flexcalc.process.affine">
+<code class="descclassname">flexcalc.process.</code><code class="descname">affine</code><span class="sig-paren">(</span><em>array</em>, <em>matrix</em>, <em>shift</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#affine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.affine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply 3x3 rotation matrix and shift to a 3D arrayset.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.allign_moments">
+<code class="descclassname">flexcalc.process.</code><code class="descname">allign_moments</code><span class="sig-paren">(</span><em>array</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#allign_moments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.allign_moments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute orientations of the volume intensity moments and allign them with XYZ.
+Align the primary moment with vertical axis - use axis == 0.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.append_tile">
+<code class="descclassname">flexcalc.process.</code><code class="descname">append_tile</code><span class="sig-paren">(</span><em>array</em>, <em>geom</em>, <em>tot_array</em>, <em>tot_geom</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#append_tile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.append_tile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a tile to a larger arrayset.
+Args:</p>
+<blockquote>
+<div>array: projection stack
+geom: geometry descritption
+tot_array: output array
+tot_geom: output geometry</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.append_volume">
+<code class="descclassname">flexcalc.process.</code><code class="descname">append_volume</code><span class="sig-paren">(</span><em>array</em>, <em>geom</em>, <em>tot_array</em>, <em>tot_geom</em>, <em>ramp=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#append_volume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.append_volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a volume array to a larger arrayset.
+Args:</p>
+<blockquote>
+<div>array: projection stack
+geom: geometry descritption
+tot_array: output array
+tot_geom: output geometry</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.autocrop">
+<code class="descclassname">flexcalc.process.</code><code class="descname">autocrop</code><span class="sig-paren">(</span><em>array</em>, <em>geom=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#autocrop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.autocrop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auto_crop the volume and update the geometry record.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.equalize_intensity">
+<code class="descclassname">flexcalc.process.</code><code class="descname">equalize_intensity</code><span class="sig-paren">(</span><em>master</em>, <em>slave</em>, <em>mode='percentile'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#equalize_intensity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.equalize_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute 99.99th percentile of two volumes and use it to renormalize the slave volume.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.equivalent_density">
+<code class="descclassname">flexcalc.process.</code><code class="descname">equivalent_density</code><span class="sig-paren">(</span><em>projections</em>, <em>geometry</em>, <em>energy</em>, <em>spectr</em>, <em>compound</em>, <em>density</em>, <em>preview=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#equivalent_density"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.equivalent_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transfrom intensity values to projected density for a single material array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.expand_medipix">
+<code class="descclassname">flexcalc.process.</code><code class="descname">expand_medipix</code><span class="sig-paren">(</span><em>array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#expand_medipix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.expand_medipix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the correct image size for a MEDIPIX data (fill in extra central lines)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.find_shift">
+<code class="descclassname">flexcalc.process.</code><code class="descname">find_shift</code><span class="sig-paren">(</span><em>volume_m</em>, <em>volume_s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#find_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.find_shift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.generate_stl">
+<code class="descclassname">flexcalc.process.</code><code class="descname">generate_stl</code><span class="sig-paren">(</span><em>array</em>, <em>geometry</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#generate_stl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.generate_stl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a mesh from a volume.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.hard_threshold">
+<code class="descclassname">flexcalc.process.</code><code class="descname">hard_threshold</code><span class="sig-paren">(</span><em>array</em>, <em>mode='histogram'</em>, <em>threshold=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#hard_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.hard_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a binary map based on the threshold value.
+Args:</p>
+<blockquote>
+<div>array (ndarray)  : data array (implicit)
+mode (str)       : ‘histogram’, ‘otsu’ or ‘constant’
+threshold (float): threshold value if mode = ‘constant’</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.interpolate_holes">
+<code class="descclassname">flexcalc.process.</code><code class="descname">interpolate_holes</code><span class="sig-paren">(</span><em>array, mask2d, kernel=[1, 1]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#interpolate_holes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.interpolate_holes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill in the holes, for instance, saturated pixels.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>mask2d: holes are zeros. Mask is the same for all projections.
+kernel: size of the interpolation kernel</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.interpolate_lines">
+<code class="descclassname">flexcalc.process.</code><code class="descname">interpolate_lines</code><span class="sig-paren">(</span><em>proj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#interpolate_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.interpolate_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate values of the horizontal read out lines of the flexray flat panel detector.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.interpolate_zeros">
+<code class="descclassname">flexcalc.process.</code><code class="descname">interpolate_zeros</code><span class="sig-paren">(</span><em>array, kernel=[1, 1], epsilon=1e-09</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#interpolate_zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.interpolate_zeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill in zero volues, for instance, blank pixels.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>kernel: Size of the interpolation kernel
+epsilon: if less than epsilon -&gt; interpolate</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.norm">
+<code class="descclassname">flexcalc.process.</code><code class="descname">norm</code><span class="sig-paren">(</span><em>array</em>, <em>type='L2'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute L2 norm of the array.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.optimize_modifier">
+<code class="descclassname">flexcalc.process.</code><code class="descname">optimize_modifier</code><span class="sig-paren">(</span><em>values, projections, geometry, samp=[1, 1, 1], key='axs_tan', metric='correlation', update=True, preview=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#optimize_modifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.optimize_modifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimize a geometry modifier using a particular sampling of the projection array.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.optimize_modifier_multires">
+<code class="descclassname">flexcalc.process.</code><code class="descname">optimize_modifier_multires</code><span class="sig-paren">(</span><em>projections</em>, <em>geometry</em>, <em>step</em>, <em>guess=None</em>, <em>subscale=1</em>, <em>key='axs_tan'</em>, <em>metric='correlation'</em>, <em>preview=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#optimize_modifier_multires"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.optimize_modifier_multires" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.optimize_rotation_center">
+<code class="descclassname">flexcalc.process.</code><code class="descname">optimize_rotation_center</code><span class="sig-paren">(</span><em>projections</em>, <em>geometry</em>, <em>guess=None</em>, <em>subscale=1</em>, <em>centre_of_mass=False</em>, <em>metric='highpass'</em>, <em>preview=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#optimize_rotation_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.optimize_rotation_center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find a center of rotation. If you can, use the center_of_mass option to get the initial guess.
+If that fails - use a subscale larger than the potential deviation from the center. Usually, 8 or 16 works fine!</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.preprocess">
+<code class="descclassname">flexcalc.process.</code><code class="descname">preprocess</code><span class="sig-paren">(</span><em>array</em>, <em>flats=None</em>, <em>darks=None</em>, <em>mode='sides'</em>, <em>dim=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#preprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.preprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply flatfield correction based on availability of flat- and dark-field.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>flats (ndarray): divide by flats
+darks (ndarray): subtract darks
+mode (str): “sides” to use maximum values of the detector sides to estimate the flat field or a mode of intensity distribution with “single”.     
+dim  (int): dimension that represents the projection number</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.process_flex">
+<code class="descclassname">flexcalc.process.</code><code class="descname">process_flex</code><span class="sig-paren">(</span><em>path</em>, <em>sample=1</em>, <em>skip=1</em>, <em>memmap=None</em>, <em>index=None</em>, <em>proj_number=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#process_flex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.process_flex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and process the array.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>path:  path to the flexray array
+sample:
+skip:
+memmap:
+index:
+proj_number (int): force projection number (treat lesser numbers as missing)</dd>
+<dt>Return:</dt>
+<dd>proj: min-log projections
+meta: meta array</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.register_astra_geometry">
+<code class="descclassname">flexcalc.process.</code><code class="descname">register_astra_geometry</code><span class="sig-paren">(</span><em>proj_fix</em>, <em>proj_mov</em>, <em>geom_fix</em>, <em>geom_mov</em>, <em>subsamp=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#register_astra_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.register_astra_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute a rigid transformation that makes sure that two reconstruction volumes are alligned.
+Args:</p>
+<blockquote>
+<div>proj_fix : projection data of the fixed volume
+proj_mov : projection data of the fixed volume
+geom_fix : projection data of the fixed volume
+geom_mov : projection data of the fixed volume</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>geom : geometry for the second reconstruction volume</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.register_volumes">
+<code class="descclassname">flexcalc.process.</code><code class="descname">register_volumes</code><span class="sig-paren">(</span><em>fixed</em>, <em>moving</em>, <em>subsamp=2</em>, <em>use_moments=True</em>, <em>use_CG=True</em>, <em>use_flips=False</em>, <em>threshold='otsu'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#register_volumes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.register_volumes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registration of two 3D volumes.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>fixed (array): reference volume
+moving (array): moving/slave volume
+subsamp (int): subsampling of the moments computation
+use_itk (bool): if True, use congugate descent method after aligning the moments
+treshold (str): can be None, ‘otsu’ or ‘histogram’ - defines the strategy for removing low intensity noise</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.residual_rings">
+<code class="descclassname">flexcalc.process.</code><code class="descname">residual_rings</code><span class="sig-paren">(</span><em>array, kernel=[3, 3]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#residual_rings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.residual_rings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply correction by computing outlayers .</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.rotate">
+<code class="descclassname">flexcalc.process.</code><code class="descname">rotate</code><span class="sig-paren">(</span><em>array</em>, <em>angle</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#rotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.rotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotates the volume via interpolation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.scale">
+<code class="descclassname">flexcalc.process.</code><code class="descname">scale</code><span class="sig-paren">(</span><em>array</em>, <em>factor</em>, <em>order=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scales the volume via interpolation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.soft_threshold">
+<code class="descclassname">flexcalc.process.</code><code class="descname">soft_threshold</code><span class="sig-paren">(</span><em>array</em>, <em>mode='histogram'</em>, <em>threshold=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#soft_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.soft_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes values smaller than the threshold value.
+Args:</p>
+<blockquote>
+<div>array (ndarray)  : data array (implicit)
+mode (str)       : ‘histogram’, ‘otsu’ or ‘constant’
+threshold (float): threshold value if mode = ‘constant’</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="flexcalc.process.translate">
+<code class="descclassname">flexcalc.process.</code><code class="descname">translate</code><span class="sig-paren">(</span><em>array</em>, <em>shift</em>, <em>order=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#translate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.translate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a 3D tranlation.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-flexcalc.analyze">
 <span id="flexcalc-analyze-module"></span><h2>flexcalc.analyze module<a class="headerlink" href="#module-flexcalc.analyze" title="Permalink to this headline">¶</a></h2>
@@ -291,7 +520,7 @@ Buffer can store a memmap data and a metadata record.</p>
 <dl class="method">
 <dt id="flexcalc.batch.Buffer.get_data">
 <code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.get_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read the data data.</p>
+<dd><p>Read the data array.</p>
 </dd></dl>
 
 <dl class="method">
@@ -309,7 +538,7 @@ Buffer can store a memmap data and a metadata record.</p>
 <dl class="method">
 <dt id="flexcalc.batch.Buffer.set_data">
 <code class="descname">set_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.set_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.set_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the data data.</p>
+<dd><p>Write the data array.</p>
 </dd></dl>
 
 <dl class="method">
@@ -600,6 +829,29 @@ Callback function is saved as the first argument in the argument list.</p>
 <dl class="method">
 <dt id="flexcalc.batch.crop_node.runtime">
 <code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#crop_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.crop_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runtime callback. Override this in sub-classes</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="flexcalc.batch.derotate_node">
+<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">derotate_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#derotate_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.derotate_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<p>Derotate projections by geom[‘det_roll’].</p>
+<dl class="attribute">
+<dt id="flexcalc.batch.derotate_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Derotate projections'</em><a class="headerlink" href="#flexcalc.batch.derotate_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="flexcalc.batch.derotate_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.derotate_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="flexcalc.batch.derotate_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#derotate_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.derotate_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
@@ -936,6 +1188,18 @@ density : density in g / cm3</dd>
 </dd></dl>
 
 <dl class="method">
+<dt id="flexcalc.batch.scheduler.derotate">
+<code class="descname">derotate</code><span class="sig-paren">(</span><em>ang=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.derotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.derotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Schedule a to derotate the detector.</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Args:</dt>
+<dd>ang: angle to derotate with, if None - get it from geom[‘det_roll’].</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
 <dt id="flexcalc.batch.scheduler.display">
 <code class="descname">display</code><span class="sig-paren">(</span><em>display_type</em>, <em>**argin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.display" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1134,230 +1398,6 @@ threshold (float): threshold value if mode = ‘constant’</dd>
 </dd></dl>
 
 </div>
-<div class="section" id="module-flexcalc.process">
-<span id="flexcalc-process-module"></span><h2>flexcalc.process module<a class="headerlink" href="#module-flexcalc.process" title="Permalink to this headline">¶</a></h2>
-<p>&#64;author: Alex Kostenko
-This module contains calculation routines for processing of the data.</p>
-<dl class="function">
-<dt id="flexcalc.process.affine">
-<code class="descclassname">flexcalc.process.</code><code class="descname">affine</code><span class="sig-paren">(</span><em>array</em>, <em>matrix</em>, <em>shift</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#affine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.affine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply 3x3 rotation matrix and shift to a 3D arrayset.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.append_tile">
-<code class="descclassname">flexcalc.process.</code><code class="descname">append_tile</code><span class="sig-paren">(</span><em>array</em>, <em>geom</em>, <em>tot_array</em>, <em>tot_geom</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#append_tile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.append_tile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Append a tile to a larger arrayset.
-Args:</p>
-<blockquote>
-<div>array: projection stack
-geom: geometry descritption
-tot_array: output array
-tot_geom: output geometry</div></blockquote>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.append_volume">
-<code class="descclassname">flexcalc.process.</code><code class="descname">append_volume</code><span class="sig-paren">(</span><em>array</em>, <em>geom</em>, <em>tot_array</em>, <em>tot_geom</em>, <em>ramp=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#append_volume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.append_volume" title="Permalink to this definition">¶</a></dt>
-<dd><p>Append a volume array to a larger arrayset.
-Args:</p>
-<blockquote>
-<div>array: projection stack
-geom: geometry descritption
-tot_array: output array
-tot_geom: output geometry</div></blockquote>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.equalize_intensity">
-<code class="descclassname">flexcalc.process.</code><code class="descname">equalize_intensity</code><span class="sig-paren">(</span><em>master</em>, <em>slave</em>, <em>mode='percentile'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#equalize_intensity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.equalize_intensity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute 99.99th percentile of two volumes and use it to renormalize the slave volume.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.equivalent_density">
-<code class="descclassname">flexcalc.process.</code><code class="descname">equivalent_density</code><span class="sig-paren">(</span><em>projections</em>, <em>geometry</em>, <em>energy</em>, <em>spectr</em>, <em>compound</em>, <em>density</em>, <em>preview=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#equivalent_density"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.equivalent_density" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transfrom intensity values to projected density for a single material array</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.expand_medipix">
-<code class="descclassname">flexcalc.process.</code><code class="descname">expand_medipix</code><span class="sig-paren">(</span><em>array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#expand_medipix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.expand_medipix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the correct image size for a MEDIPIX data (fill in extra central lines)</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.find_shift">
-<code class="descclassname">flexcalc.process.</code><code class="descname">find_shift</code><span class="sig-paren">(</span><em>volume_m</em>, <em>volume_s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#find_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.find_shift" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.generate_stl">
-<code class="descclassname">flexcalc.process.</code><code class="descname">generate_stl</code><span class="sig-paren">(</span><em>array</em>, <em>geometry</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#generate_stl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.generate_stl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a mesh from a volume.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.hard_threshold">
-<code class="descclassname">flexcalc.process.</code><code class="descname">hard_threshold</code><span class="sig-paren">(</span><em>array</em>, <em>mode='histogram'</em>, <em>threshold=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#hard_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.hard_threshold" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a binary map based on the threshold value.
-Args:</p>
-<blockquote>
-<div>array (ndarray)  : data array (implicit)
-mode (str)       : ‘histogram’, ‘otsu’ or ‘constant’
-threshold (float): threshold value if mode = ‘constant’</div></blockquote>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.interpolate_holes">
-<code class="descclassname">flexcalc.process.</code><code class="descname">interpolate_holes</code><span class="sig-paren">(</span><em>array, mask2d, kernel=[1, 1]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#interpolate_holes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.interpolate_holes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fill in the holes, for instance, saturated pixels.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>mask2d: holes are zeros. Mask is the same for all projections.
-kernel: size of the interpolation kernel</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.interpolate_lines">
-<code class="descclassname">flexcalc.process.</code><code class="descname">interpolate_lines</code><span class="sig-paren">(</span><em>proj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#interpolate_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.interpolate_lines" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interpolate values of the horizontal read out lines of the flexray flat panel detector.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.interpolate_zeros">
-<code class="descclassname">flexcalc.process.</code><code class="descname">interpolate_zeros</code><span class="sig-paren">(</span><em>array, kernel=[1, 1], epsilon=1e-09</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#interpolate_zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.interpolate_zeros" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fill in zero volues, for instance, blank pixels.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>kernel: Size of the interpolation kernel
-epsilon: if less than epsilon -&gt; interpolate</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.norm">
-<code class="descclassname">flexcalc.process.</code><code class="descname">norm</code><span class="sig-paren">(</span><em>array</em>, <em>type='L2'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.norm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute L2 norm of the array.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.optimize_modifier">
-<code class="descclassname">flexcalc.process.</code><code class="descname">optimize_modifier</code><span class="sig-paren">(</span><em>values, projections, geometry, samp=[1, 1, 1], key='axs_tan', metric='correlation', update=True, preview=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#optimize_modifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.optimize_modifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optimize a geometry modifier using a particular sampling of the projection array.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.optimize_modifier_multires">
-<code class="descclassname">flexcalc.process.</code><code class="descname">optimize_modifier_multires</code><span class="sig-paren">(</span><em>projections</em>, <em>geometry</em>, <em>step</em>, <em>guess=None</em>, <em>subscale=1</em>, <em>key='axs_tan'</em>, <em>metric='correlation'</em>, <em>preview=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#optimize_modifier_multires"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.optimize_modifier_multires" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.optimize_rotation_center">
-<code class="descclassname">flexcalc.process.</code><code class="descname">optimize_rotation_center</code><span class="sig-paren">(</span><em>projections</em>, <em>geometry</em>, <em>guess=None</em>, <em>subscale=1</em>, <em>centre_of_mass=False</em>, <em>metric='highpass'</em>, <em>preview=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#optimize_rotation_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.optimize_rotation_center" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find a center of rotation. If you can, use the center_of_mass option to get the initial guess.
-If that fails - use a subscale larger than the potential deviation from the center. Usually, 8 or 16 works fine!</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.preprocess">
-<code class="descclassname">flexcalc.process.</code><code class="descname">preprocess</code><span class="sig-paren">(</span><em>array</em>, <em>flats=None</em>, <em>darks=None</em>, <em>mode='sides'</em>, <em>dim=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#preprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.preprocess" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply flatfield correction based on availability of flat- and dark-field.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>flats (ndarray): divide by flats
-darks (ndarray): subtract darks
-mode (str): “sides” to use maximum values of the detector sides to estimate the flat field or a mode of intensity distribution with “single”.     
-dim  (int): dimension that represents the projection number</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.process_flex">
-<code class="descclassname">flexcalc.process.</code><code class="descname">process_flex</code><span class="sig-paren">(</span><em>path</em>, <em>sample=1</em>, <em>skip=1</em>, <em>memmap=None</em>, <em>index=None</em>, <em>proj_number=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#process_flex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.process_flex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read and process the array.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>path:  path to the flexray array
-sample:
-skip:
-memmap:
-index:
-proj_number (int): force projection number (treat lesser numbers as missing)</dd>
-<dt>Return:</dt>
-<dd>proj: min-log projections
-meta: meta array</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.register_astra_geometry">
-<code class="descclassname">flexcalc.process.</code><code class="descname">register_astra_geometry</code><span class="sig-paren">(</span><em>proj_fix</em>, <em>proj_mov</em>, <em>geom_fix</em>, <em>geom_mov</em>, <em>subsamp=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#register_astra_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.register_astra_geometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute a rigid transformation that makes sure that two reconstruction volumes are alligned.
-Args:</p>
-<blockquote>
-<div>proj_fix : projection data of the fixed volume
-proj_mov : projection data of the fixed volume
-geom_fix : projection data of the fixed volume
-geom_mov : projection data of the fixed volume</div></blockquote>
-<dl class="docutils">
-<dt>Returns:</dt>
-<dd>geom : geometry for the second reconstruction volume</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.register_volumes">
-<code class="descclassname">flexcalc.process.</code><code class="descname">register_volumes</code><span class="sig-paren">(</span><em>fixed</em>, <em>moving</em>, <em>subsamp=2</em>, <em>use_moments=True</em>, <em>use_CG=True</em>, <em>use_flips=False</em>, <em>threshold='otsu'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#register_volumes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.register_volumes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Registration of two 3D volumes.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>fixed (array): reference volume
-moving (array): moving/slave volume
-subsamp (int): subsampling of the moments computation
-use_itk (bool): if True, use congugate descent method after aligning the moments
-treshold (str): can be None, ‘otsu’ or ‘histogram’ - defines the strategy for removing low intensity noise</dd>
-</dl>
-<p>Returns:</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.residual_rings">
-<code class="descclassname">flexcalc.process.</code><code class="descname">residual_rings</code><span class="sig-paren">(</span><em>array, kernel=[3, 3]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#residual_rings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.residual_rings" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply correction by computing outlayers .</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.rotate">
-<code class="descclassname">flexcalc.process.</code><code class="descname">rotate</code><span class="sig-paren">(</span><em>array</em>, <em>angle</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#rotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.rotate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rotates the volume via interpolation.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.scale">
-<code class="descclassname">flexcalc.process.</code><code class="descname">scale</code><span class="sig-paren">(</span><em>array</em>, <em>factor</em>, <em>order=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.scale" title="Permalink to this definition">¶</a></dt>
-<dd><p>Scales the volume via interpolation.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.soft_threshold">
-<code class="descclassname">flexcalc.process.</code><code class="descname">soft_threshold</code><span class="sig-paren">(</span><em>array</em>, <em>mode='histogram'</em>, <em>threshold=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#soft_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.soft_threshold" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes values smaller than the threshold value.
-Args:</p>
-<blockquote>
-<div>array (ndarray)  : data array (implicit)
-mode (str)       : ‘histogram’, ‘otsu’ or ‘constant’
-threshold (float): threshold value if mode = ‘constant’</div></blockquote>
-</dd></dl>
-
-<dl class="function">
-<dt id="flexcalc.process.translate">
-<code class="descclassname">flexcalc.process.</code><code class="descname">translate</code><span class="sig-paren">(</span><em>array</em>, <em>shift</em>, <em>order=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/process.html#translate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.process.translate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply a 3D tranlation.</p>
-</dd></dl>
-
-</div>
 <div class="section" id="module-flexcalc">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-flexcalc" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -1374,7 +1414,7 @@ threshold (float): threshold value if mode = ‘constant’</div></blockquote>
         <a href="changelog.html" class="btn btn-neutral float-right" title="Changelog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="modules.html" class="btn btn-neutral float-left" title="flexcalc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="readme.html" class="btn btn-neutral float-left" title="flexCALC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

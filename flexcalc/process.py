@@ -269,9 +269,10 @@ def autocrop(array, geom = None):
     
     return array
 
-def allign_moments(array):
+def allign_moments(array, axis = 0):
     '''
     Compute orientations of the volume intensity moments and allign them with XYZ.
+    Align the primary moment with vertical axis - use axis == 0.
     '''
     
     print('Alligning volume moments.')
@@ -279,11 +280,15 @@ def allign_moments(array):
     # Moments orintations:
     T, R = analyze.moments_orientation(array, 8)
     
-    R_90 = R.T.dot(transforms3d.euler.euler2mat(numpy.pi / 2, numpy.pi / 2, 0))
-
+    if axis == 0:
+        R_90 = R.T.dot(transforms3d.euler.euler2mat(0, 0, 0))
+    elif axis == 1:
+        R_90 = R.T.dot(transforms3d.euler.euler2mat(numpy.pi / 2, 0, 0))
+    elif axis == 2:    
+        R_90 = R.T.dot(transforms3d.euler.euler2mat(numpy.pi / 2, numpy.pi / 2, 0))
+  
     # Apply transformation:
     return affine(array, R_90, [0,0,0])
-
     
 def rotate(array, angle, axis = 0):
     '''
@@ -296,11 +301,11 @@ def rotate(array, angle, axis = 0):
     if angle == 90:
        ax = [0,1,2]
        ax.remove(axis)
-       return numpy.rot90(data, axes=ax) 
+       return numpy.rot90(array, axes=ax) 
     elif angle == -90:
        ax = [0,1,2]
        ax.remove(axis)
-       return numpy.rot90(data, k =3, axes=ax) 
+       return numpy.rot90(array, k =3, axes=ax) 
         
     pbar = tqdm(unit = 'slices', total=sz) 
     for ii in range(sz):     

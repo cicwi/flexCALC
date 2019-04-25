@@ -79,9 +79,8 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../readme.html">flexcalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">flexcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">flexCALC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flexcalc.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -367,12 +366,21 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply 3x3 rotation matrix and shift to a 3D arrayset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Applying affine transformation.&#39;</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+    
+    <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;Operations&#39;</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> 
    
     <span class="c1"># Compute offset:</span>
     <span class="n">T0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
     <span class="n">T1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">T0</span> <span class="o">+</span> <span class="n">shift</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">affine_transform</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">T0</span><span class="o">-</span><span class="n">T1</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span></div>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">affine_transform</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">T0</span><span class="o">-</span><span class="n">T1</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>      
+    
+    <span class="k">return</span> <span class="n">array</span></div>
     
 <div class="viewcode-block" id="scale"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.process.scale">[docs]</a><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -388,31 +396,73 @@
     <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>      
     
-    <span class="k">return</span> <span class="n">array</span>    </div>
+    <span class="k">return</span> <span class="n">array</span>  </div>
+
+<div class="viewcode-block" id="autocrop"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.process.autocrop">[docs]</a><span class="k">def</span> <span class="nf">autocrop</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">geom</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Auto_crop the volume and update the geometry record.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">analyze</span><span class="o">.</span><span class="n">bounding_box</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+        
+    <span class="n">sz</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Old dimensions are: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sz</span><span class="p">))</span>
+           
+    <span class="n">array</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">geom</span><span class="p">)</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">geom</span><span class="p">)</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">geom</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;New dimensions are: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">array</span></div>
+
+<div class="viewcode-block" id="allign_moments"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.process.allign_moments">[docs]</a><span class="k">def</span> <span class="nf">allign_moments</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compute orientations of the volume intensity moments and allign them with XYZ.</span>
+<span class="sd">    Align the primary moment with vertical axis - use axis == 0.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Alligning volume moments.&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Moments orintations:</span>
+    <span class="n">T</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">analyze</span><span class="o">.</span><span class="n">moments_orientation</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">R_90</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">transforms3d</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">R_90</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">transforms3d</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>    
+        <span class="n">R_90</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">transforms3d</span><span class="o">.</span><span class="n">euler</span><span class="o">.</span><span class="n">euler2mat</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+  
+    <span class="c1"># Apply transformation:</span>
+    <span class="k">return</span> <span class="n">affine</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">R_90</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span></div>
     
 <div class="viewcode-block" id="rotate"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.process.rotate">[docs]</a><span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Rotates the volume via interpolation.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Applying rotation.&#39;</span><span class="p">)</span>
-        
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>    
     <span class="n">sz</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
     
     <span class="k">if</span> <span class="n">angle</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>
        <span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
        <span class="n">ax</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
-       <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span> 
+       <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span> 
     <span class="k">elif</span> <span class="n">angle</span> <span class="o">==</span> <span class="o">-</span><span class="mi">90</span><span class="p">:</span>
        <span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
        <span class="n">ax</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
-       <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span> 
+       <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span> 
         
-    <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;slices&#39;</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> 
+    <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;slices&#39;</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="n">sz</span><span class="p">)</span> 
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sz</span><span class="p">):</span>     
         
         <span class="n">sl</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">anyslice</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
         
         <span class="n">array</span><span class="p">[</span><span class="n">sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">sl</span><span class="p">],</span> <span class="n">angle</span><span class="p">,</span> <span class="n">reshape</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         
     <span class="k">return</span> <span class="n">array</span></div>
         
@@ -424,8 +474,11 @@
     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
 
     <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;Operation&#39;</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> 
-    <span class="n">ndimage</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">output</span> <span class="o">=</span> <span class="n">array</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="n">order</span><span class="p">)</span>
-        
+    
+    <span class="c1">#ndimage.interpolation.shift(array, shift, output = array, order = order)</span>
+    <span class="c1"># for some reason may return zeros in this implementation</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="n">order</span><span class="p">)</span>    
+    
     <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
@@ -1095,12 +1148,15 @@
     <span class="c1">#mask_m = binary_threshold(volume_m, mode = &#39;otsu&#39;)</span>
     <span class="c1">#mask_s = binary_threshold(volume_s, mode = &#39;otsu&#39;)</span>
     
-    <span class="n">sect</span> <span class="o">=</span> <span class="n">volume_m</span> <span class="o">*</span> <span class="n">volume_s</span>
+    <span class="n">sect</span> <span class="o">=</span> <span class="n">volume_m</span><span class="p">[::</span><span class="mi">2</span><span class="p">,::</span><span class="mi">2</span><span class="p">,::</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">volume_s</span><span class="p">[::</span><span class="mi">2</span><span class="p">,::</span><span class="mi">2</span><span class="p">,::</span><span class="mi">2</span><span class="p">]</span>
     
     <span class="k">if</span> <span class="n">sect</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING! Find shift fails bacause of no intersecting regions.&#39;</span><span class="p">)</span>
         
     <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">analyze</span><span class="o">.</span><span class="n">bounding_box</span><span class="p">(</span><span class="n">sect</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">*=</span> <span class="mi">2</span>
+    <span class="n">b</span> <span class="o">*=</span> <span class="mi">2</span>
+    <span class="n">c</span> <span class="o">*=</span> <span class="mi">2</span>
     
     <span class="c1"># Compute cross-correlation:</span>
     <span class="n">vol_m</span> <span class="o">=</span> <span class="n">volume_m</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
@@ -1109,16 +1165,21 @@
     <span class="n">vol_m</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">laplace</span><span class="p">(</span><span class="n">vol_m</span><span class="p">)</span>
     <span class="n">vol_s</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">laplace</span><span class="p">(</span><span class="n">vol_s</span><span class="p">)</span>
     
-    <span class="n">display</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">vol_m</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Master volume&#39;</span><span class="p">)</span>
-    <span class="n">display</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">vol_s</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Slave volume&#39;</span><span class="p">)</span>
+    <span class="c1">#display.slice(vol_m, dim = 0, title = &#39;Master volume&#39;)</span>
+    <span class="c1">#display.slice(vol_s, dim = 0, title = &#39;Slave volume&#39;)</span>
     
-    <span class="n">display</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">vol_m</span><span class="o">-</span> <span class="n">vol_s</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Diff before&#39;</span><span class="p">)</span>
+    <span class="c1">#display.slice(vol_m- vol_s, dim = 0, title = &#39;Diff before&#39;)</span>
     
-    <span class="n">conv</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftn</span><span class="p">(</span><span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">vol_m</span><span class="p">)</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">vol_s</span><span class="p">)))</span>
-    <span class="n">shift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">conv</span><span class="p">)),</span> <span class="n">dims</span> <span class="o">=</span> <span class="n">conv</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+    <span class="n">vol_m</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">vol_m</span><span class="p">)</span>
+    <span class="n">vol_m</span> <span class="o">=</span> <span class="o">-</span><span class="n">vol_m</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span>
     
-    <span class="n">display</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">vol_m</span><span class="o">-</span> <span class="n">translate</span><span class="p">(</span><span class="n">vol_s</span><span class="p">,</span> <span class="o">-</span><span class="n">shift</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Diff after&#39;</span><span class="p">)</span>
+    <span class="n">vol_s</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">vol_s</span><span class="p">)</span>
     
+    <span class="n">vol_m</span> <span class="o">*=</span> <span class="n">vol_s</span>
+    <span class="n">vol_m</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftn</span><span class="p">(</span><span class="n">vol_m</span><span class="p">))</span>
+    <span class="n">vol_m</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">vol_m</span><span class="p">)</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vol_m</span><span class="p">),</span> <span class="n">dims</span> <span class="o">=</span> <span class="n">vol_m</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vol_m</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+        
     <span class="k">return</span> <span class="n">shift</span></div>
 
 <span class="k">def</span> <span class="nf">_find_shift_</span><span class="p">(</span><span class="n">array_ref</span><span class="p">,</span> <span class="n">array_slave</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>    
@@ -1329,6 +1390,9 @@
 <span class="sd">    &quot;&quot;&quot;</span> 
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Stitching a volume block...&#39;</span><span class="p">)</span>               
     
+    <span class="n">display</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Append&#39;</span><span class="p">)</span>
+    <span class="n">display</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">tot_array</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Total&#39;</span><span class="p">)</span>
+    
     <span class="c1"># Offset (pixel precision):   </span>
     <span class="n">offset</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">geom</span><span class="p">[</span><span class="s1">&#39;vol_tra&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;img_pixel&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
     <span class="n">offset</span> <span class="o">-=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tot_geom</span><span class="p">[</span><span class="s1">&#39;vol_tra&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">tot_geom</span><span class="p">[</span><span class="s1">&#39;img_pixel&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tot_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
@@ -1348,21 +1412,27 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found shift of :&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">shift</span><span class="p">))</span>
     
     <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">array</span> <span class="o">=</span> <span class="n">translate</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="o">-</span><span class="n">shift</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>   
-    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing weigths.&#39;</span><span class="p">)</span>
     <span class="c1"># Ramp weight:</span>
-    <span class="n">weight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">weight</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;float16&#39;</span><span class="p">)</span>
     <span class="n">weight</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ramp</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">ramp</span><span class="p">,</span> <span class="n">ramp</span><span class="p">],</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span>
     <span class="n">weight</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ramp</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">ramp</span><span class="p">,</span> <span class="n">ramp</span><span class="p">],</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span>
     <span class="n">weight</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ramp</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">ramp</span><span class="p">,</span> <span class="n">ramp</span><span class="p">],</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span>
     
     <span class="c1"># Weight can be 100% where no prior array exists:</span>
-    <span class="n">weight</span><span class="p">[</span><span class="n">w_array</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    
-    <span class="c1"># Apply weights and add:</span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">weight</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">weight</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="n">w_array</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Adding volumes.&#39;</span><span class="p">)</span>
+    <span class="c1"># Apply weights and add (save memory):</span>
     <span class="n">array</span> <span class="o">*=</span> <span class="n">weight</span>
     
-    <span class="n">w_array</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">weight</span><span class="p">)</span>
-    <span class="n">w_array</span> <span class="o">+=</span> <span class="n">array</span>                   </div>
+    <span class="n">weight</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="n">weight</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">w_array</span> <span class="o">*=</span> <span class="n">weight</span>
+    <span class="n">w_array</span> <span class="o">+=</span> <span class="n">array</span>                   
+    
+    <span class="n">display</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">tot_array</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Total&#39;</span><span class="p">)</span></div>
     
 <div class="viewcode-block" id="equivalent_density"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.process.equivalent_density">[docs]</a><span class="k">def</span> <span class="nf">equivalent_density</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">spectr</span><span class="p">,</span> <span class="n">compound</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">preview</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>

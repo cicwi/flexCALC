@@ -1,8 +1,17 @@
-flexcalc package
+Modules
 ================
 
-Submodules
-----------
+flexCALC includes three modules: process, analyze and batch. 
+
+Verious preprocessing utilities are available via modules process and analyze. Module batch allows to build a pipeline for processing larege amounts of data on a single workstation.
+
+flexcalc.process module
+-----------------------
+
+.. automodule:: flexcalc.process
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 flexcalc.analyze module
 -----------------------
@@ -19,15 +28,6 @@ flexcalc.batch module
     :members:
     :undoc-members:
     :show-inheritance:
-
-flexcalc.process module
------------------------
-
-.. automodule:: flexcalc.process
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------

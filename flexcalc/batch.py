@@ -24,7 +24,6 @@ from flexdata.data import logger
 
 # >>> Classes >>>
 
-
 class Buffer:
     """
     Each node has an input and output buffer. It will be in read-only or write-only state.
@@ -107,7 +106,8 @@ class Buffer:
         gc.collect()
         
         # Link with a file (array can be modified but the file stays read-only):
-        self._data_ = numpy.memmap(self.filename, dtype = dtype, mode = 'c', shape = shape) 
+        # Previous option made a copy and ofter run out of memory. Now we use read-only.
+        self._data_ = numpy.memmap(self.filename, dtype = dtype, mode = 'r', shape = shape) 
         self.readonly = True
             
     def switch_writeonly(self):
@@ -385,7 +385,8 @@ class Node:
         """
         buf = self.inputs[index]
         
-        return buf.get_data(), buf.get_geom(), buf.get_misc()
+        # We will make a copy of a read-only memmap buffer to allow some operations to perform computations on this variable.
+        return buf.get_data().copy(), buf.get_geom().copy(), buf.get_misc().copy()
         
    def set_outputs(self, index, data, geom = None, misc = None):
        """

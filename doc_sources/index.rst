@@ -11,8 +11,7 @@ Contents:
 
 
    readme
-   getting_started
-   modules
+   flexcalc
    changelog
 
 

@@ -79,9 +79,8 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../readme.html">flexcalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">flexcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">flexCALC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flexcalc.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 </ul>
 
@@ -172,7 +171,6 @@
 
 <span class="c1"># &gt;&gt;&gt; Classes &gt;&gt;&gt;</span>
 
-
 <div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Each node has an input and output buffer. It will be in read-only or write-only state.</span>
@@ -255,7 +253,8 @@
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
         
         <span class="c1"># Link with a file (array can be modified but the file stays read-only):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">)</span> 
+        <span class="c1"># Previous option made a copy and ofter run out of memory. Now we use read-only.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">)</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="kc">True</span></div>
             
 <div class="viewcode-block" id="Buffer.switch_writeonly"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.switch_writeonly">[docs]</a>    <span class="k">def</span> <span class="nf">switch_writeonly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -362,7 +361,7 @@
     
 <div class="viewcode-block" id="Buffer.set_data"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.set_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Write the data data.</span>
+<span class="sd">        Write the data array.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span> <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Attempt to write into read-only block!&#39;</span><span class="p">)</span>
                 
@@ -384,7 +383,7 @@
     
 <div class="viewcode-block" id="Buffer.get_data"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Read the data data.</span>
+<span class="sd">        Read the data array.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Attempt to read an empty buffer!&#39;</span><span class="p">)</span>
@@ -533,7 +532,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
         
-        <span class="k">return</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_data</span><span class="p">(),</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_geom</span><span class="p">(),</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_misc</span><span class="p">()</span></div>
+        <span class="c1"># We will make a copy of a read-only memmap buffer to allow some operations to perform computations on this variable.</span>
+        <span class="k">return</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_geom</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_misc</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
         
 <div class="viewcode-block" id="Node.set_outputs"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.set_outputs">[docs]</a>   <span class="k">def</span> <span class="nf">set_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
@@ -696,8 +696,11 @@
             <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">out</span> <span class="o">=</span> <span class="n">data</span>
                 
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>    </div></div>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>    
+            
+            <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div></div>
+        
 <div class="viewcode-block" id="info_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.info_node">[docs]</a><span class="k">class</span> <span class="nc">info_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Print data info.</span>
@@ -718,8 +721,11 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s1">&#39;Geometry:&#39;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
             
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>    </div></div>
-                                
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>  
+            
+            <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div></div>
+            
 <div class="viewcode-block" id="fdk_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.fdk_node">[docs]</a><span class="k">class</span> <span class="nc">fdk_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Feldkamp reconstruction.</span>
@@ -868,18 +874,7 @@
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
                         
-        <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">analyze</span><span class="o">.</span><span class="n">bounding_box</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        
-        <span class="n">sz</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
-        
-        <span class="n">logger</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s1">&#39;Bounding box found: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">]))</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s1">&#39;Old dimensions are: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sz</span><span class="p">))</span>
-               
-        <span class="n">data</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">geom</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">geom</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">geom</span><span class="p">)</span>
-        
-        <span class="n">logger</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s1">&#39;New dimensions are: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">autocrop</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>              </div></div>
 
@@ -895,7 +890,7 @@
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
          
-        <span class="n">norm</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>               
+        <span class="n">norm</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span>               
         
         <span class="c1"># Find the marker:</span>
         <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">analyze</span><span class="o">.</span><span class="n">find_marker</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>    
@@ -1047,7 +1042,29 @@
             
             <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
             <span class="n">process</span><span class="o">.</span><span class="n">append_volume</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">tot_data</span><span class="p">,</span> <span class="n">tot_geom</span><span class="p">,</span> <span class="n">ramp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="mi">10</span><span class="p">)</span></div></div>
-            
+         
+<div class="viewcode-block" id="derotate_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.derotate_node">[docs]</a><span class="k">class</span> <span class="nc">derotate_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derotate projections by geom[&#39;det_roll&#39;].</span>
+<span class="sd">    &quot;&quot;&quot;</span>      
+    <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Derotate projections&#39;</span>
+    <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
+                    
+<div class="viewcode-block" id="derotate_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.derotate_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
+        <span class="n">angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span>
+        
+        <span class="k">if</span> <span class="n">angle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">angle</span> <span class="o">=</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;det_roll&#39;</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">angle</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s1">&#39;Derotating the detector image!&#39;</span><span class="p">)</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+            <span class="n">process</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">-</span><span class="n">angle</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;det_roll&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span> </div></div>
+        
 <div class="viewcode-block" id="proj_merge_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.proj_merge_node">[docs]</a><span class="k">class</span> <span class="nc">proj_merge_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Merge projections node.</span>
@@ -1127,6 +1144,7 @@
             
             <span class="c1"># Derotate tile if needed:</span>
             <span class="k">if</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;det_roll&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s1">&#39;Derotating the detector image!&#39;</span><span class="p">)</span>
                 <span class="n">angle</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">geom</span><span class="p">[</span><span class="s1">&#39;det_roll&#39;</span><span class="p">])</span>
                 <span class="n">process</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">-</span><span class="n">angle</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;det_roll&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1159,7 +1177,9 @@
             
                 <span class="n">process</span><span class="o">.</span><span class="n">optimize_modifier</span><span class="p">(</span><span class="n">values</span> <span class="o">+</span> <span class="n">geom</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">samp</span> <span class="o">=</span> <span class="n">sampling</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span><span class="p">)</span>
             
-                <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>  
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span> 
+                <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
             
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Read data form a single buffer:</span>
@@ -1169,7 +1189,9 @@
             <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">)):</span>
                 <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
                 <span class="n">geom</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span> </div></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span> 
+                <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div></div>
             
 <div class="viewcode-block" id="registration_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.registration_node">[docs]</a><span class="k">class</span> <span class="nc">registration_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1207,7 +1229,9 @@
                 
                 <span class="n">data0</span> <span class="o">=</span> <span class="n">data</span>
             
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>            </div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span> 
+            <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div></div>
   
 <div class="viewcode-block" id="writer_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.writer_node">[docs]</a><span class="k">class</span> <span class="nc">writer_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1289,7 +1313,9 @@
           <span class="n">array</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">read_stack</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sampling</span><span class="p">,</span> <span class="n">sampling</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="p">,</span> <span class="nb">format</span> <span class="o">=</span> <span class="nb">format</span><span class="p">,</span> <span class="n">transpose</span><span class="o">=</span> <span class="n">transpose</span><span class="p">,</span> <span class="n">updown</span> <span class="o">=</span> <span class="n">updown</span><span class="p">)</span>
           <span class="c1">#proj, meta = process.process_flex(path, sampling, sampling, proj_number = proj_number) </span>
             
-          <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span></div></div>
+          <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
+          <span class="n">array</span> <span class="o">=</span> <span class="kc">None</span>
+          <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div></div>
    
 <span class="c1"># &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; SCHEDULER CLASS &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
           
@@ -1716,6 +1742,15 @@
 <div class="viewcode-block" id="scheduler.display"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.display">[docs]</a>   <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">display_type</span><span class="p">,</span> <span class="o">**</span><span class="n">argin</span><span class="p">):</span>
 
        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">display_node</span><span class="p">,</span> <span class="p">[</span><span class="n">display_type</span><span class="p">,</span> <span class="n">argin</span><span class="p">])</span>           </div>
+
+<div class="viewcode-block" id="scheduler.derotate"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.derotate">[docs]</a>   <span class="k">def</span> <span class="nf">derotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ang</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Schedule a to derotate the detector.</span>
+<span class="sd">      </span>
+<span class="sd">        Args:</span>
+<span class="sd">            ang: angle to derotate with, if None - get it from geom[&#39;det_roll&#39;].</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">derotate_node</span><span class="p">,</span> <span class="n">ang</span><span class="p">)</span>       </div>
 
 <div class="viewcode-block" id="scheduler.merge"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.merge">[docs]</a>   <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;projections&#39;</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>

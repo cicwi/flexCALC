@@ -49,8 +49,11 @@ from flextomo import project
 from flexcalc import process
 
 # Read data and apply beam-hardening:
-proj, meta = process.process_flex(path, sample = 2, skip = 2)
-proj = process.equivalent_density(proj, meta, energy, spectrum, compound = 'Al', density = 2.7) 
+proj, geom = process.process_flex(path)
+proj = process.equivalent_density(proj, geom, energy, spec, compound = 'Al', density = 2.7)
+
+# Align the rotation centre:
+process.optimize_rotation_center(proj, geom, subscale = 2)
 
 # Reconstruct:
 vol = project.init_volume(proj)

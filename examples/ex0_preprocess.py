@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 """
 Load, preprocess and reconstruct a FlexRay data.
+
+Change the path variable to your own data path.
+Dataset originally used in this example can be downloaded from Zenodo:
+    
+https://doi.org/10.5281/zenodo.1144086
+
 """
 
 #%% Imports:

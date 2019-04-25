@@ -67,16 +67,17 @@ def histogram(data, nbin = 256, rng = [], plot = True, log = False):
     """
     
     #print('Calculating histogram...')
+    data2 = data[::2, ::2, ::2]
     
     if rng == []:
-        mi = min(data.min(), 0)
+        mi = min(data2.min(), 0)
         
-        ma = numpy.percentile(data, 99.99)
+        ma = numpy.percentile(data2, 99.99)
     else:
         mi = rng[0]
         ma = rng[1]
 
-    y, x = numpy.histogram(data, bins = nbin, range = [mi, ma])
+    y, x = numpy.histogram(data2, bins = nbin, range = [mi, ma])
     
     # Set bin values to the middle of the bin:
     x = (x[0:-1] + x[1:]) / 2
