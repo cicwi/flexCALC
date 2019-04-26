@@ -1,6 +1,6 @@
 # flexCALC
 
-This project is a part of the larger X-ray tomographic reconstruction toolbox comprised of flexDATA, flexTOMO and flexCALC.
+This project is a part of the larger X-ray tomographic reconstruction toolbox comprised of [flexDATA], [flexTOMO] and [flexCALC].
 flexCALC contains various routines useful with tomographic reconstructions but not directly reconstruction algorithms. These routines include data pre- and post-processing tools, simulation of spectral data, and batch-processing of large number of datasets. 
 
 ## Getting Started
@@ -11,16 +11,11 @@ Before installing flexCALC, please download and install [flexDATA](https://githu
 
 Simply install with:
 ```
-TODO
+conda create -n <your-environment> python=3.6
+conda install -c cicwi -c astra-toolbox/label/dev -c conda-forge -c simpleitk -c owlas flexcalc
 ```
 
 ### Installing from source
-
-We recommend to install [Xraylib](https://anaconda.org/conda-forge/xraylib) module first using Anaconda from the Conda-Forge channel:
-
-```
-conda install -c conda-forge xraylib 
-```
 
 To install flexCALC, clone this GitHub project. Go to the cloned directory and run PIP installer:
 ```
@@ -37,10 +32,9 @@ To learn about the functionality of the package check out our examples folder. E
 
 flexCALC is comprised of several modules:
 
-* process:     pre- and post-processing routines. For instance: volume registration, rings removal, stl model generator etc. 
-* resolution:  apply Contrast Transfer Functions (CTF) to the data to mimic resolution limits or phase contrast  
-* spectrum: use NIST data to simulate spectral characteristics of materials and to simulate polychromatic projections 
-* pipe: define a batch processing pipeline and push multiple datasets through it
+* process: pre- and post-processing routines. For instance: volume registration, rings removal etc. 
+* analyze: utilities for data analysis.
+* batch: define a batch processing pipeline and push multiple datasets through it.
 
 Typical code:
 ```
@@ -63,8 +57,6 @@ project.FDK(proj, vol, meta['geometry'])
 ## Authors and contributors
 
 * **Alexander Kostenko** - *Initial work*
-
-See also the list of [contributors](https://github.com/cicwi/flexdata/contributors) who participated in this project.
 
 ## How to contribute
 

@@ -76,7 +76,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     extras_require={ 'dev': dev_requirements },
-    url='https://github.com/teascavenger/flexcalc',
-    version='0.0.1',
+    url='https://github.com/cicwi/flexcalc',
+    version='0.1.0',
     zip_safe=False,
 )
