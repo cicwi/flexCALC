@@ -1,4 +1,4 @@
-from . import batch
+from . import pipeline
 from . import process
 from . import analyze
 

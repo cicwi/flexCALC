@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>flexcalc.batch &mdash; flexcalc  documentation</title>
+  <title>flexcalc.pipeline &mdash; flexcalc  documentation</title>
   
 
   
@@ -129,7 +129,7 @@
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
-      <li>flexcalc.batch</li>
+      <li>flexcalc.pipeline</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -144,7 +144,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for flexcalc.batch</h1><div class="highlight"><pre>
+  <h1>Source code for flexcalc.pipeline</h1><div class="highlight"><pre>
 <span></span><span class="c1"># &gt;&gt;&gt; Imports &gt;&gt;&gt;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span>
@@ -171,7 +171,7 @@
 
 <span class="c1"># &gt;&gt;&gt; Classes &gt;&gt;&gt;</span>
 
-<div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">:</span>
+<div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Each node has an input and output buffer. It will be in read-only or write-only state.</span>
 <span class="sd">    Buffer can store a memmap data and a metadata record.</span>
@@ -233,7 +233,7 @@
         <span class="c1"># Add new file:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;scratch_</span><span class="si">%04u</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">index</span><span class="p">)</span>
         
-<div class="viewcode-block" id="Buffer.switch_readonly"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.switch_readonly">[docs]</a>    <span class="k">def</span> <span class="nf">switch_readonly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.switch_readonly"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.switch_readonly">[docs]</a>    <span class="k">def</span> <span class="nf">switch_readonly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Switch the buffer into reading mode.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -257,7 +257,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">)</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="kc">True</span></div>
             
-<div class="viewcode-block" id="Buffer.switch_writeonly"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.switch_writeonly">[docs]</a>    <span class="k">def</span> <span class="nf">switch_writeonly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.switch_writeonly"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.switch_writeonly">[docs]</a>    <span class="k">def</span> <span class="nf">switch_writeonly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Switch the buffer into writing mode.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -275,7 +275,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;w+&#39;</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="n">dshape</span><span class="p">)</span>       
       <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span> <span class="o">=</span> <span class="kc">False</span></div>
       
-<div class="viewcode-block" id="Buffer.switch_offline"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.switch_offline">[docs]</a>    <span class="k">def</span> <span class="nf">switch_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.switch_offline"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.switch_offline">[docs]</a>    <span class="k">def</span> <span class="nf">switch_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Switch buffers to offline to be able to serialize node tree and save them on disk.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -287,7 +287,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div>
         
-<div class="viewcode-block" id="Buffer.switch_online"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.switch_online">[docs]</a>    <span class="k">def</span> <span class="nf">switch_online</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.switch_online"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.switch_online">[docs]</a>    <span class="k">def</span> <span class="nf">switch_online</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Switch buffers to online after loading the node tree from disk or after backing it up.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -299,7 +299,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype_</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;w+&#39;</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dshape_</span><span class="p">)</span>             </div>
                 
-<div class="viewcode-block" id="Buffer.suicide"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.suicide">[docs]</a>    <span class="k">def</span> <span class="nf">suicide</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.suicide"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.suicide">[docs]</a>    <span class="k">def</span> <span class="nf">suicide</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Remove file from disk and delete variables.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -359,7 +359,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;w+&#39;</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtype_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span><span class="o">.</span><span class="n">dtype</span>
     
-<div class="viewcode-block" id="Buffer.set_data"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.set_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.set_data"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.set_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Write the data array.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -381,7 +381,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtype_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span><span class="o">.</span><span class="n">dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dshape_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span><span class="o">.</span><span class="n">shape</span></div>
     
-<div class="viewcode-block" id="Buffer.get_data"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.get_data"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Read the data array.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -395,7 +395,7 @@
         
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_</span></div>
       
-<div class="viewcode-block" id="Buffer.get_geom"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.get_geom">[docs]</a>    <span class="k">def</span> <span class="nf">get_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.get_geom"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.get_geom">[docs]</a>    <span class="k">def</span> <span class="nf">get_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Read the meta record.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -405,14 +405,14 @@
         <span class="k">else</span><span class="p">:</span>
            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom_</span></div>
 
-<div class="viewcode-block" id="Buffer.set_geom"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.set_geom">[docs]</a>    <span class="k">def</span> <span class="nf">set_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.set_geom"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.set_geom">[docs]</a>    <span class="k">def</span> <span class="nf">set_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Write the meta record.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">readonly</span><span class="p">:</span> <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Attempt to write into read-only block!&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_geom_</span> <span class="o">=</span> <span class="n">geom</span></div>
 
-<div class="viewcode-block" id="Buffer.get_misc"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.get_misc">[docs]</a>    <span class="k">def</span> <span class="nf">get_misc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.get_misc"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.get_misc">[docs]</a>    <span class="k">def</span> <span class="nf">get_misc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Read the meta record.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -422,7 +422,7 @@
         <span class="k">else</span><span class="p">:</span>
            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_misc_</span></div>
             
-<div class="viewcode-block" id="Buffer.set_misc"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Buffer.set_misc">[docs]</a>    <span class="k">def</span> <span class="nf">set_misc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">misc</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.set_misc"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Buffer.set_misc">[docs]</a>    <span class="k">def</span> <span class="nf">set_misc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">misc</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Write the misc record.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -443,7 +443,7 @@
 <span class="n">_NTYPE_BATCH_</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">_NTYPE_GROUP_</span> <span class="o">=</span> <span class="mi">1</span>
    
-<div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+<div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">   Class responsible for processing of a single block of data.</span>
 <span class="sd">   It has two buffers: input and output.</span>
@@ -476,7 +476,7 @@
       <span class="c1"># Call the initialize method defined in the sub-class:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
       
-<div class="viewcode-block" id="Node.state2str"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.state2str">[docs]</a>   <span class="k">def</span> <span class="nf">state2str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.state2str"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.state2str">[docs]</a>   <span class="k">def</span> <span class="nf">state2str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Report my state.</span>
 <span class="sd">       &quot;&quot;&quot;</span>
@@ -485,13 +485,13 @@
        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">_NSTATE_DEACTIVATED_</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;DEACTIVATED&#39;</span>
        <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;UNKNOWN&#39;</span></div>
    
-<div class="viewcode-block" id="Node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.initialize">[docs]</a>   <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.initialize">[docs]</a>   <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Initializtion callback. Override this in sub-classes</span>
 <span class="sd">       &quot;&quot;&quot;</span>
        <span class="bp">self</span><span class="o">.</span><span class="n">init_outputs</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> </div>
     
-<div class="viewcode-block" id="Node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.runtime">[docs]</a>   <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.runtime">[docs]</a>   <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Runtime callback. Override this in sub-classes</span>
 <span class="sd">       &quot;&quot;&quot;</span>
@@ -500,7 +500,7 @@
        
        <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span></div>
        
-<div class="viewcode-block" id="Node.init_outputs"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.init_outputs">[docs]</a>   <span class="k">def</span> <span class="nf">init_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.init_outputs"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.init_outputs">[docs]</a>   <span class="k">def</span> <span class="nf">init_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Create output buffers.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -518,7 +518,7 @@
               
           <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>   </div>
           
-<div class="viewcode-block" id="Node.get_outputs"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.get_outputs">[docs]</a>   <span class="k">def</span> <span class="nf">get_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.get_outputs"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.get_outputs">[docs]</a>   <span class="k">def</span> <span class="nf">get_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get data, geom and misc from a buffer using index</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -526,7 +526,7 @@
         
         <span class="k">return</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_data</span><span class="p">(),</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_geom</span><span class="p">(),</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_misc</span><span class="p">()</span></div>
     
-<div class="viewcode-block" id="Node.get_inputs"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.get_inputs">[docs]</a>   <span class="k">def</span> <span class="nf">get_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.get_inputs"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.get_inputs">[docs]</a>   <span class="k">def</span> <span class="nf">get_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get data, geom and misc from a buffer using index</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -535,7 +535,7 @@
         <span class="c1"># We will make a copy of a read-only memmap buffer to allow some operations to perform computations on this variable.</span>
         <span class="k">return</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_geom</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">buf</span><span class="o">.</span><span class="n">get_misc</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
         
-<div class="viewcode-block" id="Node.set_outputs"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.set_outputs">[docs]</a>   <span class="k">def</span> <span class="nf">set_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.set_outputs"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.set_outputs">[docs]</a>   <span class="k">def</span> <span class="nf">set_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Set data, geom and misc from a buffer using index</span>
 <span class="sd">       &quot;&quot;&quot;</span>
@@ -548,21 +548,21 @@
        <span class="k">if</span> <span class="ow">not</span> <span class="n">misc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
            <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">set_misc</span><span class="p">(</span><span class="n">misc</span><span class="p">)</span></div>
            
-<div class="viewcode-block" id="Node.offline"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.offline">[docs]</a>   <span class="k">def</span> <span class="nf">offline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.offline"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.offline">[docs]</a>   <span class="k">def</span> <span class="nf">offline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Switch node to offline (switch its buffers to offline). This is needed for backing up nodes.</span>
 <span class="sd">       &quot;&quot;&quot;</span>
        <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">:</span>
            <span class="n">buf</span><span class="o">.</span><span class="n">switch_offline</span><span class="p">()</span></div>
    
-<div class="viewcode-block" id="Node.online"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.online">[docs]</a>   <span class="k">def</span> <span class="nf">online</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.online"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.online">[docs]</a>   <span class="k">def</span> <span class="nf">online</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Switch node to online (switch its buffers to online). This is needed for backing up nodes.</span>
 <span class="sd">       &quot;&quot;&quot;</span>
        <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">:</span>
            <span class="n">buf</span><span class="o">.</span><span class="n">switch_online</span><span class="p">()</span>        </div>
         
-<div class="viewcode-block" id="Node.get_parents"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.get_parents">[docs]</a>   <span class="k">def</span> <span class="nf">get_parents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.get_parents"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.get_parents">[docs]</a>   <span class="k">def</span> <span class="nf">get_parents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get parent nodes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -574,7 +574,7 @@
         
         <span class="k">return</span> <span class="n">nodes</span> </div>
 
-<div class="viewcode-block" id="Node.isready"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.isready">[docs]</a>   <span class="k">def</span> <span class="nf">isready</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>       
+<div class="viewcode-block" id="Node.isready"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.isready">[docs]</a>   <span class="k">def</span> <span class="nf">isready</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>       
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Check if the node is ready.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -588,7 +588,7 @@
         
       <span class="k">return</span> <span class="kc">True</span></div>
                      
-<div class="viewcode-block" id="Node.activate"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.activate">[docs]</a>   <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.activate"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.activate">[docs]</a>   <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Switch input buffers to read-only mode and output buffers to write-only.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -612,7 +612,7 @@
       <span class="c1"># If success, change state:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">deactivate</span><span class="p">()</span></div>
                               
-<div class="viewcode-block" id="Node.deactivate"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.deactivate">[docs]</a>   <span class="k">def</span> <span class="nf">deactivate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.deactivate"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.deactivate">[docs]</a>   <span class="k">def</span> <span class="nf">deactivate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Kill all inputs. Switch all outputs to read-only mode.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -636,7 +636,7 @@
       <span class="k">for</span> <span class="n">buffer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
          <span class="n">buffer</span><span class="o">.</span><span class="n">suicide</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Node.get_children"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.get_children">[docs]</a>   <span class="k">def</span> <span class="nf">get_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.get_children"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.get_children">[docs]</a>   <span class="k">def</span> <span class="nf">get_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Get children nodes.</span>
 <span class="sd">       &quot;&quot;&quot;</span>
@@ -659,7 +659,7 @@
        <span class="k">else</span><span class="p">:</span>
            <span class="k">return</span> <span class="p">[]</span></div>
      
-<div class="viewcode-block" id="Node.cleanup"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.Node.cleanup">[docs]</a>   <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.cleanup"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.Node.cleanup">[docs]</a>   <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">       Remove files:</span>
 <span class="sd">       &#39;&#39;&#39;</span>
@@ -672,7 +672,7 @@
            
 <span class="c1"># &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Node classes &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;           </span>
        
-<div class="viewcode-block" id="batch_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.batch_node">[docs]</a><span class="k">class</span> <span class="nc">batch_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="batch_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.batch_node">[docs]</a><span class="k">class</span> <span class="nc">batch_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A standard batch node based on a given callback function.</span>
 <span class="sd">    Callback function is saved as the first argument in the argument list.</span>
@@ -680,7 +680,7 @@
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;batch&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="batch_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.batch_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="batch_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.batch_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -701,14 +701,14 @@
             <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div></div>
         
-<div class="viewcode-block" id="info_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.info_node">[docs]</a><span class="k">class</span> <span class="nc">info_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="info_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.info_node">[docs]</a><span class="k">class</span> <span class="nc">info_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Print data info.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Buffer Info&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="info_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.info_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="info_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.info_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="n">logger</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Found </span><span class="si">%u</span><span class="s1"> buffers.&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">))</span>
         
@@ -726,14 +726,14 @@
             <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div></div>
             
-<div class="viewcode-block" id="fdk_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.fdk_node">[docs]</a><span class="k">class</span> <span class="nc">fdk_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="fdk_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.fdk_node">[docs]</a><span class="k">class</span> <span class="nc">fdk_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Feldkamp reconstruction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;FDK&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="fdk_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.fdk_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="fdk_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.fdk_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -755,14 +755,14 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">vol</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>                 </div></div>
 
-<div class="viewcode-block" id="crop_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.crop_node">[docs]</a><span class="k">class</span> <span class="nc">crop_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="crop_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.crop_node">[docs]</a><span class="k">class</span> <span class="nc">crop_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply crop.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Crop&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="crop_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.crop_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="crop_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.crop_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -773,14 +773,14 @@
   
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span> </div></div>
         
-<div class="viewcode-block" id="bin_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.bin_node">[docs]</a><span class="k">class</span> <span class="nc">bin_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="bin_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.bin_node">[docs]</a><span class="k">class</span> <span class="nc">bin_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply binning.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Bin&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="bin_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.bin_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="bin_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.bin_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -791,14 +791,14 @@
   
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>         </div></div>
 
-<div class="viewcode-block" id="pad_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.pad_node">[docs]</a><span class="k">class</span> <span class="nc">pad_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="pad_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.pad_node">[docs]</a><span class="k">class</span> <span class="nc">pad_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply autocrop.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Pad&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="pad_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.pad_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="pad_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.pad_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -809,7 +809,7 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>              </div></div>
 
-<div class="viewcode-block" id="beamhardening_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.beamhardening_node">[docs]</a><span class="k">class</span> <span class="nc">beamhardening_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="beamhardening_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.beamhardening_node">[docs]</a><span class="k">class</span> <span class="nc">beamhardening_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply beam hardening based on a single material approximation and an estimated spectrum.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
@@ -817,7 +817,7 @@
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Beam-hardening correction&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="beamhardening_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.beamhardening_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="beamhardening_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.beamhardening_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -835,14 +835,14 @@
                 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>    </div></div>
 
-<div class="viewcode-block" id="display_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.display_node">[docs]</a><span class="k">class</span> <span class="nc">display_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="display_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.display_node">[docs]</a><span class="k">class</span> <span class="nc">display_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Display data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Display&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="display_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.display_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="display_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.display_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -862,14 +862,14 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>           </div></div>
 
-<div class="viewcode-block" id="autocrop_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.autocrop_node">[docs]</a><span class="k">class</span> <span class="nc">autocrop_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="autocrop_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.autocrop_node">[docs]</a><span class="k">class</span> <span class="nc">autocrop_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply autocrop.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Autocrop&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="autocrop_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.autocrop_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="autocrop_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.autocrop_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -878,14 +878,14 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>              </div></div>
 
-<div class="viewcode-block" id="markernorm_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.markernorm_node">[docs]</a><span class="k">class</span> <span class="nc">markernorm_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="markernorm_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.markernorm_node">[docs]</a><span class="k">class</span> <span class="nc">markernorm_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find marker and normalize data using its intensity.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Marker normalization&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="markernorm_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.markernorm_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="markernorm_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.markernorm_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -907,14 +907,14 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span> </div></div>
         
-<div class="viewcode-block" id="threshold_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.threshold_node">[docs]</a><span class="k">class</span> <span class="nc">threshold_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="threshold_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.threshold_node">[docs]</a><span class="k">class</span> <span class="nc">threshold_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply a soft threshold.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Soft threshold&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="threshold_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.threshold_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="threshold_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.threshold_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -925,14 +925,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>                     </div></div>
         
-<div class="viewcode-block" id="cast2type_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.cast2type_node">[docs]</a><span class="k">class</span> <span class="nc">cast2type_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="cast2type_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.cast2type_node">[docs]</a><span class="k">class</span> <span class="nc">cast2type_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply autocrop.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Cast to type&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="cast2type_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.cast2type_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="cast2type_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.cast2type_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -945,14 +945,14 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>  </div></div>
         
-<div class="viewcode-block" id="flatlog_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.flatlog_node">[docs]</a><span class="k">class</span> <span class="nc">flatlog_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="flatlog_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.flatlog_node">[docs]</a><span class="k">class</span> <span class="nc">flatlog_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply flat-field and dark-field correction. Take -log(x).</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Flatlog&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                   
-<div class="viewcode-block" id="flatlog_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.flatlog_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="flatlog_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.flatlog_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -997,7 +997,7 @@
         <span class="c1"># TODO: make sure that all functions return data!</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>         </div></div>
       
-<div class="viewcode-block" id="vol_merge_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.vol_merge_node">[docs]</a><span class="k">class</span> <span class="nc">vol_merge_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="vol_merge_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.vol_merge_node">[docs]</a><span class="k">class</span> <span class="nc">vol_merge_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Merge volumes node.</span>
 <span class="sd">    &quot;&quot;&quot;</span>     
@@ -1005,10 +1005,10 @@
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Merge volumes&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_GROUP_</span>
     
-<div class="viewcode-block" id="vol_merge_node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.vol_merge_node.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vol_merge_node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.vol_merge_node.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_outputs</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
                                 
-<div class="viewcode-block" id="vol_merge_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.vol_merge_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vol_merge_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.vol_merge_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Determine Total Bounds:</span>
         <span class="n">tot_bounds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
@@ -1043,14 +1043,14 @@
             <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
             <span class="n">process</span><span class="o">.</span><span class="n">append_volume</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">tot_data</span><span class="p">,</span> <span class="n">tot_geom</span><span class="p">,</span> <span class="n">ramp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="mi">10</span><span class="p">)</span></div></div>
          
-<div class="viewcode-block" id="derotate_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.derotate_node">[docs]</a><span class="k">class</span> <span class="nc">derotate_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="derotate_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.derotate_node">[docs]</a><span class="k">class</span> <span class="nc">derotate_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Derotate projections by geom[&#39;det_roll&#39;].</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Derotate projections&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                     
-<div class="viewcode-block" id="derotate_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.derotate_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="derotate_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.derotate_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  
         <span class="n">angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span>
@@ -1065,14 +1065,14 @@
     
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span> </div></div>
         
-<div class="viewcode-block" id="proj_merge_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.proj_merge_node">[docs]</a><span class="k">class</span> <span class="nc">proj_merge_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="proj_merge_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.proj_merge_node">[docs]</a><span class="k">class</span> <span class="nc">proj_merge_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Merge projections node.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Merge projections&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_GROUP_</span>
     
-<div class="viewcode-block" id="proj_merge_node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.proj_merge_node.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="proj_merge_node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.proj_merge_node.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># The assumption is that all datasets are of the same size and resolution!</span>
         
         <span class="c1"># List of geometries and unique source positions:</span>
@@ -1108,7 +1108,7 @@
         <span class="c1"># Number of outputs = number of unique source positions:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_outputs</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_geoms_list_</span><span class="p">))</span></div>
                 
-<div class="viewcode-block" id="proj_merge_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.proj_merge_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="proj_merge_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.proj_merge_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>        
@@ -1152,19 +1152,19 @@
             <span class="c1"># Append tile:    </span>
             <span class="n">process</span><span class="o">.</span><span class="n">append_tile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">tot_data</span><span class="p">,</span> <span class="n">tot_geom</span><span class="p">)</span></div></div>
                                 
-<div class="viewcode-block" id="optimize_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.optimize_node">[docs]</a><span class="k">class</span> <span class="nc">optimize_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="optimize_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.optimize_node">[docs]</a><span class="k">class</span> <span class="nc">optimize_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Use auto-focusing to optimize geometry parameters. Its a group node - it will wait untill all previous nodes are ready before activating.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Optimize&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_GROUP_</span>
     
-<div class="viewcode-block" id="optimize_node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.optimize_node.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="optimize_node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.optimize_node.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Initialize as many outputs as there are inputs:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_outputs</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">))</span></div>
             
-<div class="viewcode-block" id="optimize_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.optimize_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="optimize_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.optimize_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">tile_index</span><span class="p">,</span> <span class="n">sampling</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span>
         
@@ -1193,19 +1193,19 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div></div>
             
-<div class="viewcode-block" id="registration_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.registration_node">[docs]</a><span class="k">class</span> <span class="nc">registration_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="registration_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.registration_node">[docs]</a><span class="k">class</span> <span class="nc">registration_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Register volumes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Registration&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_GROUP_</span>
     
-<div class="viewcode-block" id="registration_node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.registration_node.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="registration_node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.registration_node.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Initialize as many outputs as there are inputs:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_outputs</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">))</span></div>
             
-<div class="viewcode-block" id="registration_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.registration_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="registration_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.registration_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="p">(</span><span class="n">subsamp</span><span class="p">,</span> <span class="n">use_moments</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span>
         
@@ -1233,14 +1233,14 @@
             <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span></div></div>
   
-<div class="viewcode-block" id="writer_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.writer_node">[docs]</a><span class="k">class</span> <span class="nc">writer_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="writer_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.writer_node">[docs]</a><span class="k">class</span> <span class="nc">writer_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write data on disk.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Writer&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
                    
-<div class="viewcode-block" id="writer_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.writer_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="writer_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.writer_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="c1"># Read data form a single buffer:</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -1257,12 +1257,12 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span>  </div></div>
         
-<div class="viewcode-block" id="reader_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.reader_node">[docs]</a><span class="k">class</span> <span class="nc">reader_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="reader_node"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.reader_node">[docs]</a><span class="k">class</span> <span class="nc">reader_node</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
     
     <span class="n">node_name</span> <span class="o">=</span> <span class="s1">&#39;Reader&#39;</span>
     <span class="n">node_type</span> <span class="o">=</span> <span class="n">_NTYPE_BATCH_</span>
     
-<div class="viewcode-block" id="reader_node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.reader_node.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="reader_node.initialize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.reader_node.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Initiallization callback of read_data. </span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -1301,7 +1301,7 @@
             
             <span class="bp">self</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">geom</span><span class="p">,</span> <span class="n">misc</span><span class="p">)</span></div>
                         
-<div class="viewcode-block" id="reader_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.reader_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="reader_node.runtime"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.reader_node.runtime">[docs]</a>    <span class="k">def</span> <span class="nf">runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Get arguments:</span>
         <span class="n">paths</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sampling</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">transpose</span><span class="p">,</span> <span class="n">updown</span><span class="p">,</span> <span class="n">proj_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arguments</span>
         <span class="n">paths</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">get_folders_sorted</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
@@ -1319,7 +1319,7 @@
    
 <span class="c1"># &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; SCHEDULER CLASS &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
           
-<div class="viewcode-block" id="scheduler"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler">[docs]</a><span class="k">class</span> <span class="nc">scheduler</span><span class="p">:</span>
+<div class="viewcode-block" id="scheduler"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler">[docs]</a><span class="k">class</span> <span class="nc">scheduler</span><span class="p">:</span>
    <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">   Class responsible for scheduling tasks by creating tree of processing nodes connected via buffers.</span>
 <span class="sd">   Scheduler links to the root_node that provides an entry point to the node tree.</span>
@@ -1338,7 +1338,7 @@
       <span class="k">if</span> <span class="n">clean_scratch</span><span class="p">:</span>            
           <span class="bp">self</span><span class="o">.</span><span class="n">_clean_scratch_dir_</span><span class="p">()</span>
           
-<div class="viewcode-block" id="scheduler.draw_nodes"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.draw_nodes">[docs]</a>   <span class="k">def</span> <span class="nf">draw_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.draw_nodes"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.draw_nodes">[docs]</a>   <span class="k">def</span> <span class="nf">draw_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Draw the node tree.</span>
 <span class="sd">       &quot;&quot;&quot;</span>
@@ -1536,7 +1536,7 @@
           
       <span class="k">return</span> <span class="kc">None</span>      
                     
-<div class="viewcode-block" id="scheduler.backup"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.backup">[docs]</a>   <span class="k">def</span> <span class="nf">backup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.backup"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.backup">[docs]</a>   <span class="k">def</span> <span class="nf">backup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Save the node tree on disk.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -1565,7 +1565,7 @@
       <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
           <span class="n">node</span><span class="o">.</span><span class="n">online</span><span class="p">()</span></div>
       
-<div class="viewcode-block" id="scheduler.restore_nodes"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.restore_nodes">[docs]</a>   <span class="k">def</span> <span class="nf">restore_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.restore_nodes"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.restore_nodes">[docs]</a>   <span class="k">def</span> <span class="nf">restore_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Load the node tree from disk.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -1591,7 +1591,7 @@
       
       <span class="bp">self</span><span class="o">.</span><span class="n">root_node</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
               
-<div class="viewcode-block" id="scheduler.schedule"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.schedule">[docs]</a>   <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_class</span><span class="p">,</span> <span class="n">arguments</span> <span class="o">=</span> <span class="p">[]):</span>
+<div class="viewcode-block" id="scheduler.schedule"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.schedule">[docs]</a>   <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_class</span><span class="p">,</span> <span class="n">arguments</span> <span class="o">=</span> <span class="p">[]):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Schedule nodes. </span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -1622,14 +1622,14 @@
          <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unknown node type:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">node_class</span><span class="o">.</span><span class="n">node_type</span><span class="p">))</span></div>
    
-<div class="viewcode-block" id="scheduler.generic"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.generic">[docs]</a>   <span class="k">def</span> <span class="nf">generic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="o">**</span><span class="n">arguments</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.generic"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.generic">[docs]</a>   <span class="k">def</span> <span class="nf">generic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="o">**</span><span class="n">arguments</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Schedule a generic batch node with one input and one output using any given callback function.</span>
 <span class="sd">       &quot;&quot;&quot;</span>
        <span class="c1"># Pass the callback as the first argument for batch_node:</span>
        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">batch_node</span><span class="p">,</span> <span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">arguments</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="scheduler.FDK"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.FDK">[docs]</a>   <span class="k">def</span> <span class="nf">FDK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol_shape</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sirt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.FDK"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.FDK">[docs]</a>   <span class="k">def</span> <span class="nf">FDK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol_shape</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sirt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Schedule FDK reconstruction.</span>
 <span class="sd">       </span>
@@ -1640,7 +1640,7 @@
        <span class="n">arguments</span> <span class="o">=</span> <span class="p">(</span><span class="n">vol_shape</span><span class="p">,</span> <span class="n">sirt</span><span class="p">)</span>
        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">fdk_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>   </div>
 
-<div class="viewcode-block" id="scheduler.soft_threshold"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.soft_threshold">[docs]</a>   <span class="k">def</span> <span class="nf">soft_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">threshold</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.soft_threshold"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.soft_threshold">[docs]</a>   <span class="k">def</span> <span class="nf">soft_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">threshold</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Removes values smaller than the threshold value.</span>
 <span class="sd">      </span>
@@ -1652,7 +1652,7 @@
       
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">threshold_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>   </div>
       
-<div class="viewcode-block" id="scheduler.beamhardening"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.beamhardening">[docs]</a>   <span class="k">def</span> <span class="nf">beamhardening</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">compound</span><span class="p">,</span> <span class="n">density</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.beamhardening"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.beamhardening">[docs]</a>   <span class="k">def</span> <span class="nf">beamhardening</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">compound</span><span class="p">,</span> <span class="n">density</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Single material beamhardening based on a file with an effective spectrum record.</span>
 <span class="sd">        Args:            </span>
@@ -1664,7 +1664,7 @@
       
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">beamhardening_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>  </div>
       
-<div class="viewcode-block" id="scheduler.markernorm"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.markernorm">[docs]</a>   <span class="k">def</span> <span class="nf">markernorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.markernorm"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.markernorm">[docs]</a>   <span class="k">def</span> <span class="nf">markernorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Find a marker and normalize density of that marker to match the given value</span>
 <span class="sd">        Args:            </span>
@@ -1675,7 +1675,7 @@
       
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">markernorm_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>   </div>
       
-<div class="viewcode-block" id="scheduler.pad"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.pad">[docs]</a>   <span class="k">def</span> <span class="nf">pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.pad"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.pad">[docs]</a>   <span class="k">def</span> <span class="nf">pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Schedule padding operation.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -1683,28 +1683,28 @@
       
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">pad_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span> </div>
 
-<div class="viewcode-block" id="scheduler.bin"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.bin">[docs]</a>   <span class="k">def</span> <span class="nf">bin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.bin"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.bin">[docs]</a>   <span class="k">def</span> <span class="nf">bin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Schedule a bin operation.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
       <span class="n">arguments</span> <span class="o">=</span> <span class="p">(</span><span class="n">dim</span><span class="p">,)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">bin_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span> </div>
       
-<div class="viewcode-block" id="scheduler.crop"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.crop">[docs]</a>   <span class="k">def</span> <span class="nf">crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.crop"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.crop">[docs]</a>   <span class="k">def</span> <span class="nf">crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Schedule a crop operation.           </span>
 <span class="sd">      &quot;&quot;&quot;</span>
       <span class="n">arguments</span> <span class="o">=</span> <span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">crop_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>  </div>
       
-<div class="viewcode-block" id="scheduler.autocrop"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.autocrop">[docs]</a>   <span class="k">def</span> <span class="nf">autocrop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.autocrop"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.autocrop">[docs]</a>   <span class="k">def</span> <span class="nf">autocrop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Schedule autocrop operation.            </span>
 <span class="sd">      &quot;&quot;&quot;</span>      
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">autocrop_node</span><span class="p">)</span>   </div>
 
 
-<div class="viewcode-block" id="scheduler.cast2type"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.cast2type">[docs]</a>   <span class="k">def</span> <span class="nf">cast2type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">bounds</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.cast2type"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.cast2type">[docs]</a>   <span class="k">def</span> <span class="nf">cast2type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">bounds</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Schedule a cast to type operation. </span>
 <span class="sd">        Args:            </span>
@@ -1714,13 +1714,13 @@
       
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">cast2type_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>   </div>
 
-<div class="viewcode-block" id="scheduler.buffer_info"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.buffer_info">[docs]</a>   <span class="k">def</span> <span class="nf">buffer_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.buffer_info"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.buffer_info">[docs]</a>   <span class="k">def</span> <span class="nf">buffer_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Print data and meta info.</span>
 <span class="sd">       &quot;&quot;&quot;</span>
        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">info_node</span><span class="p">)</span></div>
            
-<div class="viewcode-block" id="scheduler.read_data"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.read_data">[docs]</a>   <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sampling</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;float32&#39;</span><span class="p">,</span> <span class="nb">format</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">transpose</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">updown</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">proj_number</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.read_data"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.read_data">[docs]</a>   <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sampling</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="s1">&#39;float32&#39;</span><span class="p">,</span> <span class="nb">format</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">transpose</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">updown</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">proj_number</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Schedule an image stack reader. Often will be the first node in the queue.</span>
 <span class="sd">        Args:</span>
@@ -1729,7 +1729,7 @@
       <span class="n">arguments</span> <span class="o">=</span> <span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sampling</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">transpose</span><span class="p">,</span> <span class="n">updown</span><span class="p">,</span> <span class="n">proj_number</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">reader_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span></div>
       
-<div class="viewcode-block" id="scheduler.write_data"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.write_data">[docs]</a>   <span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">skip</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">compress</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.write_data"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.write_data">[docs]</a>   <span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">skip</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">compress</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Schedule an image stack writer. </span>
 <span class="sd">        Args:</span>
@@ -1739,11 +1739,11 @@
       
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">writer_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>      </div>
    
-<div class="viewcode-block" id="scheduler.display"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.display">[docs]</a>   <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">display_type</span><span class="p">,</span> <span class="o">**</span><span class="n">argin</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.display"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.display">[docs]</a>   <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">display_type</span><span class="p">,</span> <span class="o">**</span><span class="n">argin</span><span class="p">):</span>
 
        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">display_node</span><span class="p">,</span> <span class="p">[</span><span class="n">display_type</span><span class="p">,</span> <span class="n">argin</span><span class="p">])</span>           </div>
 
-<div class="viewcode-block" id="scheduler.derotate"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.derotate">[docs]</a>   <span class="k">def</span> <span class="nf">derotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ang</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.derotate"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.derotate">[docs]</a>   <span class="k">def</span> <span class="nf">derotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ang</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Schedule a to derotate the detector.</span>
 <span class="sd">      </span>
@@ -1752,7 +1752,7 @@
 <span class="sd">      &quot;&quot;&quot;</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">derotate_node</span><span class="p">,</span> <span class="n">ang</span><span class="p">)</span>       </div>
 
-<div class="viewcode-block" id="scheduler.merge"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.merge">[docs]</a>   <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;projections&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.merge"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.merge">[docs]</a>   <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;projections&#39;</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Schedule a data merge operation. </span>
 <span class="sd">        Args:</span>
@@ -1767,28 +1767,28 @@
       <span class="k">else</span><span class="p">:</span>
           <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Unknown mode!&#39;</span><span class="p">)</span></div>
       
-<div class="viewcode-block" id="scheduler.flatlog"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.flatlog">[docs]</a>   <span class="k">def</span> <span class="nf">flatlog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">usemax</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">flats</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">darks</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">sample</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transpose</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">updown</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.flatlog"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.flatlog">[docs]</a>   <span class="k">def</span> <span class="nf">flatlog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">usemax</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">flats</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">darks</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">sample</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">transpose</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">updown</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Read flats and darks and apply them to projection data or use &#39;usemax&#39; mode to perform a data-driven correction.</span>
 <span class="sd">       &quot;&quot;&quot;</span>
        <span class="n">arguments</span> <span class="o">=</span> <span class="p">(</span><span class="n">usemax</span><span class="p">,</span> <span class="n">flats</span><span class="p">,</span> <span class="n">darks</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">transpose</span><span class="p">,</span> <span class="n">updown</span><span class="p">)</span>
        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">flatlog_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span></div>
    
-<div class="viewcode-block" id="scheduler.optimize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.optimize">[docs]</a>   <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;axs_hrz&#39;</span><span class="p">,</span> <span class="n">tile_index</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sampling</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;highpass&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.optimize"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.optimize">[docs]</a>   <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;axs_hrz&#39;</span><span class="p">,</span> <span class="n">tile_index</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sampling</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;highpass&#39;</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Optimize a parameter using parameter range, geometry key, tile number and sub-sampling.</span>
 <span class="sd">       &quot;&quot;&quot;</span>
        <span class="n">arguments</span> <span class="o">=</span> <span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">tile_index</span><span class="p">,</span> <span class="n">sampling</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">optimize_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span> </div>
        
-<div class="viewcode-block" id="scheduler.registration"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.registration">[docs]</a>   <span class="k">def</span> <span class="nf">registration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subsamp</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">use_moments</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.registration"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.registration">[docs]</a>   <span class="k">def</span> <span class="nf">registration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subsamp</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">use_moments</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">       Register volumes.</span>
 <span class="sd">       &quot;&quot;&quot;</span>
        <span class="n">arguments</span> <span class="o">=</span> <span class="p">(</span><span class="n">subsamp</span><span class="p">,</span> <span class="n">use_moments</span><span class="p">)</span>
        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">registration_node</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>        </div>
     
-<div class="viewcode-block" id="scheduler.report"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.report">[docs]</a>   <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.report"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.report">[docs]</a>   <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Print the node tree.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -1802,7 +1802,7 @@
       <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
           <span class="nb">print</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">node_name</span> <span class="o">+</span> <span class="s1">&#39; : &#39;</span> <span class="o">+</span> <span class="n">node</span><span class="o">.</span><span class="n">state2str</span><span class="p">())</span></div>
           
-<div class="viewcode-block" id="scheduler.cleanup"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.cleanup">[docs]</a>   <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<div class="viewcode-block" id="scheduler.cleanup"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.cleanup">[docs]</a>   <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Remove files after a succesfull run.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
@@ -1818,7 +1818,7 @@
       <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
           <span class="n">node</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span></div>
       
-<div class="viewcode-block" id="scheduler.run"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.batch.scheduler.run">[docs]</a>   <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="scheduler.run"><a class="viewcode-back" href="../../flexcalc.html#flexcalc.pipeline.scheduler.run">[docs]</a>   <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Run scheduled nodes.</span>
 <span class="sd">      &quot;&quot;&quot;</span>

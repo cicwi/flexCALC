@@ -7,12 +7,12 @@ There are three parts in this example: scheduling and runtime of input operation
 """
 #%% Imports
 
-from flexcalc import batch
+from flexcalc import pipeline
 #from numpy import linspace
 
 #%% Initialize and schedule (1):
 
-lola = batch.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = True)
+lola = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = True)
 
 # Load data:
 path = '/ufs/ciacc/flexbox/tiling/t*'
@@ -57,7 +57,7 @@ lola.run()
 
 #%% Restore node tree after crash and repeat:
 
-masha = batch.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = False)
+masha = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = False)
 masha.restore_nodes()
 masha.draw_nodes()
 masha.report()

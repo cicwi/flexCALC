@@ -85,7 +85,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Modules</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-flexcalc.process">flexcalc.process module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-flexcalc.analyze">flexcalc.analyze module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-flexcalc.batch">flexcalc.batch module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-flexcalc.pipeline">flexcalc.batch module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-flexcalc">Module contents</a></li>
 </ul>
 </li>
@@ -499,626 +499,626 @@ subsample: subsampling factor to to make it faster</dd>
 </dd></dl>
 
 </div>
-<div class="section" id="module-flexcalc.batch">
-<span id="flexcalc-batch-module"></span><h2>flexcalc.batch module<a class="headerlink" href="#module-flexcalc.batch" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-flexcalc.pipeline">
+<span id="flexcalc-batch-module"></span><h2>flexcalc.batch module<a class="headerlink" href="#module-flexcalc.pipeline" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="flexcalc.batch.Buffer">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">Buffer</code><span class="sig-paren">(</span><em>path</em>, <em>writer_node</em>, <em>shape=(1</em>, <em>1</em>, <em>1)</em>, <em>dtype='float32'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">Buffer</code><span class="sig-paren">(</span><em>path</em>, <em>writer_node</em>, <em>shape=(1</em>, <em>1</em>, <em>1)</em>, <em>dtype='float32'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Each node has an input and output buffer. It will be in read-only or write-only state.
 Buffer can store a memmap data and a metadata record.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.Buffer.dshape">
-<code class="descname">dshape</code><a class="headerlink" href="#flexcalc.batch.Buffer.dshape" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.dshape">
+<code class="descname">dshape</code><a class="headerlink" href="#flexcalc.pipeline.Buffer.dshape" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.Buffer.dtype">
-<code class="descname">dtype</code><a class="headerlink" href="#flexcalc.batch.Buffer.dtype" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.dtype">
+<code class="descname">dtype</code><a class="headerlink" href="#flexcalc.pipeline.Buffer.dtype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.get_data">
-<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.get_data" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the data array.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.get_geom">
-<code class="descname">get_geom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.get_geom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.get_geom" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.get_geom">
+<code class="descname">get_geom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.get_geom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.get_geom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the meta record.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.get_misc">
-<code class="descname">get_misc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.get_misc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.get_misc" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.get_misc">
+<code class="descname">get_misc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.get_misc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.get_misc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the meta record.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.set_data">
-<code class="descname">set_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.set_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.set_data" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.set_data">
+<code class="descname">set_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.set_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.set_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the data array.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.set_geom">
-<code class="descname">set_geom</code><span class="sig-paren">(</span><em>geom</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.set_geom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.set_geom" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.set_geom">
+<code class="descname">set_geom</code><span class="sig-paren">(</span><em>geom</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.set_geom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.set_geom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the meta record.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.set_misc">
-<code class="descname">set_misc</code><span class="sig-paren">(</span><em>misc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.set_misc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.set_misc" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.set_misc">
+<code class="descname">set_misc</code><span class="sig-paren">(</span><em>misc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.set_misc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.set_misc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the misc record.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.suicide">
-<code class="descname">suicide</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.suicide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.suicide" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.suicide">
+<code class="descname">suicide</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.suicide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.suicide" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove file from disk and delete variables.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.switch_offline">
-<code class="descname">switch_offline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.switch_offline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.switch_offline" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.switch_offline">
+<code class="descname">switch_offline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.switch_offline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.switch_offline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch buffers to offline to be able to serialize node tree and save them on disk.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.switch_online">
-<code class="descname">switch_online</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.switch_online"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.switch_online" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.switch_online">
+<code class="descname">switch_online</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.switch_online"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.switch_online" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch buffers to online after loading the node tree from disk or after backing it up.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.switch_readonly">
-<code class="descname">switch_readonly</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.switch_readonly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.switch_readonly" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.switch_readonly">
+<code class="descname">switch_readonly</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.switch_readonly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.switch_readonly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch the buffer into reading mode.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Buffer.switch_writeonly">
-<code class="descname">switch_writeonly</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Buffer.switch_writeonly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Buffer.switch_writeonly" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Buffer.switch_writeonly">
+<code class="descname">switch_writeonly</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Buffer.switch_writeonly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Buffer.switch_writeonly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch the buffer into writing mode.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.Node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">Node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">Node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class responsible for processing of a single block of data.
 It has two buffers: input and output.
 Three states: waiting, active, ready
 Three methods: start, action, finish</p>
 <dl class="method">
-<dt id="flexcalc.batch.Node.activate">
-<code class="descname">activate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.activate" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.activate">
+<code class="descname">activate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.activate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch input buffers to read-only mode and output buffers to write-only.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.cleanup">
-<code class="descname">cleanup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.cleanup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.cleanup" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.cleanup">
+<code class="descname">cleanup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.cleanup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.cleanup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove files:</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.deactivate">
-<code class="descname">deactivate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.deactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.deactivate" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.deactivate">
+<code class="descname">deactivate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.deactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.deactivate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Kill all inputs. Switch all outputs to read-only mode.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.get_children">
-<code class="descname">get_children</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.get_children"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.get_children" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.get_children">
+<code class="descname">get_children</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.get_children"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.get_children" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get children nodes.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.get_inputs">
-<code class="descname">get_inputs</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.get_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.get_inputs" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.get_inputs">
+<code class="descname">get_inputs</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.get_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.get_inputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get data, geom and misc from a buffer using index</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.get_outputs">
-<code class="descname">get_outputs</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.get_outputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.get_outputs" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.get_outputs">
+<code class="descname">get_outputs</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.get_outputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.get_outputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get data, geom and misc from a buffer using index</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.get_parents">
-<code class="descname">get_parents</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.get_parents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.get_parents" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.get_parents">
+<code class="descname">get_parents</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.get_parents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.get_parents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get parent nodes.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.init_outputs">
-<code class="descname">init_outputs</code><span class="sig-paren">(</span><em>count</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.init_outputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.init_outputs" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.init_outputs">
+<code class="descname">init_outputs</code><span class="sig-paren">(</span><em>count</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.init_outputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.init_outputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create output buffers.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.initialize" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializtion callback. Override this in sub-classes</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.isready">
-<code class="descname">isready</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.isready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.isready" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.isready">
+<code class="descname">isready</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.isready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.isready" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if the node is ready.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.Node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Default node'</em><a class="headerlink" href="#flexcalc.batch.Node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Default node'</em><a class="headerlink" href="#flexcalc.pipeline.Node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.Node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.Node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.Node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.offline">
-<code class="descname">offline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.offline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.offline" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.offline">
+<code class="descname">offline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.offline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.offline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch node to offline (switch its buffers to offline). This is needed for backing up nodes.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.online">
-<code class="descname">online</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.online"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.online" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.online">
+<code class="descname">online</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.online"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.online" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch node to online (switch its buffers to online). This is needed for backing up nodes.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.set_outputs">
-<code class="descname">set_outputs</code><span class="sig-paren">(</span><em>index</em>, <em>data</em>, <em>geom=None</em>, <em>misc=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.set_outputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.set_outputs" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.set_outputs">
+<code class="descname">set_outputs</code><span class="sig-paren">(</span><em>index</em>, <em>data</em>, <em>geom=None</em>, <em>misc=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.set_outputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.set_outputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set data, geom and misc from a buffer using index</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.Node.state2str">
-<code class="descname">state2str</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#Node.state2str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.Node.state2str" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.Node.state2str">
+<code class="descname">state2str</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#Node.state2str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.Node.state2str" title="Permalink to this definition">¶</a></dt>
 <dd><p>Report my state.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.autocrop_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">autocrop_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#autocrop_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.autocrop_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.autocrop_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">autocrop_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#autocrop_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.autocrop_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Apply autocrop.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.autocrop_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Autocrop'</em><a class="headerlink" href="#flexcalc.batch.autocrop_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.autocrop_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Autocrop'</em><a class="headerlink" href="#flexcalc.pipeline.autocrop_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.autocrop_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.autocrop_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.autocrop_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.autocrop_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.autocrop_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#autocrop_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.autocrop_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.autocrop_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#autocrop_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.autocrop_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.batch_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">batch_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#batch_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.batch_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.batch_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">batch_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#batch_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.batch_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>A standard batch node based on a given callback function.
 Callback function is saved as the first argument in the argument list.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.batch_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'batch'</em><a class="headerlink" href="#flexcalc.batch.batch_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.batch_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'batch'</em><a class="headerlink" href="#flexcalc.pipeline.batch_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.batch_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.batch_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.batch_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.batch_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.batch_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#batch_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.batch_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.batch_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#batch_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.batch_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.beamhardening_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">beamhardening_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#beamhardening_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.beamhardening_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.beamhardening_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">beamhardening_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#beamhardening_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.beamhardening_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Apply beam hardening based on a single material approximation and an estimated spectrum.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.beamhardening_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Beam-hardening correction'</em><a class="headerlink" href="#flexcalc.batch.beamhardening_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.beamhardening_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Beam-hardening correction'</em><a class="headerlink" href="#flexcalc.pipeline.beamhardening_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.beamhardening_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.beamhardening_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.beamhardening_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.beamhardening_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.beamhardening_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#beamhardening_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.beamhardening_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.beamhardening_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#beamhardening_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.beamhardening_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.bin_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">bin_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#bin_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.bin_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.bin_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">bin_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#bin_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.bin_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Apply binning.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.bin_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Bin'</em><a class="headerlink" href="#flexcalc.batch.bin_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.bin_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Bin'</em><a class="headerlink" href="#flexcalc.pipeline.bin_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.bin_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.bin_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.bin_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.bin_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.bin_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#bin_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.bin_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.bin_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#bin_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.bin_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.cast2type_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">cast2type_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#cast2type_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.cast2type_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.cast2type_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">cast2type_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#cast2type_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.cast2type_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Apply autocrop.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.cast2type_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Cast to type'</em><a class="headerlink" href="#flexcalc.batch.cast2type_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.cast2type_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Cast to type'</em><a class="headerlink" href="#flexcalc.pipeline.cast2type_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.cast2type_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.cast2type_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.cast2type_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.cast2type_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.cast2type_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#cast2type_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.cast2type_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.cast2type_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#cast2type_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.cast2type_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.crop_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">crop_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#crop_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.crop_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.crop_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">crop_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#crop_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.crop_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Apply crop.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.crop_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Crop'</em><a class="headerlink" href="#flexcalc.batch.crop_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.crop_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Crop'</em><a class="headerlink" href="#flexcalc.pipeline.crop_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.crop_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.crop_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.crop_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.crop_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.crop_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#crop_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.crop_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.crop_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#crop_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.crop_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.derotate_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">derotate_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#derotate_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.derotate_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.derotate_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">derotate_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#derotate_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.derotate_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Derotate projections by geom[‘det_roll’].</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.derotate_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Derotate projections'</em><a class="headerlink" href="#flexcalc.batch.derotate_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.derotate_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Derotate projections'</em><a class="headerlink" href="#flexcalc.pipeline.derotate_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.derotate_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.derotate_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.derotate_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.derotate_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.derotate_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#derotate_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.derotate_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.derotate_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#derotate_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.derotate_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.display_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">display_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#display_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.display_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.display_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">display_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#display_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.display_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Display data.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.display_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Display'</em><a class="headerlink" href="#flexcalc.batch.display_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.display_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Display'</em><a class="headerlink" href="#flexcalc.pipeline.display_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.display_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.display_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.display_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.display_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.display_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#display_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.display_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.display_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#display_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.display_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.fdk_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">fdk_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#fdk_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.fdk_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.fdk_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">fdk_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#fdk_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.fdk_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Feldkamp reconstruction.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.fdk_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'FDK'</em><a class="headerlink" href="#flexcalc.batch.fdk_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.fdk_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'FDK'</em><a class="headerlink" href="#flexcalc.pipeline.fdk_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.fdk_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.fdk_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.fdk_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.fdk_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.fdk_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#fdk_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.fdk_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.fdk_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#fdk_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.fdk_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.flatlog_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">flatlog_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#flatlog_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.flatlog_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.flatlog_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">flatlog_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#flatlog_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.flatlog_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Apply flat-field and dark-field correction. Take -log(x).</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.flatlog_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Flatlog'</em><a class="headerlink" href="#flexcalc.batch.flatlog_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.flatlog_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Flatlog'</em><a class="headerlink" href="#flexcalc.pipeline.flatlog_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.flatlog_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.flatlog_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.flatlog_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.flatlog_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.flatlog_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#flatlog_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.flatlog_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.flatlog_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#flatlog_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.flatlog_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.info_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">info_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#info_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.info_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.info_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">info_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#info_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.info_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Print data info.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.info_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Buffer Info'</em><a class="headerlink" href="#flexcalc.batch.info_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.info_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Buffer Info'</em><a class="headerlink" href="#flexcalc.pipeline.info_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.info_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.info_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.info_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.info_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.info_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#info_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.info_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.info_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#info_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.info_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.markernorm_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">markernorm_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#markernorm_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.markernorm_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.markernorm_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">markernorm_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#markernorm_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.markernorm_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Find marker and normalize data using its intensity.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.markernorm_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Marker normalization'</em><a class="headerlink" href="#flexcalc.batch.markernorm_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.markernorm_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Marker normalization'</em><a class="headerlink" href="#flexcalc.pipeline.markernorm_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.markernorm_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.markernorm_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.markernorm_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.markernorm_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.markernorm_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#markernorm_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.markernorm_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.markernorm_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#markernorm_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.markernorm_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.optimize_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">optimize_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#optimize_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.optimize_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.optimize_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">optimize_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#optimize_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.optimize_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Use auto-focusing to optimize geometry parameters. Its a group node - it will wait untill all previous nodes are ready before activating.</p>
 <dl class="method">
-<dt id="flexcalc.batch.optimize_node.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#optimize_node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.optimize_node.initialize" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.optimize_node.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#optimize_node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.optimize_node.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializtion callback. Override this in sub-classes</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.optimize_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Optimize'</em><a class="headerlink" href="#flexcalc.batch.optimize_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.optimize_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Optimize'</em><a class="headerlink" href="#flexcalc.pipeline.optimize_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.optimize_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 1</em><a class="headerlink" href="#flexcalc.batch.optimize_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.optimize_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 1</em><a class="headerlink" href="#flexcalc.pipeline.optimize_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.optimize_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#optimize_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.optimize_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.optimize_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#optimize_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.optimize_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.pad_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">pad_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#pad_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.pad_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.pad_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">pad_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#pad_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.pad_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Apply autocrop.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.pad_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Pad'</em><a class="headerlink" href="#flexcalc.batch.pad_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.pad_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Pad'</em><a class="headerlink" href="#flexcalc.pipeline.pad_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.pad_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.pad_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.pad_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.pad_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.pad_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#pad_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.pad_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.pad_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#pad_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.pad_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.proj_merge_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">proj_merge_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#proj_merge_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.proj_merge_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.proj_merge_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">proj_merge_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#proj_merge_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.proj_merge_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Merge projections node.</p>
 <dl class="method">
-<dt id="flexcalc.batch.proj_merge_node.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#proj_merge_node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.proj_merge_node.initialize" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.proj_merge_node.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#proj_merge_node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.proj_merge_node.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializtion callback. Override this in sub-classes</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.proj_merge_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Merge projections'</em><a class="headerlink" href="#flexcalc.batch.proj_merge_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.proj_merge_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Merge projections'</em><a class="headerlink" href="#flexcalc.pipeline.proj_merge_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.proj_merge_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 1</em><a class="headerlink" href="#flexcalc.batch.proj_merge_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.proj_merge_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 1</em><a class="headerlink" href="#flexcalc.pipeline.proj_merge_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.proj_merge_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#proj_merge_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.proj_merge_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.proj_merge_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#proj_merge_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.proj_merge_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.reader_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">reader_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#reader_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.reader_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.reader_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">reader_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#reader_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.reader_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <dl class="method">
-<dt id="flexcalc.batch.reader_node.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#reader_node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.reader_node.initialize" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.reader_node.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#reader_node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.reader_node.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initiallization callback of read_data.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.reader_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Reader'</em><a class="headerlink" href="#flexcalc.batch.reader_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.reader_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Reader'</em><a class="headerlink" href="#flexcalc.pipeline.reader_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.reader_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.reader_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.reader_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.reader_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.reader_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#reader_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.reader_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.reader_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#reader_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.reader_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.registration_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">registration_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#registration_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.registration_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.registration_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">registration_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#registration_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.registration_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Register volumes.</p>
 <dl class="method">
-<dt id="flexcalc.batch.registration_node.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#registration_node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.registration_node.initialize" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.registration_node.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#registration_node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.registration_node.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializtion callback. Override this in sub-classes</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.registration_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Registration'</em><a class="headerlink" href="#flexcalc.batch.registration_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.registration_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Registration'</em><a class="headerlink" href="#flexcalc.pipeline.registration_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.registration_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 1</em><a class="headerlink" href="#flexcalc.batch.registration_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.registration_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 1</em><a class="headerlink" href="#flexcalc.pipeline.registration_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.registration_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#registration_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.registration_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.registration_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#registration_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.registration_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.scheduler">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">scheduler</code><span class="sig-paren">(</span><em>_scratch_path_</em>, <em>clean_scratch=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">scheduler</code><span class="sig-paren">(</span><em>_scratch_path_</em>, <em>clean_scratch=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class responsible for scheduling tasks by creating tree of processing nodes connected via buffers.
 Scheduler links to the root_node that provides an entry point to the node tree.</p>
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.FDK">
-<code class="descname">FDK</code><span class="sig-paren">(</span><em>vol_shape=None</em>, <em>sirt=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.FDK"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.FDK" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.FDK">
+<code class="descname">FDK</code><span class="sig-paren">(</span><em>vol_shape=None</em>, <em>sirt=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.FDK"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.FDK" title="Permalink to this definition">¶</a></dt>
 <dd><p>Schedule FDK reconstruction.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -1128,20 +1128,20 @@ sirt      : run a few iterations of SIRT with non-negativity constraint</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.autocrop">
-<code class="descname">autocrop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.autocrop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.autocrop" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.autocrop">
+<code class="descname">autocrop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.autocrop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.autocrop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Schedule autocrop operation.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.backup">
-<code class="descname">backup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.backup" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.backup">
+<code class="descname">backup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.backup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the node tree on disk.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.beamhardening">
-<code class="descname">beamhardening</code><span class="sig-paren">(</span><em>file</em>, <em>compound</em>, <em>density</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.beamhardening"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.beamhardening" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.beamhardening">
+<code class="descname">beamhardening</code><span class="sig-paren">(</span><em>file</em>, <em>compound</em>, <em>density</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.beamhardening"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.beamhardening" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Single material beamhardening based on a file with an effective spectrum record.</dt>
 <dd><dl class="first last docutils">
@@ -1155,20 +1155,20 @@ density : density in g / cm3</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.bin">
-<code class="descname">bin</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.bin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.bin" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.bin">
+<code class="descname">bin</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.bin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.bin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Schedule a bin operation.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.buffer_info">
-<code class="descname">buffer_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.buffer_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.buffer_info" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.buffer_info">
+<code class="descname">buffer_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.buffer_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.buffer_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print data and meta info.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.cast2type">
-<code class="descname">cast2type</code><span class="sig-paren">(</span><em>dtype</em>, <em>bounds=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.cast2type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.cast2type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.cast2type">
+<code class="descname">cast2type</code><span class="sig-paren">(</span><em>dtype</em>, <em>bounds=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.cast2type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.cast2type" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Schedule a cast to type operation. </dt>
 <dd>Args:</dd>
@@ -1176,20 +1176,20 @@ density : density in g / cm3</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.cleanup">
-<code class="descname">cleanup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.cleanup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.cleanup" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.cleanup">
+<code class="descname">cleanup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.cleanup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.cleanup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove files after a succesfull run.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.crop">
-<code class="descname">crop</code><span class="sig-paren">(</span><em>dim</em>, <em>width</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.crop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.crop" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.crop">
+<code class="descname">crop</code><span class="sig-paren">(</span><em>dim</em>, <em>width</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.crop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Schedule a crop operation.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.derotate">
-<code class="descname">derotate</code><span class="sig-paren">(</span><em>ang=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.derotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.derotate" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.derotate">
+<code class="descname">derotate</code><span class="sig-paren">(</span><em>ang=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.derotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.derotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Schedule a to derotate the detector.</p>
 <blockquote>
 <div><dl class="docutils">
@@ -1200,31 +1200,31 @@ density : density in g / cm3</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.display">
-<code class="descname">display</code><span class="sig-paren">(</span><em>display_type</em>, <em>**argin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.display" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.display">
+<code class="descname">display</code><span class="sig-paren">(</span><em>display_type</em>, <em>**argin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.display" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.draw_nodes">
-<code class="descname">draw_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.draw_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.draw_nodes" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.draw_nodes">
+<code class="descname">draw_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.draw_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.draw_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw the node tree.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.flatlog">
-<code class="descname">flatlog</code><span class="sig-paren">(</span><em>usemax=False, flats='', darks='', sample=1, transpose=[1, 0, 2], updown=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.flatlog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.flatlog" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.flatlog">
+<code class="descname">flatlog</code><span class="sig-paren">(</span><em>usemax=False, flats='', darks='', sample=1, transpose=[1, 0, 2], updown=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.flatlog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.flatlog" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read flats and darks and apply them to projection data or use ‘usemax’ mode to perform a data-driven correction.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.generic">
-<code class="descname">generic</code><span class="sig-paren">(</span><em>callback</em>, <em>**arguments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.generic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.generic" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.generic">
+<code class="descname">generic</code><span class="sig-paren">(</span><em>callback</em>, <em>**arguments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.generic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.generic" title="Permalink to this definition">¶</a></dt>
 <dd><p>Schedule a generic batch node with one input and one output using any given callback function.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.markernorm">
-<code class="descname">markernorm</code><span class="sig-paren">(</span><em>norm</em>, <em>size=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.markernorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.markernorm" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.markernorm">
+<code class="descname">markernorm</code><span class="sig-paren">(</span><em>norm</em>, <em>size=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.markernorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.markernorm" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Find a marker and normalize density of that marker to match the given value</dt>
 <dd><dl class="first last docutils">
@@ -1237,8 +1237,8 @@ size : size of the marker (diametre in mm)</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.merge">
-<code class="descname">merge</code><span class="sig-paren">(</span><em>mode='projections'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.merge" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.merge">
+<code class="descname">merge</code><span class="sig-paren">(</span><em>mode='projections'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.merge" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Schedule a data merge operation. </dt>
 <dd><dl class="first last docutils">
@@ -1250,20 +1250,20 @@ size : size of the marker (diametre in mm)</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.optimize">
-<code class="descname">optimize</code><span class="sig-paren">(</span><em>values, key='axs_hrz', tile_index=None, sampling=[5, 1, 1], metric='highpass'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.optimize" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.optimize">
+<code class="descname">optimize</code><span class="sig-paren">(</span><em>values, key='axs_hrz', tile_index=None, sampling=[5, 1, 1], metric='highpass'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.optimize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Optimize a parameter using parameter range, geometry key, tile number and sub-sampling.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.pad">
-<code class="descname">pad</code><span class="sig-paren">(</span><em>width</em>, <em>dim</em>, <em>mode='linear'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.pad" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.pad">
+<code class="descname">pad</code><span class="sig-paren">(</span><em>width</em>, <em>dim</em>, <em>mode='linear'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.pad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Schedule padding operation.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.read_data">
-<code class="descname">read_data</code><span class="sig-paren">(</span><em>paths, name, sampling=1, shape=None, dtype='float32', format=None, transpose=[1, 0, 2], updown=True, proj_number=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.read_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.read_data" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.read_data">
+<code class="descname">read_data</code><span class="sig-paren">(</span><em>paths, name, sampling=1, shape=None, dtype='float32', format=None, transpose=[1, 0, 2], updown=True, proj_number=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.read_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.read_data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Schedule an image stack reader. Often will be the first node in the queue.</dt>
 <dd>Args:</dd>
@@ -1271,38 +1271,38 @@ size : size of the marker (diametre in mm)</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.registration">
-<code class="descname">registration</code><span class="sig-paren">(</span><em>subsamp=1</em>, <em>use_moments=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.registration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.registration" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.registration">
+<code class="descname">registration</code><span class="sig-paren">(</span><em>subsamp=1</em>, <em>use_moments=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.registration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.registration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register volumes.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.report">
-<code class="descname">report</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.report" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.report">
+<code class="descname">report</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.report" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print the node tree.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.restore_nodes">
-<code class="descname">restore_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.restore_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.restore_nodes" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.restore_nodes">
+<code class="descname">restore_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.restore_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.restore_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load the node tree from disk.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.run" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run scheduled nodes.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.schedule">
-<code class="descname">schedule</code><span class="sig-paren">(</span><em>node_class</em>, <em>arguments=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.schedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.schedule" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.schedule">
+<code class="descname">schedule</code><span class="sig-paren">(</span><em>node_class</em>, <em>arguments=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.schedule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.schedule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Schedule nodes.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.soft_threshold">
-<code class="descname">soft_threshold</code><span class="sig-paren">(</span><em>mode</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.soft_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.soft_threshold" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.soft_threshold">
+<code class="descname">soft_threshold</code><span class="sig-paren">(</span><em>mode</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.soft_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.soft_threshold" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes values smaller than the threshold value.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -1312,8 +1312,8 @@ threshold (float): threshold value if mode = ‘constant’</dd>
 </dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.scheduler.write_data">
-<code class="descname">write_data</code><span class="sig-paren">(</span><em>path</em>, <em>name</em>, <em>dim=0</em>, <em>skip=1</em>, <em>compress=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#scheduler.write_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.scheduler.write_data" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.scheduler.write_data">
+<code class="descname">write_data</code><span class="sig-paren">(</span><em>path</em>, <em>name</em>, <em>dim=0</em>, <em>skip=1</em>, <em>compress=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#scheduler.write_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.scheduler.write_data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Schedule an image stack writer. </dt>
 <dd>Args:</dd>
@@ -1323,75 +1323,75 @@ threshold (float): threshold value if mode = ‘constant’</dd>
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.threshold_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">threshold_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#threshold_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.threshold_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.threshold_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">threshold_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#threshold_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.threshold_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Apply a soft threshold.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.threshold_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Soft threshold'</em><a class="headerlink" href="#flexcalc.batch.threshold_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.threshold_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Soft threshold'</em><a class="headerlink" href="#flexcalc.pipeline.threshold_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.threshold_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.threshold_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.threshold_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.threshold_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.threshold_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#threshold_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.threshold_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.threshold_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#threshold_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.threshold_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.vol_merge_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">vol_merge_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#vol_merge_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.vol_merge_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.vol_merge_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">vol_merge_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#vol_merge_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.vol_merge_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Merge volumes node.</p>
 <dl class="method">
-<dt id="flexcalc.batch.vol_merge_node.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#vol_merge_node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.vol_merge_node.initialize" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.vol_merge_node.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#vol_merge_node.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.vol_merge_node.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializtion callback. Override this in sub-classes</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.vol_merge_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Merge volumes'</em><a class="headerlink" href="#flexcalc.batch.vol_merge_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.vol_merge_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Merge volumes'</em><a class="headerlink" href="#flexcalc.pipeline.vol_merge_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.vol_merge_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 1</em><a class="headerlink" href="#flexcalc.batch.vol_merge_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.vol_merge_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 1</em><a class="headerlink" href="#flexcalc.pipeline.vol_merge_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.vol_merge_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#vol_merge_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.vol_merge_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.vol_merge_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#vol_merge_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.vol_merge_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="flexcalc.batch.writer_node">
-<em class="property">class </em><code class="descclassname">flexcalc.batch.</code><code class="descname">writer_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#writer_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.writer_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#flexcalc.batch.Node" title="flexcalc.batch.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.batch.Node</span></code></a></p>
+<dt id="flexcalc.pipeline.writer_node">
+<em class="property">class </em><code class="descclassname">flexcalc.pipeline.</code><code class="descname">writer_node</code><span class="sig-paren">(</span><em>scheduler</em>, <em>arguments</em>, <em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#writer_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.writer_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#flexcalc.pipeline.Node" title="flexcalc.pipeline.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">flexcalc.pipeline.Node</span></code></a></p>
 <p>Write data on disk.</p>
 <dl class="attribute">
-<dt id="flexcalc.batch.writer_node.node_name">
-<code class="descname">node_name</code><em class="property"> = 'Writer'</em><a class="headerlink" href="#flexcalc.batch.writer_node.node_name" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.writer_node.node_name">
+<code class="descname">node_name</code><em class="property"> = 'Writer'</em><a class="headerlink" href="#flexcalc.pipeline.writer_node.node_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="flexcalc.batch.writer_node.node_type">
-<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.batch.writer_node.node_type" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.writer_node.node_type">
+<code class="descname">node_type</code><em class="property"> = 0</em><a class="headerlink" href="#flexcalc.pipeline.writer_node.node_type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="flexcalc.batch.writer_node.runtime">
-<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/batch.html#writer_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.batch.writer_node.runtime" title="Permalink to this definition">¶</a></dt>
+<dt id="flexcalc.pipeline.writer_node.runtime">
+<code class="descname">runtime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flexcalc/pipeline.html#writer_node.runtime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flexcalc.pipeline.writer_node.runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runtime callback. Override this in sub-classes</p>
 </dd></dl>
 

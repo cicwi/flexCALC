@@ -24,7 +24,7 @@ flexcalc.analyze module
 flexcalc.batch module
 ---------------------
 
-.. automodule:: flexcalc.batch
+.. automodule:: flexcalc.pipeline
     :members:
     :undoc-members:
     :show-inheritance:
