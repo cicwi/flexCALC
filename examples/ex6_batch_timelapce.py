@@ -22,10 +22,10 @@ path = '/ufs/ciacc/flexbox/timelapce/day*'
 b = 2
 
 # Raed data:
-lola.read_data(path, 'scan_', sampling = b, flipdim = True)
+lola.read_data(path, 'scan_', sampling = b)
 
 # Apply flatfield and log:
-lola.flatlog(flats = 'io', darks = 'di', sample = b, flipdim = True)
+lola.flatlog(flats = 'io', darks = 'di', sample = b)
 
 # Rotate 90 degrees using process.rotate:
 lola.generic(process.rotate, angle = -90, axis = 1)
