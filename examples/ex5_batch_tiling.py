@@ -19,7 +19,7 @@ path = '/ufs/ciacc/flexbox/tiling/t*'
 lola.read_data(path, 'scan_', sampling = 2)
 
 # Apply flatfield and log:
-lola.flatlog(flats = 'io', darks = 'di', sample = 2)
+lola.flatlog(flats = 'io0', darks = 'di0', sample = 2)
 
 # Display:
 lola.display('slice', dim = 1, title = 'Projections')

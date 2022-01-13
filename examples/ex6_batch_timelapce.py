@@ -25,7 +25,7 @@ b = 2
 lola.read_data(path, 'scan_', sampling = b)
 
 # Apply flatfield and log:
-lola.flatlog(flats = 'io', darks = 'di', sample = b)
+lola.flatlog(flats = 'io0', darks = 'di0', sample = b)
 
 # Rotate 90 degrees using process.rotate:
 lola.generic(process.rotate, angle = -90, axis = 1)
