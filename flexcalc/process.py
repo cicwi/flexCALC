@@ -1160,7 +1160,7 @@ def append_tile(array, geom, tot_array, tot_geom):
     det_shape = array.shape[::2]
     
     if tot_geom['det_pixel'] != geom['det_pixel']:
-        raise Exception('This array has different detector pixels! %u v.s. %u. Aborting!' % (geom['det_pixel'], tot_geom['det_pixel']))
+        raise Exception('This array has different detector pixels! %f v.s. %f. Aborting!' % (geom['det_pixel'], tot_geom['det_pixel']))
     
     if tot_array.shape[1] != array.shape[1]:
         raise Exception('This array has different number of projections from the others. %u v.s. %u. Aborting!' % (array.shape[1], tot_array.shape[1]))
