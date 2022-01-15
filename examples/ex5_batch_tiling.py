@@ -12,56 +12,56 @@ from flexcalc import pipeline
 
 #%% Initialize and schedule (1):
 
-lola = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = True)
+P = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = True)
 
 # Load data:
 path = '/ufs/ciacc/flexbox/tiling/t*'
-lola.read_data(path, 'scan_', sampling = 2)
+P.read_data(path, 'scan_', sampling = 2)
 
 # Apply flatfield and log:
-lola.flatlog(flats = 'io0', darks = 'di0', sample = 2)
+P.flatlog(flats = 'io0', darks = 'di0', sample = 2)
 
 # Display:
-lola.display('slice', dim = 1, title = 'Projections')
+P.display('slice', dim = 1, title = 'Projections')
 
 # Marge projections:
-lola.merge('projections')
+P.merge('projections')
 
-lola.display('slice', dim = 1, title = 'Merged')
+P.display('slice', dim = 1, title = 'Merged')
 
 # Optimize detector shift:
-#lola.optimize(linspace(-0.5, 0.5, 7), key = 'det_tan')
+#P.optimize(linspace(-0.5, 0.5, 7), key = 'det_tan')
 
 # Reconstruct:
-lola.FDK()
+P.FDK()
 
-lola.display('slice', dim = 2, title = 'FDK')
-lola.display('slice', dim = 0, title = 'FDK')
+P.display('slice', dim = 2, title = 'FDK')
+P.display('slice', dim = 0, title = 'FDK')
 
 # Merge volumes:
-lola.merge('volume')
+P.merge('volume')
 
 # Reduce size and save data:
-lola.cast2type(dtype = 'uint8')
-lola.autocrop()
-lola.write_data('../fdk', 'vol')
+P.cast2type(dtype = 'uint8')
+P.autocrop()
+P.write_data('../fdk', 'vol')
 
-lola.display('max_projection', dim = 2, title = 'Volume')
+P.display('max_projection', dim = 2, title = 'Volume')
 
 # Visualize nodes:
-lola.draw_nodes()
+P.draw_nodes()
 
 #%% Runtime:
 
-lola.run()
+P.run()
 
 #%% Restore node tree after crash and repeat:
 
-masha = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = False)
-masha.restore_nodes()
-masha.draw_nodes()
-masha.report()
+Q = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = False)
+Q.restore_nodes()
+Q.draw_nodes()
+Q.report()
 
-masha.run()
+Q.run()
 
-#masha.cleanup()
+#Q.cleanup()
