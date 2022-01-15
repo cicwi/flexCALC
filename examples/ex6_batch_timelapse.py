@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Example of batch processing. 
-There are three parts in this example: scheduling and runtime of input operations, scheduling and runtime of reconstruction and restoration and restart of a crashed process.
+This sample reconstructs and registers multiple volumes.
 
 @author: alex
 """
@@ -16,12 +16,12 @@ from numpy import linspace
 P = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = True)
 
 # Load data:
-path = '/ufs/ciacc/flexbox/timelapce/day*'
+path = '/ufs/ciacc/flexbox/timelapse/day*'
 
 # Binning:
 b = 2
 
-# Raed data:
+# Read data:
 P.read_data(path, 'scan_', sampling = b)
 
 # Apply flatfield and log:
