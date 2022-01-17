@@ -12,7 +12,7 @@ Before installing flexCALC, please download and install [flexDATA](https://githu
 Simply install with:
 ```
 conda create -n <your-environment> python=3.7
-conda install -c cicwi -c astra-toolbox/label/dev -c conda-forge -c simpleitk -c owlas flexcalc
+conda install -c cicwi -c astra-toolbox/label/dev -c conda-forge -c simpleitk flexcalc
 ```
 
 ### Installing from source
