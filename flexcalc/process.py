@@ -18,7 +18,6 @@ from tqdm import tqdm
 import SimpleITK as sitk
 
 from skimage import feature
-from stl import mesh
 from skimage import measure
     
 from flexdata import data
@@ -163,6 +162,8 @@ def generate_stl(array, geometry):
     """
     Make a mesh from a volume.
     """
+    from stl import mesh
+
     # Segment the volume:
     threshold = array > analyze.binary_threshold(array, mode = 'otsu')
     
