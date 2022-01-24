@@ -18,7 +18,6 @@ from flextomo import projector
 from flexcalc import process
 from flexcalc import analyze
 
-import networkx
 import matplotlib.pyplot as plt
 from flexdata.data import logger
 
@@ -1195,6 +1194,7 @@ class scheduler:
        """
        Draw the node tree.
        """
+       import networkx
         
        G = self._get_nodesgraph_()
        
@@ -1300,6 +1300,8 @@ class scheduler:
       """
       Returns networkx.MultiDiGraph object for the given node.
       """ 
+      import networkx
+
       # Directional multi-graph:
       G = networkx.Graph()
       
