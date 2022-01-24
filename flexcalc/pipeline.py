@@ -1137,10 +1137,10 @@ class reader_node(Node):
                 
             elif os.path.exists(os.path.join(path, 'scan settings.txt')):
                 geom = dt.read_flexraylog(path, sampling)  
+
+            elif os.path.exists(os.path.join(path, 'data settings XRE.txt')):
+                geom = dt.read_flexraydatasettings(path, sampling)
                 
-            elif os.path.exists(os.path.join(path, 'meta.toml')):
-                geom = dt.read_metatoml(path, sampling)  
-            
             elif os.path.exists(os.path.join(path, 'geometry.toml')):
                 geom = dt.read_geometry(path, sampling)  
 
