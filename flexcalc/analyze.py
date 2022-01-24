@@ -16,8 +16,6 @@ from scipy.interpolate import interp1d
 from flexdata import display
 from flexdata import data
 
-import transforms3d
-
 from flextomo import phantom
 from flextomo import projector
 from flextomo import model

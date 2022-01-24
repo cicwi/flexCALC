@@ -11,8 +11,7 @@ import time
 
 from scipy import ndimage
 import scipy.ndimage.interpolation as interp
-
-import transforms3d
+import scipy.spatial
 
 from tqdm import tqdm
 import SimpleITK as sitk
@@ -22,6 +21,7 @@ from skimage import measure
     
 from flexdata import data
 from flexdata import display
+from flexdata import geometry as fdg
 from flextomo import projector
 from flextomo import model
 from . import analyze
@@ -282,15 +282,15 @@ def allign_moments(array, axis = 0):
     T, R = analyze.moments_orientation(array, 8)
     
     if axis == 0:
-        R_90 = R.T.dot(transforms3d.euler.euler2mat(0, 0, 0))
+        R_90 = R.T.dot(scipy.spatial.transform.Rotation.from_euler(seq='xyz', angles=[0,0,0]).as_matrix())
     elif axis == 1:
-        R_90 = R.T.dot(transforms3d.euler.euler2mat(numpy.pi / 2, 0, 0))
+        R_90 = R.T.dot(scipy.spatial.transform.Rotation.from_euler(seq='xyz', angles=[numpy.pi/2,0,0]).as_matrix())
     elif axis == 2:    
-        R_90 = R.T.dot(transforms3d.euler.euler2mat(numpy.pi / 2, numpy.pi / 2, 0))
+        R_90 = R.T.dot(scipy.spatial.transform.Rotation.from_euler(seq='xyz', angles=[numpy.pi/2,numpy.pi/2,0]).as_matrix())
   
     # Apply transformation:
     return affine(array, R_90, [0,0,0])
-    
+
 def rotate(array, angle, axis = 0):
     '''
     Rotates the volume via interpolation.
@@ -350,7 +350,8 @@ def _itk2mat_(transform, shape):
     
     T = -numpy.array(transform.GetParameters()[3:][::-1])
     euler = -numpy.array(transform.GetParameters()[:3])
-    R = transforms3d.euler.euler2mat(euler[0], euler[1], euler[2], axes='szyx')
+    R = scipy.spatial.transform.Rotation.from_euler(seq='zyx', angles=euler).as_matrix()
+
     
     # Centre of rotation:
     centre = (transform.GetFixedParameters()[:3][::-1] - T)
@@ -366,7 +367,7 @@ def _mat2itk_(R, T, shape):
     Initialize ITK transform from a rotation matrix and a translation vector
     """       
     centre = numpy.array(shape, dtype = float) // 2
-    euler = transforms3d.euler.mat2euler(R, axes = 'szyx')    
+    euler = scipy.spatial.transform.Rotation.from_matrix(R).as_euler(seq='zyx')
 
     transform = sitk.Euler3DTransform()
     transform.SetComputeZYX(True)
@@ -498,10 +499,10 @@ def _generate_flips_(Rfix):
     
     # Axes:
     for ii in range(3):    
-        #R.append(transforms3d.euler.axangle2mat(Rfix[ii], numpy.pi))
+        #R.append(fdg._axangle2mat_(Rfix[ii], 180))
         # Angles:
         for jj in range(3):
-            R.append(transforms3d.euler.axangle2mat(Rfix[ii], (jj+1) * numpy.pi/2))
+            R.append(fdg._axangle2mat_(Rfix[ii], (jj+1)*90.0))
     
     return R
                     

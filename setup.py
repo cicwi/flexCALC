@@ -19,7 +19,6 @@ requirements = [
     "scipy",	
     "numpy-stl",
     "scikit-image",
-    "transforms3d",
     "flexdata",
     "flextomo"]
 
