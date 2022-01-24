@@ -57,11 +57,13 @@ P.run()
 
 #%% Restore node tree after crash and repeat:
 
-Q = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = False)
-Q.restore_nodes()
-Q.draw_nodes()
-Q.report()
+# If the pipeline execution crashed (due to e.g., an out of memory error),
+# it is possible to resume execution since the current state is recorded in
+# the scratch directory.
 
-Q.run()
-
+#Q = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = False)
+#Q.restore_nodes()
+#Q.draw_nodes()
+#Q.report()
+#Q.run()
 #Q.cleanup()
