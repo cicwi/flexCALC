@@ -18,7 +18,6 @@ from flextomo import projector
 from flexcalc import process
 from flexcalc import analyze
 
-import matplotlib.pyplot as plt
 from flexdata.data import logger
 
 # >>> Classes >>>
@@ -1194,6 +1193,7 @@ class scheduler:
        """
        Draw the node tree.
        """
+       import matplotlib.pyplot as plt
        import networkx
         
        G = self._get_nodesgraph_()
