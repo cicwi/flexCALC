@@ -1038,7 +1038,7 @@ def find_shift(volume_m, volume_s):
     vol_m *= vol_s
     vol_m = numpy.abs(numpy.fft.ifftn(vol_m))
     vol_m = numpy.fft.fftshift(vol_m)
-    shift = numpy.unravel_index(numpy.argmax(vol_m), dims = vol_m.shape) - numpy.array(vol_m.shape)//2
+    shift = numpy.unravel_index(numpy.argmax(vol_m), vol_m.shape) - numpy.array(vol_m.shape)//2
         
     return shift
 
