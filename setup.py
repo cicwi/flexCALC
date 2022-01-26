@@ -15,9 +15,7 @@ requirements = [
     "numpy",
     "tqdm",
     "simpleitk",
-    "pygraphviz",
     "scipy",	
-    "numpy-stl",
     "scikit-image",
     "flexdata",
     "flextomo"]
@@ -25,6 +23,15 @@ requirements = [
 setup_requirements = [ ]
 
 test_requirements = [ ]
+
+draw_requirements = [
+    "networkx",
+    "pygraphviz",
+    ]
+
+mesh_requirements = [
+    "numpy-stl",
+    ]
 
 dev_requirements = [
     'autopep8',
@@ -74,7 +81,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    extras_require={ 'dev': dev_requirements },
+    extras_require={ 'dev': dev_requirements, "draw": draw_requirements, "mesh": mesh_requirements },
     url='https://github.com/cicwi/flexcalc',
     version='0.1.0',
     zip_safe=False,
