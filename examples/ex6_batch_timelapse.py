@@ -16,13 +16,13 @@ from numpy import linspace
 P = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = True)
 
 # Load data:
-path = '/ufs/ciacc/flexbox/timelapse/day*'
+path = '/ufs/ciacc/flexbox/timelapce/day*'
 
 # Binning:
 b = 2
 
 # Read data:
-P.read_data(path, 'scan_', sampling = b)
+P.read_data(path, 'scan_', sampling = b, correct='cwi-flexray-2019-04-24')
 
 # Apply flatfield and log:
 P.flatlog(flats = 'io0', darks = 'di0', sample = b)

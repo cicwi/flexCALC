@@ -16,15 +16,15 @@ P = pipeline.scheduler('/export/scratch3/kostenko/scratch/', clean_scratch = Tru
 
 # Load data:
 path = '/ufs/ciacc/flexbox/tiling/t*'
-P.read_data(path, 'scan_', sampling = 2)
+P.read_data(path, 'scan_', sampling = 2, correct='cwi-flexray-2019-04-24')
 
 # Apply flatfield and log:
-P.flatlog(flats = 'io0', darks = 'di0', sample = 2)
+P.flatlog(flats = 'io_0', darks = 'di_0', sample = 2)
 
 # Display:
 P.display('slice', dim = 1, title = 'Projections')
 
-# Marge projections:
+# Merge projections:
 P.merge('projections')
 
 P.display('slice', dim = 1, title = 'Merged')
@@ -49,7 +49,7 @@ P.write_data('../fdk', 'vol')
 P.display('max_projection', dim = 2, title = 'Volume')
 
 # Visualize nodes:
-P.draw_nodes()
+#P.draw_nodes()
 
 #%% Runtime:
 
