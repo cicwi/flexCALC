@@ -16,7 +16,7 @@ import scipy.spatial
 from tqdm import tqdm
 import SimpleITK as sitk
 
-from skimage import feature
+from skimage import registration
 from skimage import measure
     
 from flexdata import data
@@ -1089,7 +1089,7 @@ def _find_shift_(array_ref, array_slave, offset, dim = 1):
             #display.slice(im_slv, title = 'im_slv')
         
             # Shift registration with subpixel accuracy (skimage):
-            shift, error, diffphase = feature.register_translation(im_ref, im_slv, 10)
+            shift, error, diffphase = registration.phase_cross_correlation(im_ref, im_slv, upsample_factor=10)
                         
             shifts.append(shift)
 
