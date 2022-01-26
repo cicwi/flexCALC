@@ -29,7 +29,7 @@ from . import analyze
 from flexdata.data import logger
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>> Methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-def process_flex(path, sample = 1, skip = 1, memmap = None, index = None, proj_number = None):
+def process_flex(path, *, sample = 1, skip = 1, memmap = None, index = None, proj_number = None, correct, correct_vol_center = True):
     '''
     Read and process the array.
     
@@ -50,7 +50,12 @@ def process_flex(path, sample = 1, skip = 1, memmap = None, index = None, proj_n
     print('Reading...')
     
     #index = []
-    proj, flat, dark, geom = data.read_flexray(path, sample = sample, skip = skip, memmap = memmap, proj_number = proj_number)
+    proj, flat, dark, geom = data.read_flexray(path, sample = sample, skip = skip, memmap = memmap, proj_number = proj_number, correct = correct, correct_vol_center = correct_vol_center)
+
+    if geom is not None and correct is not None:
+        geom = correct.correct(geom, profile=correct)
+    if geom is not None and correct_vol_center:
+        geom = correct.correct_vol_center(geom)
     
     # Prepro:            
     proj = preprocess(proj, flat, dark)
