@@ -577,7 +577,40 @@ class info_node(Node):
             
             data = None
             gc.collect()
-            
+
+class adjust_geometry_node(Node):
+    """
+    Adjust geometry using a user-specified callback.
+
+    NB: Geometries may get reset or adjusted further by certain types of nodes
+    later in the pipeline.
+    """
+    node_name = 'Adjust Geometry'
+    node_type = _NTYPE_BATCH_
+
+    def runtime(self):
+        callback = self.arguments[0]
+
+        geoms = []
+        shapes = []
+
+        for ii in range(len(self.inputs)):
+            data, geom, misc = self.get_inputs(ii)
+
+            geoms.append(geom)
+            shapes.append(data.shape)
+            data = None
+            gc.collect()
+
+        geoms = callback(geoms, shapes)
+
+        for ii in range(len(self.inputs)):
+            data, geom, misc = self.get_inputs(ii)
+            self.set_outputs(ii, data, geoms[ii], misc)
+
+            data = None
+            gc.collect()
+
 class fdk_node(Node):
     """
     Feldkamp reconstruction.
@@ -1588,6 +1621,16 @@ class scheduler:
        Print data and meta info.
        """
        self.schedule(info_node)
+
+   def adjust_geometry(self, callback):
+       """
+       Adjust geometry.
+
+        Args:
+        callback (callable): user-provided function that takes a list of geometry and a list of shapes, and returns a list of new geometries
+       """
+       arguments = (callback, )
+       self.schedule(adjust_geometry_node, arguments)
            
    def read_data(self, paths, name, *, sampling = 1, shape = None, dtype = 'float32', format = None, transpose = [1, 0, 2], updown = True, proj_number = None, correct, correct_vol_center = True):
       """
