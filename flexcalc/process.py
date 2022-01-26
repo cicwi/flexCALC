@@ -16,7 +16,7 @@ import scipy.spatial
 from tqdm import tqdm
 import SimpleITK as sitk
 
-from skimage import feature
+from skimage import registration
 from skimage import measure
     
 from flexdata import data
@@ -29,7 +29,7 @@ from . import analyze
 from flexdata.data import logger
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>> Methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-def process_flex(path, sample = 1, skip = 1, memmap = None, index = None, proj_number = None):
+def process_flex(path, *, sample = 1, skip = 1, memmap = None, index = None, proj_number = None, correct, correct_vol_center = True):
     '''
     Read and process the array.
     
@@ -50,7 +50,12 @@ def process_flex(path, sample = 1, skip = 1, memmap = None, index = None, proj_n
     print('Reading...')
     
     #index = []
-    proj, flat, dark, geom = data.read_flexray(path, sample = sample, skip = skip, memmap = memmap, proj_number = proj_number)
+    proj, flat, dark, geom = data.read_flexray(path, sample = sample, skip = skip, memmap = memmap, proj_number = proj_number, correct = correct, correct_vol_center = correct_vol_center)
+
+    if geom is not None and correct is not None:
+        geom = correct.correct(geom, profile=correct)
+    if geom is not None and correct_vol_center:
+        geom = correct.correct_vol_center(geom)
     
     # Prepro:            
     proj = preprocess(proj, flat, dark)
@@ -1033,7 +1038,7 @@ def find_shift(volume_m, volume_s):
     vol_m *= vol_s
     vol_m = numpy.abs(numpy.fft.ifftn(vol_m))
     vol_m = numpy.fft.fftshift(vol_m)
-    shift = numpy.unravel_index(numpy.argmax(vol_m), dims = vol_m.shape) - numpy.array(vol_m.shape)//2
+    shift = numpy.unravel_index(numpy.argmax(vol_m), vol_m.shape) - numpy.array(vol_m.shape)//2
         
     return shift
 
@@ -1084,7 +1089,7 @@ def _find_shift_(array_ref, array_slave, offset, dim = 1):
             #display.slice(im_slv, title = 'im_slv')
         
             # Shift registration with subpixel accuracy (skimage):
-            shift, error, diffphase = feature.register_translation(im_ref, im_slv, 10)
+            shift, error, diffphase = registration.phase_cross_correlation(im_ref, im_slv, upsample_factor=10)
                         
             shifts.append(shift)
 

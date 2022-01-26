@@ -13,6 +13,7 @@ from copy import deepcopy
 from flexdata import data as dt
 from flexdata import geometry
 from flexdata import display
+from flexdata import correct
 
 from flextomo import projector
 from flexcalc import process
@@ -576,7 +577,40 @@ class info_node(Node):
             
             data = None
             gc.collect()
-            
+
+class adjust_geometry_node(Node):
+    """
+    Adjust geometry using a user-specified callback.
+
+    NB: Geometries may get reset or adjusted further by certain types of nodes
+    later in the pipeline.
+    """
+    node_name = 'Adjust Geometry'
+    node_type = _NTYPE_BATCH_
+
+    def runtime(self):
+        callback = self.arguments[0]
+
+        geoms = []
+        shapes = []
+
+        for ii in range(len(self.inputs)):
+            data, geom, misc = self.get_inputs(ii)
+
+            geoms.append(geom)
+            shapes.append(data.shape)
+            data = None
+            gc.collect()
+
+        geoms = callback(geoms, shapes)
+
+        for ii in range(len(self.inputs)):
+            data, geom, misc = self.get_inputs(ii)
+            self.set_outputs(ii, data, geoms[ii], misc)
+
+            data = None
+            gc.collect()
+
 class fdk_node(Node):
     """
     Feldkamp reconstruction.
@@ -1118,7 +1152,7 @@ class reader_node(Node):
         Initiallization callback of read_data. 
         '''
         # Get arguments:
-        paths, name, sampling, shape, dtype, format, transpose, updown, proj_number = self.arguments
+        paths, name, sampling, shape, dtype, format, transpose, updown, proj_number, correction_profile, correct_vol_center = self.arguments
         paths = dt.get_folders_sorted(paths)
        
         # Create as many output buffers as there are paths:
@@ -1128,24 +1162,38 @@ class reader_node(Node):
           
             logger.print('Found data @ ' + path)
             
-            #shape = dt.stack_shape(path, name, sampling, sampling, shape, dtype, format, transpose, updown)
-            
-            # If present, read meta:
+            # If present, read meta.
+            # Warn if no correction profile set when reading metadata, and
+            # also warn if correction profile *is* set when reading pre-parsed
+            # geometry.toml file
             if os.path.exists(os.path.join(path, 'metadata.toml')):
-                geom = dt.read_flexraymeta(path, sampling)   
+                if correction_profile is None:
+                    logger.warning("Not applying correction profile after reading metadata.toml.")
+                geom = dt.parse_flexray_metadatatoml(path, sampling)
                 
             elif os.path.exists(os.path.join(path, 'scan settings.txt')):
-                geom = dt.read_flexraylog(path, sampling)  
+                if correction_profile is None:
+                    logger.warning("Not applying correction profile after reading 'scan settings.txt'.")
+                geom = dt.parse_flexray_scansettings(path, sampling)
 
             elif os.path.exists(os.path.join(path, 'data settings XRE.txt')):
-                geom = dt.read_flexraydatasettings(path, sampling)
+                if correction_profile is None:
+                    logger.warning("Not applying correction profile after reading 'data settings XRE.txt'.")
+                geom = dt.parse_flexray_datasettings(path, sampling)
                 
             elif os.path.exists(os.path.join(path, 'geometry.toml')):
-                geom = dt.read_geometry(path, sampling)  
+                if correction_profile is not None:
+                    logger.warning("Applying correction profile after reading geometry.toml.")
+                geom = dt.read_geometrytoml(path, sampling)
 
             else:
                 logger.warning('No meta data found.')
                 geom = None
+
+            if geom is not None and correction_profile is not None:
+                geom = correct.correct(geom, profile=correction_profile)
+            if geom is not None and correct_vol_center:
+                geom = correct.correct_vol_center(geom)
                 
             # Remember the path to the data using meta:    
             misc = {'path':path}
@@ -1154,7 +1202,7 @@ class reader_node(Node):
                         
     def runtime(self):
         # Get arguments:
-        paths, name, sampling, shape, dtype, format, transpose, updown, proj_number = self.arguments
+        paths, name, sampling, shape, dtype, format, transpose, updown, proj_number, correction_profile, correct_vol_center = self.arguments
         paths = dt.get_folders_sorted(paths)
            
         # Read!
@@ -1162,7 +1210,6 @@ class reader_node(Node):
        
           logger.print('Reading data @ ' + path)
           array = dt.read_stack(path, name, sampling, sampling, shape = shape, dtype = dtype, format = format, transpose= transpose, updown = updown)
-          #proj, meta = process.process_flex(path, sampling, sampling, proj_number = proj_number) 
             
           self.set_outputs(ii, array)
           array = None
@@ -1574,14 +1621,24 @@ class scheduler:
        Print data and meta info.
        """
        self.schedule(info_node)
+
+   def adjust_geometry(self, callback):
+       """
+       Adjust geometry.
+
+        Args:
+        callback (callable): user-provided function that takes a list of geometry and a list of shapes, and returns a list of new geometries
+       """
+       arguments = (callback, )
+       self.schedule(adjust_geometry_node, arguments)
            
-   def read_data(self, paths, name, sampling = 1, shape = None, dtype = 'float32', format = None, transpose = [1, 0, 2], updown = True, proj_number = None):
+   def read_data(self, paths, name, *, sampling = 1, shape = None, dtype = 'float32', format = None, transpose = [1, 0, 2], updown = True, proj_number = None, correct, correct_vol_center = True):
       """
       Schedule an image stack reader. Often will be the first node in the queue.
         Args:
             
       """
-      arguments = (paths, name, sampling, shape, dtype, format, transpose, updown, proj_number)
+      arguments = (paths, name, sampling, shape, dtype, format, transpose, updown, proj_number, correct, correct_vol_center)
       self.schedule(reader_node, arguments)
       
    def write_data(self, path, name, dim = 0, skip = 1, compress = True):
