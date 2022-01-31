@@ -22,7 +22,6 @@ from skimage import measure
 from flexdata import data
 from flexdata import display
 from flexdata import geometry as fdg
-from flexdata import correct as fdc
 from flextomo import projector
 from flextomo import model
 from . import analyze
@@ -53,11 +52,6 @@ def process_flex(path, *, sample = 1, skip = 1, memmap = None, index = None, pro
     #index = []
     proj, flat, dark, geom = data.read_flexray(path, sample = sample, skip = skip, memmap = memmap, proj_number = proj_number, correct = correct, correct_vol_center = correct_vol_center)
 
-    if geom is not None and correct is not None:
-        geom = fdc.correct(geom, profile=correct)
-    if geom is not None and correct_vol_center:
-        geom = fdc.correct_vol_center(geom)
-    
     # Prepro:            
     proj = preprocess(proj, flat, dark)
         
