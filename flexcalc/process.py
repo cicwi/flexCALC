@@ -1161,7 +1161,7 @@ def append_tile(array, geom, tot_array, tot_geom):
     total_shape = tot_array.shape[::2]
     det_shape = array.shape[::2]
     
-    if tot_geom['det_pixel'] != geom['det_pixel']:
+    if numpy.abs(tot_geom['det_pixel'] - geom['det_pixel']) > 1e-6:
         raise Exception('This array has different detector pixels! %f v.s. %f. Aborting!' % (geom['det_pixel'], tot_geom['det_pixel']))
     
     if tot_array.shape[1] != array.shape[1]:
