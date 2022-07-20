@@ -943,7 +943,7 @@ def optimize_modifier(values, projections, geometry, samp = [1, 1, 1], key = 'ax
     
     return guess
         
-def optimize_modifier_multires(projections, geometry, step, guess = None, subscale = 1, key = 'axs_tan', metric = 'correlation', preview = False):
+def optimize_modifier_multires(projections, geometry, step, guess = None, subscale = 1, key = 'axs_tan', metric = 'correlation', update = True, preview = False):
     '''
     
     '''        
@@ -963,12 +963,13 @@ def optimize_modifier_multires(projections, geometry, step, guess = None, subsca
         # Create a search space of 5 values around the initial guess:
         trial_values = numpy.linspace(guess - step * subscale, guess + step * subscale, 5)
         
-        guess = optimize_modifier(trial_values, projections, geometry, samp, key = key, preview = preview)
+        guess = optimize_modifier(trial_values, projections, geometry, samp, key = key, preview = preview, update = False)
                 
         subscale = subscale // 2
     
-    print('Old value:%0.3f' % geometry[key], 'new value: %0.3f' % guess)          
-    geometry[key] = guess
+    print('Old value:%0.3f' % geometry[key], 'new value: %0.3f' % guess)
+    if update:
+        geometry[key] = guess
     
     return guess
 
