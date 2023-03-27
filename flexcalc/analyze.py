@@ -446,13 +446,11 @@ def calibrate_spectrum(projections, volume, geometry, compound = 'Al', density =
     #import random
     
     # Find the shape of the object:                                                    
-    if threshold:
+    if threshold is not None:
         t = binary_threshold(volume, mode = 'constant', threshold = threshold)
-        
-        segmentation = numpy.float32()
     else:
         t = binary_threshold(volume, mode = 'otsu')
-        segmentation = numpy.float32(volume > t)
+    segmentation = numpy.float32(volume > t)
         
     display.slice(segmentation, dim=0,title = 'Segmentation')        
         
