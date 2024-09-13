@@ -59,7 +59,7 @@ install_dev: ## install in editable mode
 	pip install -e .[dev]
 
 conda_package: ## build Conda package
-	conda build conda/ -c cicwi -c astra-toolbox -c nvidia
+	conda build conda/ -c cicwi -c astra-toolbox -c nvidia -c conda-forge
 
 pypi_wheels: ## build wheel package for PyPI
 	python -m build --wheel
