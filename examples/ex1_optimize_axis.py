@@ -13,8 +13,8 @@ from flexcalc import process
 import numpy
 
 #%% Simulate data with shifted rotation axis
-    
-# Initialize images:    
+
+# Initialize images:
 proj = numpy.zeros([1, 128, 128], dtype = 'float32')
 
 # Define a simple projection geometry:
@@ -34,7 +34,7 @@ display.slice(proj, title = 'Sinogram')
 # Unmodified geometry:
 geom = geometry.circular(src2obj = 100, det2obj = 100, det_pixel = 0.1, ang_range = [0, 360])
 
-# Optimization:    
+# Optimization:
 process.optimize_rotation_center(proj, geom, subscale = 2)
 
 #%% Reconstruct:

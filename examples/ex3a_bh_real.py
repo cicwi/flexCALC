@@ -16,7 +16,7 @@ from flexcalc import analyze
 from flexcalc import process
 
 import numpy
-   
+
 #%% Short version of the spectral modeling:
 
 path = '/export/scratch2/kostenko/archive/Natrualis/al_70kv_1mmbrass/'
@@ -37,21 +37,21 @@ projector.FDK(proj, vol, geom)
 display.slice(vol, bounds = [], title = 'Uncorrected')
 
 #%% Reconstruct:
-    
+
 vol_rec = numpy.zeros_like(vol)
 projector.FDK(proj, vol_rec, geom)
 
 display.slice(vol_rec, title = 'Uncorrected FDK')
-display.plot(vol_rec[0, 64], title = 'Crossection')       
+display.plot(vol_rec[0, 64], title = 'Cross section')
 
 #%% Estimate system spectrum:
 
-print('Callibrating spectrum...')    
-energy, spec = analyze.calibrate_spectrum(proj, vol, geom, compound = 'Al', density = 2.7)   
-   
+print('Calibrating spectrum...')
+energy, spec = analyze.calibrate_spectrum(proj, vol, geom, compound = 'Al', density = 2.7)
+
 #meta = {'energy':e, 'spectrum':s, 'description':geom.description}
 #data.write_toml(os.path.join(path, 'spectrum.toml'), meta)
-    
+
 #%% Beam Hardening correction based on the estimated spectrum:
 
 # Correct data:
@@ -63,4 +63,4 @@ projector.FDK(proj_cor, vol_rec, geom)
 
 # Display:
 display.slice(vol_rec, title = 'Corrected FDK')
-display.plot(vol_rec[0, 64])      
+display.plot(vol_rec[0, 64])

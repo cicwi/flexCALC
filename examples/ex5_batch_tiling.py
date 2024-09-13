@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Example of batch processing. 
+Example of batch processing.
 There are three parts in this example: scheduling and runtime of input operations, scheduling and runtime of reconstruction and restoration and restart of a crashed process.
 
 @author: alex

@@ -13,8 +13,8 @@ from flexcalc import process
 import numpy
 
 #%% Simulate data with shifted rotation axis
-    
-# Initialize images:    
+
+# Initialize images:
 proj = numpy.zeros([128, 128, 128], dtype = 'float32')
 
 # Define a simple projection geometry:
@@ -40,7 +40,7 @@ projector.FDK(proj, vol, geom)
 
 display.slice(vol, bounds = [0, 2], title = 'FDK: uncorrected')
 
-#%% Optimization:    
+#%% Optimization:
 vals = numpy.linspace(0., 3., 7)
 process.optimize_modifier(vals, proj, geom, samp = [1, 1, 1], key = 'det_roll', metric = 'highpass')
 

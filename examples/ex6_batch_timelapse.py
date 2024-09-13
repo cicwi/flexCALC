@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Example of batch processing. 
+Example of batch processing.
 This sample reconstructs and registers multiple volumes.
 
 @author: alex

@@ -15,7 +15,7 @@ requirements = [
     "numpy",
     "tqdm",
     "simpleitk",
-    "scipy",	
+    "scipy",
     "scikit-image",
     "flexdata",
     "flextomo"]
@@ -51,7 +51,7 @@ dev_requirements = [
     'bumpversion',
     'watchdog',
     'coverage',
-    
+
     ]
 
 setup(

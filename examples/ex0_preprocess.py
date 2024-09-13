@@ -5,7 +5,7 @@ Load, preprocess and reconstruct a FlexRay data.
 
 Change the path variable to your own data path.
 Dataset originally used in this example can be downloaded from Zenodo:
-    
+
 https://doi.org/10.5281/zenodo.1144086
 
 """
@@ -28,9 +28,9 @@ proj, geom = process.process_flex(path, sample = 4, skip = 4)
 # Read:
 path = '/ufs/ciacc/flexbox/good'
 dark = data.read_stack(path, 'di00', sample = 4)
-flat = data.read_stack(path, 'io00', sample = 4)    
+flat = data.read_stack(path, 'io00', sample = 4)
 proj = data.read_stack(path, 'scan_', sample = 4, skip = 4)
-geom = data.read_flexraylog(path, sample = 4)   
+geom = data.read_flexraylog(path, sample = 4)
 
 # Process:
 proj = process.preprocess(proj, flat, dark, dim = 1)
