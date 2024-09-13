@@ -8,9 +8,6 @@ from setuptools import setup, find_packages
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('CHANGELOG.md') as history_file:
-    history = history_file.read()
-
 requirements = [
     "numpy",
     "tqdm",
@@ -73,7 +70,7 @@ setup(
     description="ASTRA-based cone beam reconstruction routines",
     install_requires=requirements,
     license="GNU General Public License v3",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     include_package_data=True,
     keywords='flexcalc',
     name='flexcalc',
