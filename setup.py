@@ -43,7 +43,7 @@ dev_requirements = [
     # Documentation
     'sphinx',
     'sphinx_rtd_theme',
-    'recommonmark',
+    'myst-parser',
     # Other
     'bumpversion',
     'watchdog',
