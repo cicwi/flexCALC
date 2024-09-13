@@ -3,22 +3,26 @@
 
 package:
     name: flexcalc
-    
+
     version: {{ data['version'] }}
 
 source:
     path: ../
 
 build:
+    noarch: python
     number: '0'
+    script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-build-isolation --verbose
 
 requirements:
     build:
-        - python
+        - python >=3.7
+        - pip
         - setuptools
+        - wheel
 
     run:
-        - python
+        - python >=3.7
         # dependencies are defined in setup.py
         {% for dep in data['install_requires'] %}
         - {{ dep.lower() }}
@@ -27,8 +31,4 @@ requirements:
 about:
     home: https://github.com/teascavenger/flexcalc
     license_file: LICENSE.md
-    summary: "ASTRA-based cone beam reconstruction routines"
-
-extra:
-    maintainers:
-        - Alex Kostenko
+    summary: "CT data pre- and post-processing tools, simulation of spectral data, and batch-processing of large number of datasets"
