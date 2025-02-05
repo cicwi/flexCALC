@@ -9,7 +9,7 @@ We recommend that the user installs [conda package manager](https://docs.anacond
 
 ### Installing with conda
 
-`conda install flexcalc -c cicwi -c astra-toolbox -c nvidia`
+`conda install flexcalc -c cicwi -c astra-toolbox -c nvidia -c SimpleITK`
 
 ### Installing with pip
 
